@@ -1,27 +1,24 @@
+// tailwind.config.js
 import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
 
 /** @type {import('tailwindcss').Config} */
 export default {
-    content: [
-        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
-        './storage/framework/views/*.php',
-        './resources/views/**/*.blade.php',
-        './resources/js/**/*.js',    
-        './resources/js/**/*.vue',  
-        './resources/css/**/*.css',  
-        './app/Http/Controllers/*.php', 
-        './resources/views/layouts/*.blade.php',
-        './resources/views/components/*.blade.php', 
-    ],
-
-    theme: {
-        extend: {
-            fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
-            },
-        },
+  content: [
+    './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
+    './storage/framework/views/*.php',
+    './resources/views/**/*.blade.php',
+    './resources/js/**/*.js',
+    './resources/js/**/*.vue',
+    './resources/css/**/*.css',
+    './app/Http/Controllers/*.php',
+  ],
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+      },
     },
-
-    plugins: [forms],
+  },
+  plugins: [forms],
 };

@@ -1,0 +1,24 @@
+# Ignore version control
+.git
+.gitignore
+
+# Ignore environment & config files
+.env
+.env.*
+Homestead.json
+Homestead.yaml
+
+# Ignore development dependencies
+node_modules
+vendor
+
+# Ignore local caches and build artifacts
+/public/storage
+/public/hot
+/public/build
+/storage/*.key
+/storage/pail
+npm-debug.log
+yarn-error.log
+*.log
+.DS_Store

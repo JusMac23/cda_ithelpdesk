@@ -23,6 +23,8 @@
 
         <!-- Ticket Management with toggle -->
         <div x-data="{ open: false }">
+            
+            @if(auth()->user()->can('view_all_tickets') || auth()->user()->can('create_ticket') || auth()->user()->can('reassign_ticket_ticket') || auth()->user()->can('update_status_ticket') || auth()->user()->can('delete_tickets') || auth()->user()->can('search_tickets'))
             <button @click="open = !open" type="button"
                     class=" menu-link w-full flex items-center px-3 py-0 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition focus:outline-none">
                 <div class="icon-wrapper">
@@ -33,9 +35,11 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
             </button>
+            @endif
+
             <ul x-show="open" x-transition class="ml-10 mt-1 space-y-1 text-sm text-gray-700">
 
-                @if(auth()->user()->can('view_all_tickets') || auth()->user()->can('create_ticket') || auth()->user()->can('reassign_ticket_ticket') || auth()->user()->can('update_status_ticket') || auth()->user()->can('delete_tickets') || auth()->user()->can('search_tickets'))
+                @if(auth()->user()->can('view_all_tickets'))
                 <li>
                     <a href="{{ route('tickets.index') }}"
                         class="sidebar-label menu-link flex w-full px-3 py-2 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition @if(request()->routeIs('tickets.index')) font-semibold text-indigo-600 @endif">
@@ -52,7 +56,7 @@
                     <a href="{{ route('myrequested_tickets.index') }}"
                         class="sidebar-label menu-link flex w-full px-3 py-2 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition @if(request()->routeIs('myrequested_tickets.index')) font-semibold text-indigo-600 @endif">
                         <span class="sidebar-label px-4 flex items-center">
-                            <span class="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span> <!-- Small Dot -->
+                            <span class="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span> 
                             My Requested Tickets
                         </span>
                     </a>
@@ -64,7 +68,7 @@
                     <a href="{{ route('assignedtome_tickets.index') }}"
                         class="sidebar-label menu-link flex w-full px-3 py-2 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition @if(request()->routeIs('assignedtome_tickets.index')) font-semibold text-indigo-600 @endif">
                         <span class="sidebar-label px-4 flex items-center">
-                            <span class="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span> <!-- Small Dot -->
+                            <span class="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span>
                             Tickets Assigned to Me
                         </span>
                     </a>
@@ -76,13 +80,78 @@
                     <a href="{{ route('reassigned_tickets.index') }}"
                         class="sidebar-label menu-link flex w-full px-3 py-2 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition @if(request()->routeIs('reassigned_tickets.index')) font-semibold text-indigo-600 @endif">
                         <span class="sidebar-label px-4 flex items-center">
-                            <span class="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span> <!-- Small Dot -->
+                            <span class="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span> 
                             Re-Assigned Tickets
                         </span>
                     </a>
                 </li>
                 @endif
 
+            </ul>
+        </div>
+
+        <!--Databreach Management with toggle -->
+        <div x-data="{ open: false }">
+            @if(auth()->user()->can('view_all_databreach') || auth()->user()->can('view_overview_databreach') || auth()->user()->can('create_databreach') || auth()->user()->can('view_databreach') || auth()->user()->can('edit_databreach') || auth()->user()->can('delete_databreach') || auth()->user()->can('search_databreach'))
+            <button @click="open = !open" type="button"
+                    class=" menu-link w-full flex items-center px-3 py-0 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition focus:outline-none">
+                <div class="icon-wrapper">
+                    <span class="material-icons-outlined text-xl">security</span>
+                </div>
+                <span class="sidebar-label ml-2">Data Breach Report</span>
+                <svg class="w-4 h-4 ml-2 transition-transform duration-200 transform" :class="open ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+            @endif
+
+            <ul x-show="open" x-transition class="ml-10 mt-1 space-y-1 text-sm text-gray-700">
+
+                @if(auth()->user()->can('view_all_databreach'))
+                <li>
+                    <a href="{{ route('databreach.index') }}"
+                        class="sidebar-label menu-link flex w-full px-3 py-2 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition @if(request()->routeIs('databreach.index')) font-semibold text-indigo-600 @endif">
+                        <span class="sidebar-label px-4 flex items-center">
+                            <span class="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span> 
+                            All Reports
+                        </span>
+                    </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->can('view_overview_databreach'))
+                <li>
+                    <a href="{{ url('overview_databreach') }}"
+                        class="sidebar-label menu-link flex w-full px-3 py-2 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition @if(request()->routeIs('overview_databreach')) font-semibold text-indigo-600 @endif">
+                        <span class="sidebar-label px-4 flex items-center">
+                            <span class="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span> 
+                            Data Breach Overview
+                        </span>
+                    </a>
+                </li>
+                @endif
+
+                <li>   
+                    <a href="{{ route('databreach.per_region_databreach') }}"
+                        class="sidebar-label menu-link flex w-full px-3 py-2 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition @if(request()->routeIs('databreach.team_databreach')) font-semibold text-indigo-600 @endif">
+                        <span class="sidebar-label px-4 flex items-center">
+                            <span class="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span> 
+                            Data Breach Notifications Regional Reports
+                        </span>
+                    </a>
+                </li>
+
+                @if(auth()->user()->can('view_dbrt') || auth()->user()->can('create_dbrt') || auth()->user()->can('edit_dbrt') || auth()->user()->can('delete_dbrt'))
+                <li>   
+                    <a href="{{ route('databreach.team_databreach') }}"
+                        class="sidebar-label menu-link flex w-full px-3 py-2 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition @if(request()->routeIs('databreach.team_databreach')) font-semibold text-indigo-600 @endif">
+                        <span class="sidebar-label px-4 flex items-center">
+                            <span class="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span> 
+                            Data Breach Response Team
+                        </span>
+                    </a>
+                </li>
+                @endif
             </ul>
         </div>
 
@@ -96,6 +165,15 @@
         </a>
         @endif
 
+        <!--
+        <a href="#" class="menu-link flex items-center px-3 py-0 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition">
+            <div class="icon-wrapper">
+                <span class="material-icons-outlined text-xl">folder_shared</span>
+            </div>
+            <span class="sidebar-label ml-2">Active Directory</span>
+        </a>
+        -->
+
         <!-- Technical Services -->
         @if(auth()->user()->can('view_technical_services') || auth()->user()->can('create_technical_services') || auth()->user()->can('edit_technical_services') || auth()->user()->can('delete_technical_services') || auth()->user()->can('search_technical_services'))
         <a href="{{ route('tech_services.index') }}" class="menu-link flex items-center px-3 py-0 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition">
@@ -105,15 +183,6 @@
             <span class="sidebar-label ml-2">Technical Services</span>
         </a>
         @endif
-
-        <!-- Active Directory 
-        <a href="#" class="menu-link flex items-center px-3 py-0 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition">
-            <div class="icon-wrapper">
-                <span class="material-icons-outlined text-xl">folder_shared</span>
-            </div>
-            <span class="sidebar-label ml-2">Active Directory</span>
-        </a>
-        -->
 
         <!-- Users -->
         @if(auth()->user()->can('view_tech_users') || auth()->user()->can('create_tech_users') || auth()->user()->can('edit_tech_users') || auth()->user()->can('delete_tech_users') || auth()->user()->can('tech_users'))

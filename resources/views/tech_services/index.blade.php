@@ -61,21 +61,21 @@
                         @endcan
 
                         <div class="overflow-x-auto bg-white shadow-lg rounded-lg border border-gray-200">
-                            <table class="min-w-full table-fixed divide-y divide-gray-200 text-sm text-left text-gray-800">
-                                <thead class="bg-gray-100 border-b border-gray-300 sticky top-0 z-10">
-                                    <tr>
-                                        <th class="px-6 py-2 min-w-[6rem] font-semibold text-gray-700 uppercase tracking-wider">Technical Services</th>
-                                        <th class="px-6 py-2 min-w-[5rem] font-semibold text-gray-700 uppercase tracking-wider">Date Added</th>
-                                        <th class="px-6 py-2 min-w-[5rem] font-semibold text-gray-700 uppercase tracking-wider">Date Updated</th>
-                                        @can('edit_technical_services')<th class="px-6 py-2 text-center min-w-[7rem] font-semibold text-gray-700 uppercase tracking-wider">Actions</th>@endcan
+                            <table class="min-w-full table-fixed divide-y divide-gray-200 text-left text-gray-800">
+                                <thead class="bg-gray-100 text-gray-700">
+                                    <tr hover:bg-gray-50 border-b>
+                                        <th class="px-6 py-2 font-semibold uppercase text-left">Technical Services</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-left">Date Added</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-left">Date Updated</th>
+                                        @can('edit_technical_services')<th class="px-6 py-2 font-semibold uppercase text-center">Actions</th>@endcan
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100 bg-white">
                                     @forelse ($technical_services as $tech_services)
                                         <tr class="hover:bg-gray-50 focus-within:bg-gray-100 transition">
-                                            <td class="px-3 py-2">{{ $tech_services->technical_services }} </td>
-                                            <td class="px-3 py-2 text-gray-600 text-xs">{{ \Carbon\Carbon::parse($tech_services->added_at)->format('M d, Y h:i A') }}</td>
-                                            <td class="px-3 py-2 text-gray-600 text-xs">
+                                            <td class="px-4 py-2">{{ $tech_services->technical_services }} </td>
+                                            <td class="px-4 py-2">{{ \Carbon\Carbon::parse($tech_services->added_at)->format('M d, Y h:i A') }}</td>
+                                            <td class="px-4 py-2">
                                                 @if($tech_services->updated_at)
                                                     {{ \Carbon\Carbon::parse($tech_services->updated_at)->format('M d, Y h:i A') }}
                                                 @else
@@ -87,7 +87,7 @@
                                                     <!-- Edit Button -->
                                                     @can('edit_technical_services')
                                                     <div class="w-24 border rounded-lg px-2 py-1 bg-blue-50 hover:bg-blue-100 transition mb-1 flex justify-center">
-                                                        <button class="editBtn flex items-center space-x-1 text-xs text-blue-600 hover:text-blue-800"
+                                                        <button class="editBtn flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800"
                                                             data-id="{{ $tech_services->id }}"
                                                             data-technical_services="{{ $tech_services->technical_services }}">
                                                             <i class="fas fa-edit"></i>
@@ -106,7 +106,7 @@
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="button" 
-                                                                    class="flex items-center space-x-1 text-xs text-red-600 hover:text-red-800 delete-btn" 
+                                                                    class="flex items-center space-x-1 text-sm text-red-600 hover:text-red-800 delete-btn" 
                                                                     data-id="{{ $tech_services->id }}">
                                                                 <i class="fas fa-trash-alt"></i>
                                                                 <span>Delete</span>
@@ -120,7 +120,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="3" class="text-center py-8 text-gray-500 text-lg">
+                                            <td colspan="3" class="text-center py-4 text-gray-500">
                                                 <p>No Technical Services found.</p>
                                             </td>
                                         </tr>

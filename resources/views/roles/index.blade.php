@@ -1,27 +1,4 @@
 <x-app-layout>
-    @if(session('success'))
-    <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: '{{ session('success') }}',
-            timer: 3000,
-            showConfirmButton: false
-        });
-    </script>
-    @endif
-
-    @if(session('error'))
-    <script>
-        Swal.fire({
-            icon: 'error',
-            title: 'Notice!',
-            text: '{{ session('error') }}',
-            timer: 3000,
-            showConfirmButton: false
-        });
-    </script>
-    @endif
     
     <div id="main-content" class="min-h-screen transition-all duration-300 ease-in-out">
         <div id="techContent">
@@ -39,22 +16,22 @@
                         @endcan
 
                         <div class="overflow-x-auto bg-white shadow-lg rounded-lg border border-gray-200">
-                            <table class="min-w-full table-fixed divide-y divide-gray-200 text-sm text-left text-gray-800">
-                                <thead class="bg-gray-100 border-b border-gray-300 sticky top-0 z-10">
+                            <table class="min-w-full table-fixed divide-y divide-gray-200 text-left text-gray-800">
+                                <thead class="bg-gray-100 text-gray-700">
                                     <tr>
-                                        <th class="px-6 py-2">ROLE NAME</th>
-                                        <th class="px-6 py-2 text-center">PERSMISSION</th>
-                                        <th class="px-6 py-2 text-center">ACTIONS</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-center">ROLE NAME</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-center">PERSMISSION</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-center">ACTIONS</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-100 bg-white">
+                                <tbody>
                                     @forelse ($roles as $role)
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-3 py-2 text-center">{{ $role->name }}</td>
-                                        <td class="px-3 py-2">
+                                    <tr class="hover:bg-gray-50 border-b">
+                                        <td class="px-4 py-2 text-center">{{ $role->name }}</td>
+                                        <td class="px-4 py-2">
                                             @if($role->permissions->isNotEmpty())
                                             <div class="space-y-2">
-                                                @foreach($role->permissions->chunk(6) as $chunk)
+                                                @foreach($role->permissions->chunk(5) as $chunk)
                                                 <div class="flex flex-wrap">
                                                     @foreach($chunk as $permission)
                                                     <span class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-xs font-semibold mr-2 mb-2">
@@ -68,12 +45,12 @@
                                             <span class="text-gray-500 italic">No permissions assigned</span>
                                             @endif
                                         </td>
-                                        <td class="px-9 py-3">
-                                            <div class="flex items-left space-x-3">
+                                        <td class="px-9 py-3 text-center">
+                                            <div class="flex items-center space-x-3">
                                                 <!-- Edit Button -->
                                                 @can('edit_roles')
                                                 <div class="w-24 border rounded-lg px-2 py-1 bg-blue-50 hover:bg-blue-100 flex justify-center">
-                                                    <button class="editBtn text-xs text-blue-600 hover:text-blue-800 flex items-center space-x-1"
+                                                    <button class="editBtn text-sm text-blue-600 hover:text-blue-800 flex items-center space-x-1"
                                                         data-id="{{ $role->id }}"
                                                         data-name="{{ $role->name }}"
                                                         data-permissions='@json($role->permissions->pluck("id"))'>
@@ -92,7 +69,7 @@
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="button" 
-                                                                class="delete-btn text-xs text-red-600 hover:text-red-800 flex items-center space-x-1" 
+                                                                class="delete-btn text-sm text-red-600 hover:text-red-800 flex items-center space-x-1" 
                                                                 data-id="{{ $role->id }}">
                                                             <i class="fas fa-trash-alt"></i>
                                                             <span>Delete</span>
@@ -106,7 +83,7 @@
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="6" class="text-center py-8 text-gray-500 text-lg">
+                                        <td colspan="6" class="text-center py-4 text-gray-500">
                                             <p>No Roles found.</p>
                                         </td>
                                     </tr>
@@ -208,6 +185,27 @@
 
     <script>
     document.addEventListener("DOMContentLoaded", function () {
+
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '{{ session('success') }}',
+                timer: 3000,
+                showConfirmButton: false
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Notice!',
+                text: '{{ session('error') }}',
+                timer: 3000,
+                showConfirmButton: false
+            });
+        @endif
+
         // Add Role Modal
         const addModal = document.getElementById("permissionModal");
         const addContent = document.getElementById("permissionModalContent");

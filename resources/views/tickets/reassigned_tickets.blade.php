@@ -61,7 +61,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="9" class="text-center py-8 text-gray-500 text-lg">
+                                            <td colspan="9" class="text-center py-4 text-gray-500">
                                                 <p>No Re-Assigned Tickets found.</p>
                                             </td>
                                         </tr>

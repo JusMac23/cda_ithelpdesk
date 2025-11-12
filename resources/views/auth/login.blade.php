@@ -1,35 +1,50 @@
 <x-guest-layout>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
-    {{-- SweetAlert for Errors --}}
-    @if(session('error'))
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            Swal.fire({
-                icon: 'error',
-                title: 'Authentication Error',
-                text: '{{ session('error') }}',
-                confirmButtonColor: '#2563eb',
-            });
-        });
-    </script>
-    @endif
+    <style>
+        .cda-button {
+            background-color: #2563eb;
+            color: white;
+            border: 1px solid #ccc;
+            border-radius: .8rem;
+            padding: 0.5rem 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s;
+            width: 100%;
+        }
 
-    {{-- SweetAlert for Success --}}
-    @if(session('success'))
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: '{{ session('success') }}',
-                confirmButtonColor: '#2563eb',
-                timer: 3000
-            });
-        });
-    </script>
-    @endif
+        .cda-button:hover {
+            background-color: #1e4fd1; 
+            border-color: #6366f1; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        @media (min-width: 640px) {
+            .cda-button {
+                width: auto;
+            }
+        }
+        .divider {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 20px;
+        }
+
+        .divider hr {
+        flex: 1;
+        border: none;
+        border-top: 1px solid #ccc; /* Line color */
+        }
+
+        .divider span {
+        margin: 0 10px;
+        color: #555;
+        font-size: 14px;
+        font-weight: 500;
+        }
+    </style>
 
     {{-- Session Status --}}
     <x-auth-session-status class="mb-4" :status="session('status')" />
@@ -85,36 +100,36 @@
         {{-- Login Button --}}
         <div>
             <x-primary-button id="login-button"
-                class="w-full justify-center text-center py-3 rounded-xl font-semibold text-white text-lg transition duration-200"
-                style="background-color: #cbd5e1; cursor: not-allowed; pointer-events: none;">
+                class="w-full justify-center text-center py-3 rounded-xl transition duration-200"
+                style="background-color: #cbd5e1; cursor: not-allowed; pointer-events: none; text-transform: none; font-size: 1rem;">
                 {{ __('Log in') }}
             </x-primary-button>
         </div>
     </form>
 
     {{-- Divider --}}
-    <div class="flex justify items-center my-4">
-        <div class="flex-grow border-t border-gray-300"></div>
-        <span class="mx-3 text-sm text-gray-500">OR</span>
-        <div class="flex-grow border-t border-gray-300"></div>
+    <div class="divider">
+        <hr>
+            <span>OR</span>
+        <hr>
     </div>
 
     {{-- Social Logins --}}
     <div class="space-y-3 mt-6">
-        <p class="text-center text-sm font-medium text-gray-700">Sign in with</p>
 
         <div class="flex flex-col sm:flex-row justify-center">
             {{-- Authentik --}}
-            <a href="{{ route('auth.authentik') }}"
-            class="w-full sm:w-auto flex items-center justify-center border border-gray-300 rounded-xl px-4 py-3 bg-white hover:border-indigo-400 hover:shadow-md transition duration-200 mb-2">
-                <img src="{{ asset('images/authentik.png') }}" alt="Authentik Logo" class="h-4">
+            <a href="{{ route('auth.authentik') }}" class="cda-button mb-2">
+                <span class="font-medium">
+                <i class="fa-solid fa-building-columns mr-2"></i> Continue with CDAOauth
+                </span>
             </a>
-
-            {{-- Google --}}
+            {{-- Google
             <a href="{{ route('auth.google') }}"
             class="w-full sm:w-auto flex items-center justify-center border border-gray-300 rounded-xl px-4 py-3 bg-white hover:border-indigo-400 hover:shadow-md transition duration-200">
                 <img src="{{ asset('images/google-logo.png') }}" alt="Google Logo" class="h-4">
             </a>
+            --}}
         </div>
     </div>
 
@@ -123,9 +138,31 @@
         &copy; {{ date('Y') }} CDA ICTD. All rights reserved.
     </p>
 
-
-    {{-- Enable login button after CAPTCHA --}}
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script>
+        @if(session('success'))
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#2563eb',
+                    timer: 3000
+                });
+            });
+        @endif
+
+        @if(session('error'))
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Authentication Error',
+                    text: '{{ session('error') }}',
+                    confirmButtonColor: '#2563eb',
+                });
+            });
+        @endif
+
         function enableLoginButton() {
             const button = document.getElementById('login-button');
             if (button) {

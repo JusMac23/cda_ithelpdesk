@@ -370,10 +370,15 @@ class TicketsController extends Controller
     {
         $ticket = Tickets::findOrFail($ticket_id);
         
+        // Save ticket number before deleting
+        $ticketNumber = $ticket->ticket_number;
+
+        // Delete photo if it exists
         if ($ticket->photo && \Storage::disk('public')->exists($ticket->photo)) {
             \Storage::disk('public')->delete($ticket->photo);
         }
 
+        // Delete the ticket record
         $ticket->delete();
 
         // Create notification
@@ -382,8 +387,9 @@ class TicketsController extends Controller
             'ticket_deleted',
             "Ticket #{$ticketNumber} was deleted"
         );
- 
-        ReassignedTicket::where('ticket_number', $ticket->ticket_number)->delete();
+
+        // Delete reassigned records
+        ReassignedTicket::where('ticket_number', $ticketNumber)->delete();
 
         return redirect()->route('tickets.index')->with('success', 'Ticket deleted successfully.');
     }

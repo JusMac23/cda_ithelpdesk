@@ -58,10 +58,21 @@ class AuthenticatedSessionController extends Controller
         $user = Auth::user();
 
         // Role-based redirection
-        if ($user->hasRole('Super Admin', 'Admin')) {
+        if ($user->hasRole('Super Admin')) {
+
             return redirect()->route('dashboard');
-        } elseif ($user->hasRole('User')) {
-            return redirect()->route('myrequested_tickets.index');
+
+        } elseif ($user->hasRole('Admin')) {
+
+            return redirect()->route('assignedtome_tickets.index');
+
+        } elseif ($user->hasRole('DPO')) {
+
+            return redirect()->route('databreach.index');
+
+        } elseif ($user->hasRole('DBRT')) {
+
+            return redirect()->route('databreach.index');
         }
 
         // Default fallback

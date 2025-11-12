@@ -16,9 +16,17 @@ return new class extends Migration
             $table->text('message');
             $table->boolean('is_read')->default(false);
             $table->timestamps();
-            
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('ticket_id')->references('ticket_id')->on('tickets')->onDelete('cascade');
+
+            // Foreign keys
+            $table->foreign('user_id')
+                  ->references('user_id')
+                  ->on('users_tbl')
+                  ->onDelete('cascade');
+
+            $table->foreign('ticket_id')
+                  ->references('ticket_id')
+                  ->on('tickets_tbl')
+                  ->onDelete('cascade');
         });
     }
 

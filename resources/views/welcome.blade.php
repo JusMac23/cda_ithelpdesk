@@ -15,6 +15,7 @@
     <!-- Fonts & Material Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Outlined" rel="stylesheet">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.tailwindcss.com"></script>
@@ -97,20 +98,40 @@
 </header>
 
 <!-- Hero Section -->
-<section class="relative w-full bg-cover bg-center bg-no-repeat min-h-screen flex items-center justify-center text-white"
+<section class="relative w-full min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat text-white"
          style="background-image: url('{{ asset('images/hero-bg.jpg') }}');">
-    <div class="relative z-10 text-center px-6 animate-fade-in-down py-16 lg:py-24 max-w-4xl">
-        <h2 class="text-3xl lg:text-6xl font-extrabold mb-6 drop-shadow-xl">
-            Your Seamless Gateway to CDA IT-Helpdesk
-        </h2>
-        <p class="text-lg lg:text-xl text-gray-200 max-w-2xl mx-auto mb-8">
-            Fast, reliable, and secure assistance for all your technical concerns across all CDA offices.
+    
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-blue-900/30 to-black/60 backdrop-blur-[1px]"></div>
+
+    <!-- Content -->
+    <div class="relative z-10 text-center px-6 py-16 lg:py-28 max-w-4xl animate-fade-in">
+        <h1 class="text-4xl md:text-6xl font-extrabold mb-6 drop-shadow-[0_5px_10px_rgba(0,0,0,0.6)] leading-tight">
+            Your Seamless Gateway to <span class="text-blue-400">CDA IT-Helpdesk</span>
+        </h1>
+
+        <p class="text-lg md:text-xl text-gray-200 mb-12 leading-relaxed">
+            Fast, reliable, and secure assistance for all your technical and security concerns across CDA offices.
         </p>
-        <a href="{{ url('create_ticket') }}"
-           class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-full text-lg font-bold shadow-xl interactive-link">
-            <span class="material-icons-outlined">add_circle</span> Submit a Ticket
-        </a>
+
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <!-- Ticket Button -->
+            <a href="{{ url('create_ticket') }}"
+               class="inline-flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg hover:shadow-blue-400/40 transform hover:-translate-y-1 transition-all duration-300">
+                <i class="fa-solid fa-ticket text-white text-xl"></i>
+                Submit Ticket
+            </a>
+            <a href="{{ url('create_incident') }}"
+               class="inline-flex items-center justify-center gap-3 bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg hover:shadow-red-400/40 transform hover:-translate-y-1 transition-all duration-300">
+                <i class="fa-solid fa-shield-alt text-red text-xl"></i>
+                Submit Incident Report
+            </a>
+        </div>
     </div>
+
+    <!-- Floating Animated Shapes -->
+    <div class="absolute top-10 left-10 w-20 h-20 bg-blue-500/20 rounded-full blur-2xl animate-pulse"></div>
+    <div class="absolute bottom-10 right-16 w-28 h-28 bg-blue-300/20 rounded-full blur-3xl animate-ping"></div>
 </section>
 
 <!-- Services -->

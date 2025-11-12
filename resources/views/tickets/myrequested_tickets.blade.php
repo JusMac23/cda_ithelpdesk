@@ -1,15 +1,5 @@
 <x-app-layout>
-    @if(session('success'))
-    <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: '{{ session('success') }}',
-            timer: 2000,
-            showConfirmButton: false
-        });
-    </script>
-    @endif
+    
     <div id="main-content" class="min-h-screen transition-all duration-300 ease-in-out">
         <div id="ticketsContent">
             <div class="w-full">
@@ -50,9 +40,7 @@
                                         <th class="px-6 py-2 text-center min-w-[5rem] font-semibold text-gray-700 uppercase tracking-wider">Date Resolved</th>
                                         <th class="px-6 py-2 text-center min-w-[2rem] font-semibold text-gray-700 uppercase tracking-wider">Photo</th>
                                         <th class="px-6 py-2 text-center min-w-[2rem] font-semibold text-gray-700 uppercase tracking-wider">Status</th>
-                                        @can('reassign_myrequested_tickets|update_status_myrequested_tickets|delete_myrequested_tickets')
                                         <th class="px-6 py-2 text-center min-w-[9rem] text-center font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
-                                        @endcan
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100 bg-white">
@@ -148,7 +136,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="13" class="text-center py-8 text-gray-500 text-lg">
+                                            <td colspan="13" class="text-center py-4 text-gray-500">
                                                 <p>No Requested Ticket.</p>
                                             </td>
                                         </tr>
@@ -191,7 +179,7 @@
 
                         <!-- Requestor Section -->
                         <fieldset class="border border-gray-300 rounded-md p-6">
-                            <legend class="text-lg font-semibold text-gray-700 px-2">📌 Client Information</legend>
+                            <legend class="text-lg font-semibold text-gray-700 px-2">Client Information</legend>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mt-4">
                                 <!-- First Name -->
@@ -283,7 +271,7 @@
 
                         <!-- Routed Section -->
                         <fieldset class="border border-gray-300 rounded-md p-6">
-                            <legend class="text-lg font-semibold text-gray-700 px-2">🧭 Designated Personnel</legend>
+                            <legend class="text-lg font-semibold text-gray-700 px-2">Designated Personnel</legend>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mt-4">
                                 <!-- Region -->
@@ -502,6 +490,16 @@
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const body = document.body;
+
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '{{ session('success') }}',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        @endif
 
         // === AUTO-RELOAD & COUNTDOWN ===
         const checkbox = document.getElementById('autoReloadCheckbox');
@@ -796,13 +794,7 @@
                     });
 
                 } else if (newStatus === 'Resolved') {
-                    Swal.fire({
-                        title: 'Success',
-                        text: 'Ticket successfully updated.',
-                        icon: 'success',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
+
                 }
             });
         }

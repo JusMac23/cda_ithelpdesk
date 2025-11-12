@@ -18,13 +18,10 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <!-- Styles & Scripts -->
+    <!-- Styles & Scripts (Vite handles Tailwind + JS build) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="//unpkg.com/alpinejs" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
-
 
 <body class="font-sans antialiased bg-gray-100 text-gray-800">
     <div class="min-h-screen flex">
@@ -154,7 +151,7 @@
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
-                                    {{ __('Log Out') }}
+                                    {{ __('Log out') }}
                                 </x-dropdown-link>
                             </form>
                         </x-slot>

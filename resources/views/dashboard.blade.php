@@ -194,23 +194,23 @@
                             <i class="fa-solid fa-clock-rotate-left mr-2 text-blue-600"></i> Recently Resolved Tickets
                         </h4>
                         <div class="overflow-x-auto bg-white shadow-lg rounded-lg border border-gray-200">
-                            <table class="min-w-full table-fixed divide-y divide-gray-200 text-sm text-left text-gray-800">
-                                <thead class="bg-gray-100 border-b border-gray-300 sticky top-0 z-10">
+                            <table class="min-w-full table-fixed divide-y divide-gray-200 text-left text-gray-800">
+                                <thead class="bg-gray-100 text-gray-700">
                                     <tr>
-                                        <th class="px-6 py-3">Ticket Number</th>
-                                        <th class="px-6 py-3">Requested By</th>
-                                        <th class="px-6 py-3">Division</th>
-                                        <th class="px-6 py-3">Service</th>
-                                        <th class="px-6 py-3">Assigned Personnel</th>
-                                        <th class="px-6 py-3">Date Created</th>
-                                        <th class="px-6 py-3">Date Resolved</th>
-                                        <th class="px-6 py-3">Status</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-left">Ticket Number</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-left">Requested By</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-left">Division</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-left">Service</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-left">Assigned Personnel</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-left">Date Created</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-left">Date Resolved</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-center">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse ($recentlyResolved as $ticket)
-                                        <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                                            <td class="px-6 py-4">{{ $ticket->ticket_number      }}</td>
+                                        <tr class="hover:bg-gray-50 border-b">
+                                            <td class="px-6 py-4">{{ $ticket->ticket_number}}</td>
                                             <td class="px-6 py-4">{{ $ticket->firstname }} {{ $ticket->lastname }}</td>
                                             <td class="px-6 py-4">{{ $ticket->division }}</td>
                                             <td class="px-6 py-4">{{ $ticket->service }}</td>
@@ -226,8 +226,8 @@
                                                     default => 'bg-gray-100 text-gray-800',
                                                 };
                                             @endphp
-                                            <td class="px-6 py-4">
-                                                <span class="inline-block px-3 py-1 text-xs font-semibold rounded-full {{ $statusClasses }}">
+                                            <td class="px-6 py-4 text-center">
+                                                <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full {{ $statusClasses }}">
                                                     {{ $ticket->status }}
                                                 </span>
                                             </td>

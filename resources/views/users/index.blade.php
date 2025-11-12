@@ -1,38 +1,4 @@
 <x-app-layout>
-    @if(session('success'))
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: '{{ session('success') }}',
-                timer: 3000,
-                showConfirmButton: false
-            });
-        </script>
-    @endif
-
-    @if(session('error'))
-        <script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Notice!',
-                text: '{{ session('error') }}',
-                timer: 3000,
-                showConfirmButton: false
-            });
-        </script>
-    @endif
-
-    @if ($errors->any())
-        <script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Validation Error',
-                html: `{!! implode('<br>', $errors->all()) !!}`,
-                showConfirmButton: true
-            });
-        </script>
-    @endif
 
     <div id="main-content" class="min-h-screen transition-all duration-300 ease-in-out">
         <div id="techContent">
@@ -66,27 +32,27 @@
                         </div>
 
                         <div class="overflow-x-auto bg-white shadow-lg rounded-lg border border-gray-200">
-                            <table class="min-w-full table-fixed divide-y divide-gray-200 text-sm text-left text-gray-800">
-                                <thead class="bg-gray-100 border-b border-gray-300 sticky top-0 z-10">
+                            <table class="min-w-full table-fixed divide-y divide-gray-200 text-left text-gray-800">
+                                <thead class="bg-gray-100 text-gray-700">
                                     <tr>
-                                        <th class="px-6 py-2 min-w-[6rem] font-semibold text-gray-700 uppercase tracking-wider">FullName</th>
-                                        <th class="px-6 py-2 min-w-[6rem] font-semibold text-gray-700 uppercase tracking-wider">Email</th>
-                                        <th class="px-6 py-2 min-w-[6rem] font-semibold text-gray-700 uppercase tracking-wider">Role</th>
-                                        <th class="px-6 py-2 min-w-[5rem] font-semibold text-gray-700 uppercase tracking-wider">Date Added</th>
-                                        <th class="px-6 py-2 min-w-[5rem] font-semibold text-gray-700 uppercase tracking-wider">Date Updated</th>
-                                        @can('delete_tech_users')<th class="px-6 py-2 text-center min-w-[7rem] font-semibold text-gray-700 uppercase tracking-wider">Actions</th>@endcan
+                                        <th class="px-6 py-2 font-semibold uppercase text-left">FullName</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-left">Email</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-left">Role</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-left">Date Added</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-left">Date Updated</th>
+                                        @can('delete_tech_users')<th class="px-6 py-2 font-semibold uppercase text-center">Actions</th>@endcan
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100 bg-white">
                                     @forelse ($users as $user)
-                                        <tr class="hover:bg-gray-50 focus-within:bg-gray-100 transition">
-                                            <td class="px-3 py-2">{{ $user->name }}</td>
-                                            <td class="px-3 py-2">{{ $user->email }}</td>
+                                        <tr class="hover:bg-gray-50 border-b">
+                                            <td class="px-4 py-2">{{ $user->name }}</td>
+                                            <td class="px-4 py-2">{{ $user->email }}</td>
 
-                                            <td class="px-3 py-2">
+                                            <td class="px-4 py-2">
                                                 @if($user->roles->isNotEmpty())
                                                     @foreach($user->roles as $role)
-                                                        <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-700">
+                                                        <span class="inline-block px-2 py-1 text-sm font-semibold rounded-full bg-indigo-100 text-indigo-700">
                                                             {{ $role->name }}
                                                         </span>
                                                     @endforeach
@@ -96,8 +62,8 @@
                                                     </span>
                                                 @endif
                                             </td>
-                                            <td class="px-3 py-2 text-gray-600 text-xs">{{ \Carbon\Carbon::parse($user->created_at)->format('M d, Y h:i A') }}</td>
-                                            <td class="px-3 py-2 text-gray-600 text-xs">
+                                            <td class="px-4 py-2">{{ \Carbon\Carbon::parse($user->created_at)->format('M d, Y h:i A') }}</td>
+                                            <td class="px-4 py-2">
                                                 @if($user->updated_at)
                                                     {{ \Carbon\Carbon::parse($user->updated_at)->format('M d, Y h:i A') }}
                                                 @else
@@ -111,7 +77,7 @@
                                                     {{-- Edit Button --}}
                                                     @can('edit_tech_users')
                                                     <div class="w-24 border rounded-lg px-2 py-1 bg-blue-50 hover:bg-blue-100 transition mb-1 flex justify-center">
-                                                        <button class="editBtn flex items-center space-x-1 text-xs text-blue-600 hover:text-blue-800"
+                                                        <button class="editBtn flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800"
                                                             data-id="{{ $user->id }}"
                                                             data-name="{{ $user->name }}"
                                                             data-email="{{ $user->email }}"
@@ -132,7 +98,7 @@
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="button"
-                                                                    class="flex items-center space-x-1 text-xs text-red-600 hover:text-red-800 delete-btn"
+                                                                    class="flex items-center space-x-1 text-sm text-red-600 hover:text-red-800 delete-btn"
                                                                     data-id="{{ $user->id }}">
                                                                 <i class="fas fa-trash-alt"></i>
                                                                 <span>Delete</span>
@@ -205,13 +171,15 @@
                             <div>
                                 <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
                                 <input type="text" name="name" id="name" required
-                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                        placeholder="John A. Doe"
+                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                             </div>
 
                             <div class="sm:col-span-2">
                                 <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
                                 <input type="email" name="email" id="email" required
-                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                        placeholder="j_doe@cda.gov.ph"
+                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                             </div>
 
                             <div>
@@ -355,6 +323,36 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: '{{ session('success') }}',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Notice!',
+                    text: '{{ session('error') }}',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            @endif
+
+            @if ($errors->any())
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    html: `{!! implode('<br>', $errors->all()) !!}`,
+                    showConfirmButton: true
+                });
+            @endif
+
             // Add Modal
             const addModal = document.getElementById("userModal");
             const openAddBtn = document.getElementById("openModal");
@@ -457,4 +455,5 @@
             });
         });
     </script>
+    
 </x-app-layout>

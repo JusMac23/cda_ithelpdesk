@@ -20,6 +20,8 @@ class PermissionSeeder extends Seeder
 
             'view_profile',
             'edit_profile',
+            'update_password',
+            'delete_profile',
 
             'view_all_tickets',
             'create_ticket',
@@ -51,6 +53,21 @@ class PermissionSeeder extends Seeder
             'delete_reassigned_tickets',
             'search_reassigned_tickets',
 
+            'view_all_databreach',
+            'view_overview_databreach',
+            'create_databreach',
+            'view_databreach',
+            'edit_databreach',
+            'delete_databreach',
+            'search_databreach',
+            'filter_databreach',
+            'generate_csv_databreach',
+            'print_databreach',
+
+            'view_dbrt',
+            'create_dbrt',
+            'edit_dbrt',
+            'delete_dbrt',
 
             'view_technical_personnel',
             'create_technical_personnel',

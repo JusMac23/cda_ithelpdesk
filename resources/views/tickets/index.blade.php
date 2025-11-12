@@ -1,28 +1,4 @@
 <x-app-layout>
-    @if(session('success'))
-    <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: '{{ session('success') }}',
-            timer: 3000,
-            showConfirmButton: false
-        });
-    </script>
-    @endif
-
-    @if(session('error'))
-    <script>
-        Swal.fire({
-            icon: 'error',
-            title: 'Notice!',
-            text: '{{ session('error') }}',
-            timer: 3000,
-            showConfirmButton: false
-        });
-    </script>
-    @endif
-    
     <div id="main-content" class="min-h-screen transition-all duration-300 ease-in-out">
         <div id="ticketsContent">
             <div class="w-full">
@@ -39,7 +15,7 @@
                             @endcan
 
                             <label class="inline-flex items-center space-x-2">
-                                <input type="checkbox" id="autoReloadCheckbox" class="form-checkbox text-indigo-600">
+                                <input type="checkbox" id="autoReloadCheckbox" class="form-checkbox text-indigo-600 mr-2">
                                 <span class="text-sm text-gray-700 ml-1">
                                     (<span id="countdown">60</span>s) Seconds Auto-Reload
                                 </span>
@@ -230,7 +206,6 @@
                                                     @endif
                                                     @endcan
 
-
                                                     @can('delete_ticket')
                                                     <div class="border rounded-lg px-1 py-1 bg-red-50 hover:bg-red-100 transition mb-1">
                                                         <form id="delete-form-{{ $ticket->ticket_id }}" 
@@ -253,7 +228,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="13" class="text-center py-8 text-gray-500 text-lg">
+                                            <td colspan="13" class="text-center py-4 text-gray-500">
                                                 <p>No Tickets found.</p>
                                             </td>
                                         </tr>
@@ -296,7 +271,7 @@
 
                         <!-- Requestor Section -->
                         <fieldset class="border border-gray-300 rounded-md p-6">
-                            <legend class="text-lg font-semibold text-gray-700 px-2">📌 Client Information</legend>
+                            <legend class="text-lg font-semibold text-gray-700 px-2">Client Information</legend>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mt-4">
                                 <!-- First Name -->
@@ -388,7 +363,7 @@
 
                         <!-- Routed Section -->
                         <fieldset class="border border-gray-300 rounded-md p-6">
-                            <legend class="text-lg font-semibold text-gray-700 px-2">🧭 Designated Personnel</legend>
+                            <legend class="text-lg font-semibold text-gray-700 px-2">Designated Personnel</legend>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mt-4">
                                 <!-- Region -->
@@ -606,8 +581,29 @@
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+
             const body = document.body;
 
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: '{{ session('success') }}',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Notice!',
+                    text: '{{ session('error') }}',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            @endif
+            
             // === AUTO-RELOAD & COUNTDOWN ===
             const checkbox = document.getElementById('autoReloadCheckbox');
             const countdownDisplay = document.getElementById('countdown');
@@ -901,13 +897,7 @@
                         });
 
                     } else if (newStatus === 'Resolved') {
-                        Swal.fire({
-                            title: 'Success',
-                            text: 'Ticket successfully updated.',
-                            icon: 'success',
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
+                        
                     }
                 });
             }

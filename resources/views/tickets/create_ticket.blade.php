@@ -9,54 +9,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>CDA-ITHelpdesk</title>
+    <title>CDA-ITHelpdesk - Create Ticket</title>
     <link rel="icon" href="{{ asset('images/CDA-logo-RA11364-PNG.png') }}" type="image/png">
 
-    <!-- Fonts -->
+    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Outlined" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
-
-    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
+    <!-- Styles & Scripts (Vite handles Tailwind + JS build) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         @keyframes fade-in-down {
             from { opacity: 0; transform: translateY(-20px); }
-            to   { opacity: 1; transform: translateY(0); }
+            to { opacity: 1; transform: translateY(0); }
         }
+
         .animate-fade-in-down {
-            animation: fade-in-down 0.9s ease-out both;
+            animation: fade-in-down 0.7s ease-out both;
         }
-        .interactive-link {
-            transition: all 0.3s ease-in-out;
+
+        .card-hover {
+            transition: all 0.3s ease;
         }
-        .interactive-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+
+        .card-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
         }
-        
+
+        .input-focus:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+        }
+
         body, button, input, select, textarea, h1, h2, h3, h4, p, a, span, li, legend, label, option {
-            font-family: 'Figtree', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
+            font-family: 'Figtree', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;
         }
-        
+
         .material-icons-outlined {
             font-family: 'Material Icons Outlined' !important;
         }
-        
+
         .fa, .fas, .far, .fal, .fab {
             font-family: 'Font Awesome 6 Free' !important;
         }
     </style>
 </head>
+
 <body class="bg-gray-50 text-gray-800 antialiased">
 
 <header class="bg-white shadow-lg sticky top-0 z-50 border-b border-gray-200">
-
     <div class="h-1 bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500"></div>
     
     <div class="container mx-auto px-6 py-4 flex justify-between items-center">
@@ -105,9 +113,9 @@
     </div>
 </header>
 
-<section class="p-8 max-w-4xl mx-auto bg-gray-200 rounded-2xl shadow-xl mt-10 mb-16 animate-fade-in-down">
+<section class="p-8 max-w-6xl mx-auto bg-white rounded-2xl shadow-xl mt-10 mb-16 animate-fade-in-down relative">
     <button id="close" onclick="window.location.href='{{ url('/') }}'" 
-        class="absolute top-4 right-5 text-gray-400 hover:text-gray-700 text-3xl transition-colors duration-200 leading-none">&times;
+        class="absolute top-6 right-8 text-gray-400 hover:text-gray-700 text-3xl transition-colors duration-200 leading-none bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-sm hover:shadow-md">&times;
     </button>
 
     @if ($errors->any())
@@ -115,7 +123,7 @@
             <div class="flex">
                 <i class="fas fa-exclamation-circle text-xl mt-1 mr-3"></i>
                 <div>
-                    <h4 class="font-semibold text-sm mb-1">Please fix the following:</h4>
+                    <h4 class="font-semibold text-sm mb-1">Please fix the following errors:</h4>
                     <ul class="list-disc pl-5 space-y-1 text-sm">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -126,137 +134,223 @@
         </div>
     @endif
 
-    <h2 class="text-4xl font-bold text-gray-900 mb-10 border-b-2 border-gray-300 pb-4">
-        📝 Submit a Ticket
+    <h2 class="text-3xl font-bold text-gray-900 mb-10 border-b-2 border-gray-200 pb-4 flex items-center gap-3">
+        <i class="fas fa-file-alt text-indigo-600"></i>
+        Create Support Ticket
     </h2>
-    <form action="{{ route('tickets.store.client') }}" method="POST" enctype="multipart/form-data" class="space-y-12">
+
+    <form action="{{ route('tickets.store.client') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
         @csrf
 
-        {{-- Client Info --}}
-        <fieldset class="border border-gray-300 rounded-xl p-6">
-            <legend class="text-lg font-semibold text-gray-800 px-2">📌 Client Information</legend>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                @foreach ([['firstname', 'First Name', 'Juan', 'text'], ['lastname', 'Last Name', 'Dela Cruz', 'text'], ['email', 'Email', 'j_delacruz@cda.gov.ph', 'email']] as [$name, $label, $placeholder, $type])
-                    <div>
-                        <label for="{{ $name }}" class="block text-sm font-medium text-gray-800 mb-1">{{ $label }} <span class="text-red-500">*</span></label>
-                        <input type="{{ $type }}" name="{{ $name }}" id="{{ $name }}" placeholder="e.g., {{ $placeholder }}"
-                            class="w-full rounded-lg border-gray-300 shadow-sm bg-white text-gray-800 text-sm px-4 py-2.5" required>
+        <!-- Client Information -->
+        <fieldset class="border border-gray-200 rounded-2xl p-8 bg-white card-hover shadow-sm">
+            <legend class="text-xl font-bold text-gray-800 px-4 flex items-center gap-2">
+                Client Information
+            </legend>
+            <div class="space-y-6 mt-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-2">
+                        <label for="firstname" class="block text-sm font-semibold text-gray-700">
+                            First Name <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="firstname" name="firstname" 
+                            placeholder="e.g., Juan" required
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus">
                     </div>
-                @endforeach
 
-                {{-- Date Created --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-800 mb-1">Date Created</label>
-                    <input type="text" value="{{ \Carbon\Carbon::now('Asia/Manila')->format('F j, Y h:i A') }}" readonly
-                        class="w-full bg-gray-100 text-gray-800 border border-gray-300 rounded-lg px-4 py-2.5 text-sm">
-                    <input type="hidden" name="date_created" value="{{ \Carbon\Carbon::now('Asia/Manila')->format('Y-m-d') }}">
+                    <div class="space-y-2">
+                        <label for="lastname" class="block text-sm font-semibold text-gray-700">
+                            Last Name <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="lastname" name="lastname" 
+                            placeholder="e.g., Dela Cruz" required
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="email" class="block text-sm font-semibold text-gray-700">
+                            Email <span class="text-red-500">*</span>
+                        </label>
+                        <input type="email" id="email" name="email" 
+                            placeholder="e.g., j_delacruz@cda.gov.ph" required
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus">
+                    </div>
                 </div>
 
-                {{-- Division --}}
-                <div>
-                    <label for="division" class="block text-sm font-medium text-gray-800 mb-1">Division <span class="text-red-500">*</span></label>
-                    <select name="division" id="division" required
-                        class="w-full rounded-lg border-gray-300 shadow-sm text-sm px-4 py-2.5 bg-white text-gray-800">
-                        <option value="" disabled selected>Select Division</option>
-                        @foreach ($sections_divisions as $division)
-                            <option value="{{ $division }}">{{ $division }}</option>
-                        @endforeach
-                    </select>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">
+                            Date Created
+                        </label>
+                        <input type="text" value="{{ \Carbon\Carbon::now('Asia/Manila')->format('F j, Y h:i A') }}" readonly
+                            class="w-full bg-gray-100 text-gray-600 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none">
+                        <input type="hidden" name="date_created" value="{{ \Carbon\Carbon::now('Asia/Manila')->format('Y-m-d') }}">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="division" class="block text-sm font-semibold text-gray-700">
+                            Division <span class="text-red-500">*</span>
+                        </label>
+                        <select id="division" name="division" required
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus appearance-none bg-white">
+                            <option value="" disabled selected>Select Division</option>
+                            @foreach ($sections_divisions as $division)
+                                <option value="{{ $division }}">{{ $division }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
-                {{-- Device --}}
-                <div>
-                    <label for="device" class="block text-sm font-medium text-gray-800 mb-1">Device <span class="text-red-500">*</span></label>
-                    <select name="device" id="device"
-                        class="w-full rounded-lg border-gray-300 shadow-sm text-sm px-4 py-2.5 bg-white text-gray-800">
-                        <option value="" disabled selected>Select Device</option>
-                        @foreach (['Desktop PC', 'Laptop/Netbook PC', 'Tablet PC', 'All-in-1 Printer', 'Printer Only', 'Scanner Only', 'Others'] as $device)
-                            <option>{{ $device }}</option>
-                        @endforeach
-                    </select>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="device" class="block text-sm font-semibold text-gray-700">
+                            Device <span class="text-red-500">*</span>
+                        </label>
+                        <select id="device" name="device" required
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus appearance-none bg-white">
+                            <option value="" disabled selected>Select Device</option>
+                            @foreach (['Desktop PC', 'Laptop/Netbook PC', 'Tablet PC', 'All-in-1 Printer', 'Printer Only', 'Scanner Only', 'Others'] as $device)
+                                <option value="{{ $device }}">{{ $device }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="service" class="block text-sm font-semibold text-gray-700">
+                            Technical Service <span class="text-red-500">*</span>
+                        </label>
+                        <select id="service" name="service" required
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus appearance-none bg-white">
+                            <option value="" disabled selected>Select Service</option>
+                            @foreach ($technical_services as $service)
+                                <option value="{{ $service }}">{{ $service }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
-                {{-- Service --}}
-                <div>
-                    <label for="service" class="block text-sm font-medium text-gray-800 mb-1">Technical Service <span class="text-red-500">*</span></label>
-                    <select name="service" id="service"
-                        class="w-full rounded-lg border-gray-300 shadow-sm text-sm px-4 py-2.5 bg-white text-gray-800">
-                        <option value="" disabled selected>Select Service</option>
-                        @foreach ($technical_services as $service)
-                            <option value="{{ $service }}">{{ $service }}</option>
-                        @endforeach
-                    </select>
+                <div class="space-y-2">
+                    <div class="space-y-2">
+                        <label for="photo" class="block text-sm font-semibold text-gray-700">
+                            Attach Photo (Optional)
+                        </label>
+                        <input type="file" id="photo" name="photo" accept="image/*"
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                    </div>
                 </div>
 
-                {{-- Photo --}}
-                <div>
-                    <label for="photo" class="block text-sm font-medium text-gray-800 mb-1">Attach Photo (Optional)</label>
-                    <input type="file" name="photo" id="photo"
-                        class="w-full text-sm text-gray-700 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200 cursor-pointer bg-white border border-gray-300 rounded-lg">
-                </div>
-
-                {{-- Request --}}
-                <div class="md:col-span-2">
-                    <label for="request" class="block text-sm font-medium text-gray-800 mb-1">Request Details <span class="text-red-500">*</span></label>
-                    <textarea name="request" id="request" rows="4"
-                        class="w-full rounded-lg border-gray-300 shadow-sm text-sm px-4 py-2.5 bg-white text-gray-800"
-                        placeholder="Describe the issue or request in detail..." required></textarea>
-                </div>
-            </div>
-        </fieldset>
-
-        {{-- IT Routing --}}
-        <fieldset class="border border-gray-300 rounded-xl p-6">
-            <legend class="text-lg font-semibold text-gray-800 px-2">🧭 Designated Personnel</legend>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                {{-- IT Area --}}
-                <div>
-                    <label for="it_area" class="block text-sm font-medium text-gray-800 mb-1">Region <span class="text-red-500">*</span></label>
-                    <select name="it_area" id="it_area"
-                        class="w-full rounded-lg border-gray-300 shadow-sm text-sm px-4 py-2.5 bg-white text-gray-800">
-                        <option selected disabled>Select Region</option>
-                        @foreach($it_area as $area)
-                            <option value="{{ $area }}">{{ $area }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                {{-- IT Personnel --}}
-                <div>
-                    <label for="it_personnel" class="block text-sm font-medium text-gray-800 mb-1">Assigned Personnel</label>
-                    <select name="it_personnel" id="it_personnel"
-                        class="w-full rounded-lg border-gray-300 shadow-sm text-sm px-4 py-2.5 bg-white text-gray-800">
-                        <option selected disabled>Select Personnel</option>
-                    </select>
-                </div>
-
-                {{-- IT Email --}}
-                <div>
-                    <label for="it_email" class="block text-sm font-medium text-gray-800 mb-1">IT Email</label>
-                    <input type="text" name="it_email" id="it_email" readonly
-                        class="w-full rounded-lg border-gray-300 shadow-sm bg-gray-100 text-sm px-4 py-2.5 text-gray-800">
-                </div>
-
-                {{-- Status --}}
-                <div>
-                    <label for="status" class="block text-sm font-medium text-gray-800 mb-1">Status</label>
-                    <input type="text" name="status" id="status" value="Pending" readonly
-                        class="w-full rounded-lg border-gray-300 shadow-sm bg-gray-100 text-sm px-4 py-2.5 text-gray-800">
+                <div class="space-y-2">
+                    <label for="request" class="block text-sm font-semibold text-gray-700">
+                        Request Details <span class="text-red-500">*</span>
+                    </label>
+                    <textarea id="request" name="request" rows="4"
+                        placeholder="Describe the issue or request in detail..."
+                        required
+                        class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus resize-none"></textarea>
                 </div>
             </div>
         </fieldset>
 
-        {{-- Submit --}}
-        <div class="flex justify-end pt-6 border-t border-gray-300">
-            <button type="submit"
-                class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md transition ease-in-out duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        <!-- Designated Personnel -->
+        <fieldset class="border border-gray-200 rounded-2xl p-8 bg-white card-hover shadow-sm">
+            <legend class="text-xl font-bold text-gray-800 px-4 flex items-center gap-2">
+                Designated Personnel
+            </legend>
+            <div class="space-y-6 mt-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="it_area" class="block text-sm font-semibold text-gray-700">
+                            Region <span class="text-red-500">*</span>
+                        </label>
+                        <select id="it_area" name="it_area" required
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus appearance-none bg-white">
+                            <option value="" disabled selected>Select Region</option>
+                            @foreach($it_area as $area)
+                                <option value="{{ $area }}">{{ $area }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="it_personnel" class="block text-sm font-semibold text-gray-700">
+                            Assigned Personnel
+                        </label>
+                        <select id="it_personnel" name="it_personnel"
+                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 input-focus appearance-none bg-white">
+                            <option value="" disabled selected>Select Personnel</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="it_email" class="block text-sm font-semibold text-gray-700">
+                            IT Email
+                        </label>
+                        <input type="text" id="it_email" name="it_email" readonly
+                            class="w-full bg-gray-100 text-gray-600 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="status" class="block text-sm font-semibold text-gray-700">
+                            Status
+                        </label>
+                        <input type="text" id="status" name="status" value="Pending" readonly
+                            class="w-full bg-gray-100 text-gray-600 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none">
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Action Buttons -->
+        <div>
+            <div class="g-recaptcha"
+                data-sitekey="{{ config('services.recaptcha.site_key') }}"
+                data-callback="enableLoginButton"
+                data-expired-callback="disableLoginButton"
+                data-error-callback="disableLoginButton"></div>
+
+            @if ($errors->has('g-recaptcha-response'))
+                <x-input-error :messages="$errors->get('g-recaptcha-response')" class="mt-2" />
+            @endif
+        </div>
+
+        <div class="flex justify-end gap-4 pt-8 border-t border-gray-200">
+            <button type="submit" id="submitTicketBtn"
+                class="inline-flex items-center gap-3 px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                disabled>
                 <i class="fas fa-paper-plane text-sm"></i> Submit Ticket
             </button>
         </div>
     </form>
 </section>
+
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 <script>
-    //Auto Populated
+
+    // SweetAlert notifications
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: '{{ session('success') }}',
+            timer: 3000,
+            showConfirmButton: false
+        });
+    @endif
+
+    @if(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: '{{ session('error') }}',
+            timer: 3000,
+            showConfirmButton: false
+        });
+    @endif
+    
+    // Auto-populate IT personnel based on region selection
     const itMapping = @json($it_mapping);
     const regionSelect = document.getElementById('it_area');
     const personnelSelect = document.getElementById('it_personnel');
@@ -264,7 +358,7 @@
 
     if (regionSelect && personnelSelect && emailInput) {
         regionSelect.addEventListener('change', function () {
-            personnelSelect.innerHTML = '<option disabled selected>Select Personnel</option>';
+            personnelSelect.innerHTML = '<option value="" disabled selected>Select Personnel</option>';
             emailInput.value = '';
             const personnelList = itMapping[this.value] || [];
 
@@ -281,17 +375,92 @@
             emailInput.value = selected ? selected.email : '';
         });
     }
-    
-    // Notification
-    @if(session('success'))
-        Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: '{{ session('success') }}',
-            timer: 3000,
-            showConfirmButton: false
+
+    // Form validation enhancement
+    document.querySelector('form').addEventListener('submit', function(e) {
+        let isValid = true;
+        const requiredFields = this.querySelectorAll('[required]');
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('border-red-500', 'bg-red-50');
+            } else {
+                field.classList.remove('border-red-500', 'bg-red-50');
+            }
         });
-    @endif
+
+        if (!isValid) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Missing Information',
+                text: 'Please fill in all required fields marked with *.',
+                confirmButtonColor: '#3085d6'
+            });
+        }
+    });
+
+    // Real-time validation
+    document.querySelectorAll('[required]').forEach(field => {
+        field.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.classList.add('border-red-500', 'bg-red-50');
+            } else {
+                this.classList.remove('border-red-500', 'bg-red-50');
+            }
+        });
+
+        field.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('border-red-500', 'bg-red-50');
+            }
+        });
+    });
+
+    // Device "Others" option handling
+    document.getElementById('device').addEventListener('change', function() {
+        if (this.value === 'Others') {
+            // You can add a text input for specifying other devices here
+            console.log('Other device selected - consider adding a text input');
+        }
+    });
+
+    // Service "Others" option handling (if applicable)
+    document.getElementById('service').addEventListener('change', function() {
+        if (this.value === 'Others') {
+            // You can add a text input for specifying other services here
+            console.log('Other service selected - consider adding a text input');
+        }
+    });
+
+     // Called when reCAPTCHA is successfully completed
+    function enableLoginButton() {
+        const button = document.getElementById('submitTicketBtn');
+        if (button) {
+            button.disabled = false;
+            button.style.opacity = '1';
+            button.style.cursor = 'pointer';
+            button.style.pointerEvents = 'auto';
+        }
+    }
+
+    // Called when reCAPTCHA expires or fails
+    function disableLoginButton() {
+        const button = document.getElementById('submitTicketBtn');
+        if (button) {
+            button.disabled = true;
+            button.style.opacity = '0.6';
+            button.style.cursor = 'not-allowed';
+            button.style.pointerEvents = 'none';
+        }
+    }
+
+    // Always start disabled when page loads
+    document.addEventListener('DOMContentLoaded', function () {
+        disableLoginButton();
+    });
+
 </script>
 </body>
 </html>

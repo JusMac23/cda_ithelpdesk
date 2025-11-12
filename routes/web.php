@@ -15,6 +15,10 @@ use App\Http\Controllers\TechnicalPersonnelController;
 use App\Http\Controllers\TechnicalServicesController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\RolesController;
+use App\Http\Controllers\CreateIncidentReportController;
+use App\Http\Controllers\DataBreachNotificationController;
+use App\Http\Controllers\DatabreachPerRegionController;
+use App\Http\Controllers\CreateDataBreachTeamController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\OAuthGoogleController;
 use App\Http\Controllers\Auth\OAuthAuthentikController;
@@ -39,6 +43,10 @@ Route::middleware('web')->group(function () {
 Route::get('/create_ticket', [CreateTicketController::class, 'showForm'])->name('tickets.create');
 Route::post('/create_ticket', [CreateTicketController::class, 'store'])->name('tickets.store.client');
 
+// Create Incident Report (public)
+Route::get('/create_incident', [CreateIncidentReportController::class, 'create'])->name('incident.create');
+Route::post('/create_incident', [CreateIncidentReportController::class, 'store'])->name('incident.store');
+
 // Client Signature Routes
 Route::get('/tickets/{ticket_id}/client-signature', [UploadClientSignatureController::class, 'showSignatureForm'])->name('tickets.client_signature');
 Route::post('/tickets/{ticket_id}/client-signature', [UploadClientSignatureController::class, 'saveSignature'])->name('tickets.saveClientSignature');
@@ -54,9 +62,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('permission:view_dashboard');
 
     // Profile Management
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit')->middleware('permission:view_profile|edit_profile|update_password|delete_profile');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update')->middleware('permission:edit_profile|update_password');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy')->middleware('permission:delete_profile');
 
     // Ticket Management
     Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets.index')
@@ -77,6 +85,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/tickets/myrequested_tickets', [MyRequestedTicketsController::class, 'index'])->name('myrequested_tickets.index')
         ->middleware('permission:view_myrequested_tickets|create_myrequested_tickets|reassign_myrequested_tickets|update_status_myrequested_tickets|delete_myrequested_tickets|search_myrequested_tickets');
     Route::post('/tickets/save', [MyRequestedTicketsController::class, 'save'])->name('tickets.save')->middleware('permission:create_myrequested_tickets');
+
+     // Create Data Breach Notification
+    Route::get('/databreach', [DataBreachNotificationController::class, 'index'])->name('databreach.index')
+        ->middleware('permission:view_all_databreach|view_overview_databreach|create_databreach|view_databreach|edit_databreach|delete_databreach|search_databreach');
+    Route::get('/overview_databreach', [DataBreachNotificationController::class, 'overview'])->name('databreach.overview')->middleware('permission:view_overview_databreach');
+    Route::get('/create_databreach', [DataBreachNotificationController::class, 'create'])->name('databreach.create')->middleware('permission:create_databreach');
+    Route::post('/create_databreach', [DataBreachNotificationController::class, 'store'])->name('databreach.store')->middleware('permission:create_databreach');
+    Route::get('/databreach/{dbn_id}', [DataBreachNotificationController::class, 'show'])->name('databreach.show')->middleware('permission:view_databreach');
+    Route::get('/edit_databreach/{dbn_id}/edit', [DataBreachNotificationController::class, 'edit'])->name('databreach.edit')->middleware('permission:edit_databreach');
+    Route::get('/get-dbrt-email/{region}', [DataBreachNotificationController::class, 'getDbrtEmail']);
+    Route::put('/edit_databreach/{dbn_id}', [DataBreachNotificationController::class, 'update'])->name('databreach.update')->middleware('permission:edit_databreach');
+    Route::delete('/databreach/{dbn_id}', [DataBreachNotificationController::class, 'destroy'])->name('databreach.destroy')->middleware('permission:delete_databreach');
+
+     // Create Data Breach Notification Per Region
+    Route::get('/per_region_databreach', [DatabreachPerRegionController::class, 'index'])->name('databreach.per_region_databreach');
+        
+
+    // Data Breach Response Team (DBRT) Management
+    Route::get('/team_databreach', [CreateDataBreachTeamController::class, 'index'])->name('databreach.team_databreach')->middleware('permission:view_dbrt|create_dbrt|edit_databreach|delete_dbrt');
+    Route::post('/team_databreach', [CreateDataBreachTeamController::class, 'store'])->name('databreach.team_databreach.store')->middleware('permission:create_dbrt');
+    Route::put('/databreach/team_databreach/{dbrt_id}', [CreateDataBreachTeamController::class, 'update'])->name('databreach.team_databreach.update')->middleware('permission:edit_dbrt');
+    Route::delete('/team_databreach/{dbrt_id}', [CreateDataBreachTeamController::class, 'destroy'])->name('databreach.team_databreach.destroy')->middleware('permission:delete_dbrt');
 
     // Technical Personnel
     Route::get('/tech_personnel', [TechnicalPersonnelController::class, 'index'])->name('tech_personnel.index')

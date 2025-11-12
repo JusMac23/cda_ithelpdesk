@@ -1,27 +1,5 @@
 <x-app-layout>
-    @if(session('success'))
-    <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: '{{ session('success') }}',
-            timer: 2000,
-            showConfirmButton: false
-        });
-    </script>
-    @endif
-
-    @if(session('error'))
-    <script>
-        Swal.fire({
-            icon: 'error',
-            title: 'Notice!',
-            text: '{{ session('error') }}',
-            timer: 3000,
-            showConfirmButton: false
-        });
-    </script>
-    @endif
+    
     <div id="main-content" class="min-h-screen transition-all duration-300 ease-in-out">
         <div id="ticketsContent">
             <div class="w-full">
@@ -158,6 +136,18 @@
                                                     </div>
                                                     @endcan
 
+                                                    @can('generate_tsar')
+                                                    @if($ticket->status === 'Resolved')
+                                                        <div class="border rounded-lg px-1 py-1 bg-indigo-50 hover:bg-indigo-100 transition mb-1">
+                                                            <a href="{{ route('tickets.generateTSAR', $ticket->ticket_id) }}"
+                                                                class="flex items-center space-x-1 text-xs text-blue-600 hover:text-blue-800">
+                                                                <i class="fas fa-file-alt"></i>
+                                                                <span>Generate TSAR</span>
+                                                            </a>
+                                                        </div>
+                                                    @endif
+                                                    @endcan
+
                                                     @can('delete_assignedtome_tickets')
                                                     <div class="border rounded-lg px-1 py-1 bg-red-50 hover:bg-red-100 transition mb-1">
                                                         <form id="delete-form-{{ $ticket->ticket_id }}" 
@@ -180,7 +170,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="13" class="text-center py-8 text-gray-500 text-lg">
+                                            <td colspan="13" class="text-center py-4 text-gray-500">
                                                 <p>No Tickets Queue found.</p>
                                             </td>
                                         </tr>
@@ -223,7 +213,7 @@
 
                         <!-- Requestor Section -->
                         <fieldset class="border border-gray-300 rounded-md p-6">
-                            <legend class="text-lg font-semibold text-gray-700 px-2">📌 Client Information</legend>
+                            <legend class="text-lg font-semibold text-gray-700 px-2">Client Information</legend>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mt-4">
                                 <!-- First Name -->
@@ -315,7 +305,7 @@
 
                         <!-- Routed Section -->
                         <fieldset class="border border-gray-300 rounded-md p-6">
-                            <legend class="text-lg font-semibold text-gray-700 px-2">🧭 Designated Personnel</legend>
+                            <legend class="text-lg font-semibold text-gray-700 px-2">Designated Personnel</legend>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mt-4">
                                 <!-- Region -->
@@ -531,9 +521,29 @@
             </div>
         </div>
     </div>
-    <script>
+<script>
     document.addEventListener('DOMContentLoaded', function () {
         const body = document.body;
+
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '{{ session('success') }}',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Notice!',
+                text: '{{ session('error') }}',
+                timer: 3000,
+                showConfirmButton: false
+            });
+        @endif
 
         // === AUTO-RELOAD & COUNTDOWN ===
         const checkbox = document.getElementById('autoReloadCheckbox');
@@ -828,13 +838,6 @@
                     });
 
                 } else if (newStatus === 'Resolved') {
-                    Swal.fire({
-                        title: 'Success',
-                        text: 'Ticket successfully updated.',
-                        icon: 'success',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
                 }
             });
         }
@@ -864,4 +867,5 @@
         });
     });
 </script>
+
 </x-app-layout>

@@ -59,25 +59,25 @@
                         @endcan
 
                         <div class="overflow-x-auto bg-white shadow-lg rounded-lg border border-gray-200">
-                            <table class="min-w-full table-fixed divide-y divide-gray-200 text-sm text-left text-gray-800">
-                                <thead class="bg-gray-100 border-b border-gray-300 sticky top-0 z-10">
-                                    <tr>
-                                        <th class="px-6 py-2 min-w-[6rem] font-semibold text-gray-700 uppercase tracking-wider">FullName/Division</th>
-                                        <th class="px-6 py-2 min-w-[6rem] font-semibold text-gray-700 uppercase tracking-wider">Email</th>
-                                        <th class="px-6 py-2 min-w-[4rem] font-semibold text-gray-700 uppercase tracking-wider">Region</th>
-                                        <th class="px-6 py-2 min-w-[5rem] font-semibold text-gray-700 uppercase tracking-wider">Date Added</th>
-                                        <th class="px-6 py-2 min-w-[5rem] font-semibold text-gray-700 uppercase tracking-wider">Date Updated</th>
-                                        <th class="px-6 py-2 text-center min-w-[7rem] font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+                            <table class="min-w-full table-fixed divide-y divide-gray-200 text-left text-gray-800">
+                                <thead class="bg-gray-100 text-gray-700">
+                                    <tr class="hover:bg-gray-50 border-b">
+                                        <th class="px-6 py-2 min-w-[6rem] font-semibold text-gray-700 uppercase">FullName/Division</th>
+                                        <th class="px-6 py-2 min-w-[6rem] font-semibold text-gray-700 uppercase">Email</th>
+                                        <th class="px-6 py-2 min-w-[4rem] font-semibold text-gray-700 uppercase">Region</th>
+                                        <th class="px-6 py-2 min-w-[5rem] font-semibold text-gray-700 uppercase">Date Added</th>
+                                        <th class="px-6 py-2 min-w-[5rem] font-semibold text-gray-700 uppercase">Date Updated</th>
+                                        <th class="px-6 py-2 text-center min-w-[7rem] font-semibold text-gray-700 uppercase">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100 bg-white">
                                     @forelse ($technical_personnel as $tech_personnel)
                                         <tr class="hover:bg-gray-50 focus-within:bg-gray-100 transition">
-                                            <td class="px-3 py-2">{{ $tech_personnel->firstname }} {{ $tech_personnel->middle_initial }} {{ $tech_personnel->lastname }}</td>
-                                            <td class="px-3 py-2">{{ $tech_personnel->it_email }}</td>
-                                            <td class="px-3 py-2">{{ $tech_personnel->it_area }}</td>
-                                            <td class="px-3 py-2 text-gray-600 text-xs">{{ \Carbon\Carbon::parse($tech_personnel->date_added)->format('M d, Y h:i A') }}</td>
-                                            <td class="px-3 py-2 text-gray-600 text-xs">
+                                            <td class="px-4 py-2">{{ $tech_personnel->firstname }} {{ $tech_personnel->middle_initial }} {{ $tech_personnel->lastname }}</td>
+                                            <td class="px-4 py-2">{{ $tech_personnel->it_email }}</td>
+                                            <td class="px-4 py-2">{{ $tech_personnel->it_area }}</td>
+                                            <td class="px-4 py-2">{{ \Carbon\Carbon::parse($tech_personnel->date_added)->format('M d, Y h:i A') }}</td>
+                                            <td class="px-4 py-2">
                                                 @if($tech_personnel->date_updated)
                                                     {{ \Carbon\Carbon::parse($tech_personnel->date_updated)->format('M d, Y h:i A') }}
                                                 @else
@@ -89,7 +89,7 @@
                                                     <!-- Edit Button -->
                                                     @can('edit_technical_personnel')
                                                     <div class="w-24 border rounded-lg px-2 py-1 bg-blue-50 hover:bg-blue-100 transition mb-1 flex justify-center">
-                                                        <button class="editBtn flex items-center space-x-1 text-xs text-blue-600 hover:text-blue-800"
+                                                        <button class="editBtn flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800"
                                                             data-id="{{ $tech_personnel->id }}"
                                                             data-firstname="{{ $tech_personnel->firstname }}"
                                                             data-middle_initial="{{ $tech_personnel->middle_initial }}"
@@ -112,7 +112,7 @@
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="button" 
-                                                                    class="flex items-center space-x-1 text-xs text-red-600 hover:text-red-800 delete-btn" 
+                                                                    class="flex items-center space-x-1 text-sm text-red-600 hover:text-red-800 delete-btn" 
                                                                     data-id="{{ $tech_personnel->id }}">
                                                                 <i class="fas fa-trash-alt"></i>
                                                                 <span>Delete</span>
@@ -126,7 +126,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="6" class="text-center py-8 text-gray-500 text-lg">
+                                            <td colspan="6" class="text-center py-4 text-gray-500">
                                                 <p>No Technical Personnel found.</p>
                                             </td>
                                         </tr>
