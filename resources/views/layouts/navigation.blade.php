@@ -131,6 +131,7 @@
                 </li>
                 @endif
 
+                <!--
                 <li>   
                     <a href="{{ route('databreach.per_region_databreach') }}"
                         class="sidebar-label menu-link flex w-full px-3 py-2 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition @if(request()->routeIs('databreach.team_databreach')) font-semibold text-indigo-600 @endif">
@@ -140,6 +141,7 @@
                         </span>
                     </a>
                 </li>
+                -->
 
                 @if(auth()->user()->can('view_dbrt') || auth()->user()->can('create_dbrt') || auth()->user()->can('edit_dbrt') || auth()->user()->can('delete_dbrt'))
                 <li>   

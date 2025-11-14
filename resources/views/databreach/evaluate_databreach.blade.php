@@ -1,5 +1,5 @@
 <x-app-layout>
-@can('edit_databreach')
+@can('evaluate_databreach')
     <div id="main-content" class="min-h-screen bg-gray-50 py-10 transition-all duration-300 ease-in-out">
         <div class="max-w-6xl mx-auto px-8">
             <div class="relative bg-white rounded-2xl p-8 border border-gray-200 shadow-sm transition-all duration-300 sm:rounded-lg">
@@ -7,7 +7,7 @@
                 <!-- Header -->
                 <div class="flex justify-between items-center mb-8">
                     <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">
-                        Edit Data Breach Notifications
+                        Evaluate Incident Report
                     </h2>
                     <div class="flex items-center justify-center w-12 h-12 bg-gray-600 rounded-full border-2 border-white transition-colors duration-300 ease-in-out hover:bg-gray-800">
                         <button id="close" 
@@ -36,7 +36,7 @@
                 @endif
 
                 <!-- Form -->
-                <form action="{{ route('databreach.update', $notification->dbn_id) }}" method="POST" enctype="multipart/form-data" class="space-y-10">
+                <form action="{{ route('databreach.update_evaluation', $notification->dbn_id) }}" method="POST" enctype="multipart/form-data" class="space-y-10">
                     @csrf
                     @method('PUT')
 

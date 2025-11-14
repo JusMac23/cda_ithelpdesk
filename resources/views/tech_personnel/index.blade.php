@@ -319,7 +319,7 @@
                     <div class="flex justify-end pt-6 border-t border-gray-200">
                         <button type="submit"
                                 class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <i class="fas fa-paper-plane mr-2"></i> Submit
+                            <i class="fas fa-save mr-2"></i> Update
                         </button>
                     </div>
                 </form>

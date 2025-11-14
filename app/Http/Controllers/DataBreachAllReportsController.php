@@ -6,12 +6,16 @@ use Illuminate\Http\Request;
 use App\Models\DataBreachNotification;
 use App\Models\DatabreachForAssessment;
 use App\Models\DatabreachTeam;
+use App\Models\Role;
+use App\Models\Users;
 use App\Mail\IncidentSubmitted; 
+use App\Mail\IncidentForEvaluation;
+use App\Mail\IncidentEvaluated;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http; 
 use Illuminate\Support\Facades\Mail;
 
-class DataBreachNotificationController extends Controller
+class DataBreachAllReportsController extends Controller
 {
     // Handle Provide List
     public function index(Request $request)
@@ -182,7 +186,7 @@ class DataBreachNotificationController extends Controller
         }
 
         return redirect()->route('databreach.index')
-            ->with('success', "Incident Report submitted successfully with DBN Number: {$data['dbn_number']} and status: For Assessment.");
+            ->with('success', "Incident report submitted successfully. Status: For Assessment.");
 
     }
 
@@ -193,8 +197,8 @@ class DataBreachNotificationController extends Controller
         return view('databreach.view_databreach', compact('notification'));
     }
 
-    // Handle Edit
-    public function edit($dbn_id)
+    // Handle Assessment
+    public function assess($dbn_id)
     {
         $notification = DataBreachNotification::findOrFail($dbn_id);
 
@@ -210,10 +214,10 @@ class DataBreachNotificationController extends Controller
 
         $notification->team_email = $team ? $team->email : null;
 
-        return view('databreach.edit_databreach', compact('notification'));
+        return view('databreach.assess_databreach', compact('notification'));
     }
 
-    public function getDbrtEmail($region)
+    public function assess_getDbrtEmail($region)
     {
         $team = DatabreachTeam::where('region', 'like', '%' . $region . '%')->first();
 
@@ -223,7 +227,101 @@ class DataBreachNotificationController extends Controller
     }
 
     // Handle Update
-    public function update(Request $request, $dbn_id)
+    public function update_assessment(Request $request, $dbn_id)
+    {
+        $notification = DataBreachNotification::findOrFail($dbn_id);
+
+        $data = $request->validate([
+            'dbn_number'                        => 'required|string|max:100',
+            'pic'                               => 'required|string|max:255',
+            'email'                             => 'required|email|max:255',
+            'representative'                    => 'required|string|max:255',
+            'representative_email_address'      => 'required|email|max:255',
+            'date_occurrence'                   => 'required|date',
+            'date_discovery'                    => 'required|date',
+            'date_notification'                 => 'required|date',
+            'brief_summary'                     => 'required|string',
+            'notification_type'                 => 'required|string|max:255',
+            'notification_type_description'     => 'nullable|array',
+            'notification_type_description.*'   => 'string|max:255',
+            'sector_name'                       => 'required|string|max:255',
+            'subsector_name'                    => 'required|string|max:255',
+            'timeliness'                        => 'required|string|max:255',
+            'general_cause'                     => 'nullable|string|max:255',
+            'specific_cause'                    => 'nullable|string|max:255',
+            'with_request'                      => 'required|in:Yes,No',
+            'how_breach_occured'                => 'required|string',
+            'chronology'                        => 'required|string',
+            'num_records'                       => 'required|integer',
+            'hundred_plus'                      => 'nullable|boolean',
+            'num_records_provide_details'       => 'required|string',
+            'description_nature'                => 'required|string',
+            'likely_consequences'               => 'required|string',
+            'dpo'                               => 'required|string|max:255',
+            'spi'                               => 'required|string|max:255',
+            'other_info'                        => 'required|string',
+            'measures_to_address'               => 'required|string',
+            'measures_to_secure'                => 'required|string',
+            'actions_to_mitigate'               => 'required|string',
+            'actions_to_inform'                 => 'required|string',
+            'actions_to_prevent'                => 'required|string',
+            'record_type'                       => 'required|string|max:255',
+            'data_subjects'                     => 'required|string|max:255',
+        ]);
+
+        if (isset($data['notification_type_description']) && is_array($data['notification_type_description'])) {
+            $data['notification_type_description'] = json_encode($data['notification_type_description']);
+        }
+
+        $data['status'] = 'For Evaluation';
+        $notification->update($data);
+
+        // Get the role ID for DPO
+        $dpoRoleId = Role::where('name', 'DPO')->value('id');
+
+        // Get emails of all users with DPO role
+        $emailDPO = User::where('role_id', $dpoRoleId)->pluck('email');
+
+        // Send email to each DPO
+        foreach ($emailDPO as $email) {
+            Mail::to($email)->send(new IncidentForEvaluation($data));
+        }
+
+        return redirect()->route('databreach.index')
+            ->with('success', 'Incident report assessed successfully. Status: For Evaluation by DPO.');
+    }
+
+    // Handle Evaluation
+    public function evaluate($dbn_id)
+    {
+        $notification = DataBreachNotification::findOrFail($dbn_id);
+
+        // Decode JSON into array for Blade display
+        if (is_string($notification->notification_type_description)) {
+            $notification->notification_type_description = json_decode($notification->notification_type_description, true);
+        }
+
+        $notification = DataBreachNotification::findOrFail($dbn_id);
+
+        $region = $notification->pic;
+        $team = DatabreachTeam::where('region', 'like', '%' . $region . '%')->first();
+
+        $notification->team_email = $team ? $team->email : null;
+
+        return view('databreach.evaluate_databreach', compact('notification'));
+    }
+
+    public function evaluate_getDbrtEmail($region)
+    {
+        $team = DatabreachTeam::where('region', 'like', '%' . $region . '%')->first();
+
+        return response()->json([
+            'email' => $team ? $team->email : null,
+        ]);
+    }
+
+    // Handle Update
+    public function update_evaluation(Request $request, $dbn_id)
     {
         $notification = DataBreachNotification::findOrFail($dbn_id);
 
@@ -271,9 +369,17 @@ class DataBreachNotificationController extends Controller
     
         $notification->update($data);
 
+        // Send email to ALL Databreach Team
+        $teamEmails = DataBreachTeam::whereNotNull('email')->pluck('email');
+
+        foreach ($teamEmails as $email) {
+            Mail::to($email)->send(new IncidentEvaluated($data));
+        }
+
         return redirect()->route('databreach.index')
-            ->with('success', 'Notification updated successfully.');
+            ->with('success', 'Incident report evaluated successfully. Status: For reporting to the NPC by the DPO.');
     }
+
 
     // Handle Delete
     public function destroy($dbn_id)

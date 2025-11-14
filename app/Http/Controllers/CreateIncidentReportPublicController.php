@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http; 
 use Illuminate\Support\Facades\Mail;
 
-class CreateIncidentReportController extends Controller
+class CreateIncidentReportPublicController extends Controller
 {
     // Handle Create
     public function create()
@@ -86,7 +86,7 @@ class CreateIncidentReportController extends Controller
             Mail::to($email)->send(new IncidentSubmitted($data));
         }
         
-        return redirect()->back()->with('success', "Incident Report submitted successfully with DBN Number: {$data['dbn_number']} and status: For Assessment.");
+        return redirect()->back()->with('success', "Incident report submitted successfully. Status: For Assessment.");
 
     }
 }

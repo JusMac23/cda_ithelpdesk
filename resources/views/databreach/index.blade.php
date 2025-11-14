@@ -70,13 +70,6 @@
                                         <i class="fas fa-filter mr-2"></i> Apply Filter
                                     </button>
                                 </div>
-                                <!-- Apply Filter Button -->
-                                <div class="pt-6">
-                                    <button type="submit"
-                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150 ease-in-out">
-                                        <i class="fas fa-download mr-2"></i> Generate CSV
-                                    </button>
-                                </div>
                             </div>
                         </form>
                         @endcan
@@ -118,42 +111,64 @@
                                                     {{ $notification->status }}
                                                 </span>
                                             </td>
-                                            <td class="px-6 py-4 text-center">
-                                                <div class="flex justify-center items-center gap-3 h-full">
+                                            <td class="px-6 py-4">
+                                                <div class="flex justify-left items-left gap-3 h-full">
+                                                    <div class="flex flex-col space-y-2">
+                                                        @can('view_databreach')
+                                                            <div class="border-2 rounded p-2 hover:bg-blue-50">
+                                                                <a href="{{ route('databreach.show', $notification->dbn_id) }}" 
+                                                                class="flex items-center text-blue-600 hover:text-blue-800" 
+                                                                title="View">
+                                                                    <i class="fas fa-eye mr-2 text-sm"></i>
+                                                                    <span class="text-sm">View</span>
+                                                                </a>
+                                                            </div>
+                                                        @endcan
 
-                                                    @can('view_databreach')
-                                                        <a href="{{ route('databreach.show', $notification->dbn_id) }}" class="text-blue-600 hover:text-blue-800" title="View">
-                                                            <i class="fas fa-eye"></i>
-                                                        </a>
-                                                    @endcan
+                                                        @can('assess_databreach')
+                                                            @if ($notification->status !== 'Reported')
+                                                                <div class="border-2 rounded p-2 hover:bg-yellow-50">
+                                                                    <a href="{{ route('databreach.assess', $notification->dbn_id) }}" 
+                                                                    class="flex items-center text-yellow-600 hover:text-yellow-800" 
+                                                                    title="Assess">
+                                                                        <i class="fas fa-search-plus mr-2 text-sm"></i>
+                                                                        <span class="text-sm">Assess</span>
+                                                                    </a>
+                                                                </div>
+                                                            @endif
+                                                        @endcan
 
-                                                    @can('edit_databreach')
-                                                        @if ($notification->status === 'Reported')
-                                                            <i class="fas fa-edit text-gray-400 cursor-not-allowed" title="Edit Disabled"></i>
-                                                        @else
-                                                            <a href="{{ route('databreach.edit', $notification->dbn_id) }}" class="text-yellow-600 hover:text-yellow-800" title="Edit">
-                                                                <i class="fas fa-edit"></i>
-                                                            </a>
-                                                        @endif
-                                                    @endcan
+                                                        @can('evaluate_databreach')
+                                                            @if (!in_array($notification->status, ['Reported', 'For Assessment']))
+                                                                <div class="border-2 rounded p-2 hover:bg-green-50">
+                                                                    <a href="{{ route('databreach.evaluate', $notification->dbn_id) }}" 
+                                                                    class="flex items-center text-green-600 hover:text-green-800" 
+                                                                    title="Evaluate">
+                                                                        <i class="fas fa-check mr-2 text-sm"></i>
+                                                                        <span class="text-sm">Evaluate</span>
+                                                                    </a>
+                                                                </div>
+                                                            @endif
+                                                        @endcan
 
-                                                    @can('delete_databreach')
-                                                        @if ($notification->status === 'Reported')
-                                                            <i class="fas fa-trash-alt text-gray-400 cursor-not-allowed" title="Delete Disabled"></i>
-                                                        @else
-                                                            <form action="{{ route('databreach.destroy', $notification->dbn_id) }}" method="POST" class="inline delete-form">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button
-                                                                    type="button"
-                                                                    class="text-red-600 hover:text-red-800 delete-btn"
-                                                                    title="Delete"
-                                                                >
-                                                                    <i class="fas fa-trash-alt"></i>
-                                                                </button>
-                                                            </form>
-                                                        @endif
-                                                    @endcan
+                                                        @can('delete_databreach')
+                                                            @if ($notification->status !== 'Reported')
+                                                                <div class="border-2 rounded p-2 hover:bg-red-50">
+                                                                    <form action="{{ route('databreach.destroy', $notification->dbn_id) }}" 
+                                                                        method="POST" class="flex items-center">
+                                                                        @csrf
+                                                                        @method('DELETE')
+                                                                        <button type="submit" 
+                                                                                class="flex items-center text-red-600 hover:text-red-800" 
+                                                                                title="Delete">
+                                                                            <i class="fas fa-trash-alt mr-2 text-sm"></i>
+                                                                            <span class="text-sm">Delete</span>
+                                                                        </button>
+                                                                    </form>
+                                                                </div>
+                                                            @endif
+                                                        @endcan
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -185,7 +200,7 @@
                     icon: 'success',
                     title: 'Success!',
                     text: '{{ session('success') }}',
-                    timer: 2000,
+                    timer: 3000,
                     showConfirmButton: false
                 });
             @endif

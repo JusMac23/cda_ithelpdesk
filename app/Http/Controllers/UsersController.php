@@ -46,7 +46,6 @@ class UsersController extends Controller
         return view('users.index', compact('users', 'roles'));
     }
 
-
     // Add New User
     public function store(Request $request)
     {
@@ -75,7 +74,7 @@ class UsersController extends Controller
             'name'       => $validated['name'],
             'email'      => $validated['email'],
             'password'   => bcrypt($validated['password']),
-            'role'       => 'User', 
+            'role'       => $role->id,
             'created_at' => Carbon::now('Asia/Manila'),
         ]);
 
