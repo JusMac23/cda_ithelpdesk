@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\DatabreachTeam;
 
-class DataBreachTeamController extends Controller
+class DatabreachTeamController extends Controller
 {
     // Display DBRT Team List
     public function index()

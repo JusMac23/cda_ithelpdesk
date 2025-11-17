@@ -18,7 +18,8 @@ use App\Http\Controllers\RolesController;
 use App\Http\Controllers\CreateIncidentReportPublicController;
 use App\Http\Controllers\DataBreachAllReportsController;
 use App\Http\Controllers\DatabreachPerRegionController;
-use App\Http\Controllers\DataBreachTeamController;
+use App\Http\Controllers\GenerateDocsController;
+use App\Http\Controllers\DatabreachTeamController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\OAuthGoogleController;
 use App\Http\Controllers\Auth\OAuthAuthentikController;
@@ -100,14 +101,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/evaluate_databreach/{dbn_id}', [DataBreachAllReportsController::class, 'update_evaluation'])->name('databreach.update_evaluation')->middleware('permission:evaluate_databreach');
     Route::delete('/databreach/{dbn_id}', [DataBreachAllReportsController::class, 'destroy'])->name('databreach.destroy')->middleware('permission:delete_databreach');
 
-     // Create Data Breach Notification Per Region
+    // Generate Data Breach Report
+    Route::get('/databreach/{id}/generate-docx', [GenerateDocsController::class, 'generateDocx'])->name('databreach.generateDocx');
+
+
+    // Create Data Breach Notification Per Region
     Route::get('/per_region_databreach', [DatabreachPerRegionController::class, 'index'])->name('databreach.per_region_databreach');
 
     // Data Breach Response Team (DBRT) Management
-    Route::get('/team_databreach', [DataBreachTeamController::class, 'index'])->name('databreach.team_databreach')->middleware('permission:view_dbrt|create_dbrt|edit_databreach|delete_dbrt');
-    Route::post('/team_databreach', [DataBreachTeamController::class, 'store'])->name('databreach.team_databreach.store')->middleware('permission:create_dbrt');
-    Route::put('/databreach/team_databreach/{dbrt_id}', [DataBreachTeamController::class, 'update'])->name('databreach.team_databreach.update')->middleware('permission:edit_dbrt');
-    Route::delete('/team_databreach/{dbrt_id}', [DataBreachTeamController::class, 'destroy'])->name('databreach.team_databreach.destroy')->middleware('permission:delete_dbrt');
+    Route::get('/team_databreach', [DatabreachTeamController::class, 'index'])->name('databreach.team_databreach')->middleware('permission:view_dbrt|create_dbrt|edit_databreach|delete_dbrt');
+    Route::post('/team_databreach', [DatabreachTeamController::class, 'store'])->name('databreach.team_databreach.store')->middleware('permission:create_dbrt');
+    Route::put('/databreach/team_databreach/{dbrt_id}', [DatabreachTeamController::class, 'update'])->name('databreach.team_databreach.update')->middleware('permission:edit_dbrt');
+    Route::delete('/team_databreach/{dbrt_id}', [DatabreachTeamController::class, 'destroy'])->name('databreach.team_databreach.destroy')->middleware('permission:delete_dbrt');
 
     // Technical Personnel
     Route::get('/tech_personnel', [TechnicalPersonnelController::class, 'index'])->name('tech_personnel.index')
