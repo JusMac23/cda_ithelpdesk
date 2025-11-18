@@ -27,7 +27,7 @@ class DatabreachPerRegionController extends Controller
         // Fetch notifications assigned to this user and their region
         $query = DataBreachNotification::query()
             ->where('email', $userEmail)
-            ->where('pic', $userRegion); // match the region
+            ->where('pic', $userRegion); 
 
         // Apply status filter
         if (!empty($status)) {

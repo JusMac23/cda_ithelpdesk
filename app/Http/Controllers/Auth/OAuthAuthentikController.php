@@ -50,12 +50,12 @@ class OAuthAuthentikController extends Controller
                 }
             }
 
-            // Get the default "Admin" role for new users only
+            // Get the default "User" role for new users only
             try {
-                $defaultUserRole = Role::where('name', 'Admin')->first();
+                $defaultUserRole = Role::where('name', 'User')->first();
                 
                 if (!$defaultUserRole) {
-                    $defaultUserRole = Role::create(['name' => 'Admin']);
+                    $defaultUserRole = Role::create(['name' => 'User']);
                     \Log::info('Created new User role with ID: ' . $defaultUserRole->id);
                 }
                 
@@ -89,8 +89,8 @@ class OAuthAuthentikController extends Controller
                 }
                 
                 // CRITICAL: For existing users, REMOVE any default User role if they already have other roles
-                if ($existingRoles->count() > 0 && $existingRoles->contains('Admin')) {
-                    // If user has both Admin and User roles, remove the User role
+                if ($existingRoles->count() > 0 && $existingRoles->contains('User')) {
+                    // If user has both User and User roles, remove the User role
                     if ($existingRoles->count() > 1) {
                         try {
                             $user->removeRole($defaultUserRole);
@@ -130,9 +130,10 @@ class OAuthAuthentikController extends Controller
                     \Log::info('Added role to user data for database column');
                 }
                 
+                
                 // Create new user
-                $user = User::create($userData);
-                \Log::info('Created NEW user: ' . $user->email);
+                // $user = User::create($userData);
+                // \Log::info('Created NEW user: ' . $user->email);
                 
                 // Assign default User role to NEW users only
                 try {
@@ -141,6 +142,7 @@ class OAuthAuthentikController extends Controller
                 } catch (\Exception $assignException) {
                     \Log::error('Role assignment failed for new user: ' . $assignException->getMessage());
                 }
+            
             }
             
             // FINAL ROLE CHECK: Ensure no role duplication
@@ -148,7 +150,7 @@ class OAuthAuthentikController extends Controller
             \Log::info('FINAL role check for ' . $user->email . ': ' . $finalRoles->implode(', '));
             
             // If user has multiple roles including User, remove the User role
-            if ($finalRoles->count() > 1 && $finalRoles->contains('Admin')) {
+            if ($finalRoles->count() > 1 && $finalRoles->contains('User')) {
                 try {
                     $user->removeRole($defaultUserRole);
                     \Log::info('REMOVED User role due to multiple roles detected');
@@ -165,7 +167,7 @@ class OAuthAuthentikController extends Controller
 
             // Get current roles for final logging
             $userRoles = $user->getRoleNames();
-            \Log::info('Admin ' . $user->email . ' logged in with FINAL roles: ' . $userRoles->implode(', '));
+            \Log::info('User ' . $user->email . ' logged in with FINAL roles: ' . $userRoles->implode(', '));
 
             // Redirect based on user's actual roles
             if ($user->hasRole('Super Admin')) {
@@ -173,7 +175,7 @@ class OAuthAuthentikController extends Controller
             return redirect()->route('dashboard');
                 \Log::info('Redirecting to Super Admin');
 
-            } elseif ($user->hasRole('Admin')) {
+            } elseif ($user->hasRole('User')) {
                 \Log::info('Redirecting to Assigned Tickets');
                 return redirect()->route('assignedtome_tickets.index');
 

@@ -111,8 +111,8 @@
                                             <td class="px-6 py-4">{{ $dbn->dbn_number }}</td>
                                             <td class="px-6 py-4">{{ $dbn->sender_fullname }}</td>
                                             <td class="px-6 py-4">{{ $dbn->pic }}</td>
-                                            <td class="px-4 py-4 text-sm text-gray-600">{{ \Carbon\Carbon::parse($dbn->date_occurrence)->format('M d, Y h:i A') }}</td>
-                                            <td class="px-4 py-4 text-sm text-gray-600">{{ \Carbon\Carbon::parse($dbn->date_discovery)->format('M d, Y h:i A') }}</td>
+                                            <td class="px-4 py-4 text-gray-600">{{ \Carbon\Carbon::parse($dbn->date_occurrence)->format('M d, Y h:i A') }}</td>
+                                            <td class="px-4 py-4 text-gray-600">{{ \Carbon\Carbon::parse($dbn->date_discovery)->format('M d, Y h:i A') }}</td>
                                             <td class="px-6 py-4">{{ $dbn->general_cause }}</td>
                                             <td class="px-6 py-4 text-left">
                                                 <span class="px-2 py-1 rounded-full text-sm font-semibold

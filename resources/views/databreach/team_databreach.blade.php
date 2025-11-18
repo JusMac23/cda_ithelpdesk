@@ -26,7 +26,7 @@
                                         <th class="px-6 py-2 font-semibold uppercase text-left">Fullname</th>
                                         <th class="px-6 py-2 font-semibold uppercase text-left">Email</th>
                                         <th class="px-6 py-2 font-semibold uppercase text-left">Region</th>
-                                        <th class="px-6 py-2 font-semibold uppercase text-center">Actions</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-left">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -37,8 +37,8 @@
                                             </td>
                                             <td class="px-6 py-4">{{ $team->email ?? 'N/A' }}</td>
                                             <td class="px-6 py-4">{{ $team->region ?? 'N/A' }}</td>
-                                            <td class="px-6 py-4 text-center">
-                                                <div class="flex justify-center items-center gap-3 h-full">
+                                            <td class="px-6 py-4 text-left">
+                                                <div class="flex justify-left items-left gap-3 h-full">
                                                     @can('edit_dbrt')
                                                     <button class="flex items-center border border-blue-400 space-x-1 text-sm text-blue-600 hover:text-blue-800 px-2 py-1 rounded-lg edit-btn"
                                                             data-id="{{ $team->dbrt_id }}"

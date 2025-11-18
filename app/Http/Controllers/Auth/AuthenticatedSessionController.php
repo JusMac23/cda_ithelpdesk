@@ -62,7 +62,7 @@ class AuthenticatedSessionController extends Controller
 
             return redirect()->route('dashboard');
 
-        } elseif ($user->hasRole('Admin')) {
+        } elseif ($user->hasRole('User')) {
 
             return redirect()->route('assignedtome_tickets.index');
 

@@ -24,7 +24,7 @@
         <!-- Ticket Management with toggle -->
         <div x-data="{ open: false }">
             
-            @if(auth()->user()->can('view_all_tickets') || auth()->user()->can('create_ticket') || auth()->user()->can('reassign_ticket_ticket') || auth()->user()->can('update_status_ticket') || auth()->user()->can('delete_tickets') || auth()->user()->can('search_tickets'))
+            @if(auth()->user()->can('view_all_tickets') || auth()->user()->can('view_myrequested_tickets') || auth()->user()->can('view_assignedtome_tickets') || auth()->user()->can('view_reassigned_tickets'))
             <button @click="open = !open" type="button"
                     class=" menu-link w-full flex items-center px-3 py-0 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition focus:outline-none">
                 <div class="icon-wrapper">
@@ -51,7 +51,7 @@
                 </li>
                 @endif
 
-                @if(auth()->user()->can('view_myrequested_tickets') || auth()->user()->can('create_myrequested_tickets') || auth()->user()->can('reassign_myrequested_tickets') || auth()->user()->can('update_status_myrequested_tickets') || auth()->user()->can('delete_myrequested_tickets') || auth()->user()->can('search_myrequested_tickets'))
+                @if(auth()->user()->can('view_myrequested_tickets'))
                 <li>   
                     <a href="{{ route('myrequested_tickets.index') }}"
                         class="sidebar-label menu-link flex w-full px-3 py-2 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition @if(request()->routeIs('myrequested_tickets.index')) font-semibold text-indigo-600 @endif">
@@ -63,7 +63,7 @@
                 </li>
                 @endif
 
-                @if(auth()->user()->can('view_assignedtome_tickets') || auth()->user()->can('create_assignedtome_tickets') || auth()->user()->can('reassign_assignedtome_tickets') || auth()->user()->can('update_status_assignedtome_tickets') || auth()->user()->can('delete_assignedtome_tickets') || auth()->user()->can('search_assignedtome_tickets'))
+                @if(auth()->user()->can('view_assignedtome_tickets'))
                 <li>   
                     <a href="{{ route('assignedtome_tickets.index') }}"
                         class="sidebar-label menu-link flex w-full px-3 py-2 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition @if(request()->routeIs('assignedtome_tickets.index')) font-semibold text-indigo-600 @endif">
@@ -92,7 +92,7 @@
 
         <!--Databreach Management with toggle -->
         <div x-data="{ open: false }">
-            @if(auth()->user()->can('view_all_databreach') || auth()->user()->can('view_overview_databreach') || auth()->user()->can('create_databreach') || auth()->user()->can('view_databreach') || auth()->user()->can('edit_databreach') || auth()->user()->can('delete_databreach') || auth()->user()->can('search_databreach'))
+            @if(auth()->user()->can('view_all_databreach') || auth()->user()->can('view_overview_databreach') || auth()->user()->can('view_dbrt'))
             <button @click="open = !open" type="button"
                     class=" menu-link w-full flex items-center px-3 py-0 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition focus:outline-none">
                 <div class="icon-wrapper">
@@ -131,6 +131,7 @@
                 </li>
                 @endif
 
+                <!--
                 <li>   
                     <a href="{{ route('databreach.per_region_databreach') }}"
                         class="sidebar-label menu-link flex w-full px-3 py-2 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition @if(request()->routeIs('databreach.team_databreach')) font-semibold text-indigo-600 @endif">
@@ -140,6 +141,7 @@
                         </span>
                     </a>
                 </li>
+                -->
 
                 @if(auth()->user()->can('view_dbrt') || auth()->user()->can('create_dbrt') || auth()->user()->can('edit_dbrt') || auth()->user()->can('delete_dbrt'))
                 <li>   

@@ -111,15 +111,14 @@
         </h1>
 
         <p class="text-lg md:text-xl text-gray-200 mb-12 leading-relaxed">
-            Fast, reliable, and secure assistance for all your technical and security concerns across CDA offices.
+            Fast, reliable, and secure assistance for all your technical and security concerns across all CDA offices nationwide.
         </p>
 
         <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <!-- Ticket Button -->
             <a href="{{ url('create_ticket') }}"
                class="inline-flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg hover:shadow-blue-400/40 transform hover:-translate-y-1 transition-all duration-300">
                 <i class="fa-solid fa-ticket text-white text-xl"></i>
-                Submit Ticket
+                Submit Tickets Report
             </a>
             <a href="{{ url('create_incident') }}"
                class="inline-flex items-center justify-center gap-3 bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg hover:shadow-red-400/40 transform hover:-translate-y-1 transition-all duration-300">

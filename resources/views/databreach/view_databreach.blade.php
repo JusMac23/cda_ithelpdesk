@@ -46,12 +46,22 @@
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center pt-6">
                 <!-- Print Button -->
-                @can('print_databreach')
-                <button type="submit"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-150 ease-in-out">
-                    <i class="fas fa-print mr-2"></i> Print Report
-                </button>
-                @endcan
+
+                <div class="flex items-center space-x-3">
+                    @can('generate_docs_databreach')
+                    <a href="{{ route('databreach.generateDocx', $notification->dbn_id) }}"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-150 ease-in-out">
+                        <i class="fas fa-download mr-2 text-base"></i> Generate Docx
+                    </a>
+                    @endcan
+
+                    @can('view_overview_databreach')
+                    <a href="{{ route('databreach.overview') }}"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150 ease-in-out">
+                        <i class="fas fa-print mr-2 text-base "></i> Print
+                    </a>
+                    @endcan
+                </div>
 
                 <!-- Close Button -->
                 <div class="flex justify-center items-center w-12 h-12 bg-gray-600 rounded-full border-2 border-white transition-colors duration-300 ease-in-out hover:bg-gray-800">

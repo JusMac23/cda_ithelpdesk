@@ -115,7 +115,8 @@
 
 <section class="p-8 max-w-6xl mx-auto bg-white rounded-2xl shadow-xl mt-10 mb-16 animate-fade-in-down relative">
     <button id="close" onclick="window.location.href='{{ url('/') }}'" 
-        class="absolute top-6 right-8 text-gray-400 hover:text-gray-700 text-3xl transition-colors duration-200 leading-none bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-sm hover:shadow-md">&times;
+        class="absolute top-6 right-8 text-gray-500 hover:text-gray-700 text-3xl leading-none w-10 h-10 flex items-center justify-center bg-transparent border-none shadow-none transition-colors duration-200">
+        &times;
     </button>
 
     @if ($errors->any())
@@ -134,9 +135,9 @@
         </div>
     @endif
 
-    <h2 class="text-3xl font-bold text-gray-900 mb-10 border-b-2 border-gray-200 pb-4 flex items-center gap-3">
+    <h2 class="text-2xl font-bold text-gray-900 mb-10 border-b-2 border-gray-200 pb-4 flex items-center gap-3">
         <i class="fas fa-file-alt text-indigo-600"></i>
-        Create Support Ticket
+        Tickets Form    
     </h2>
 
     <form action="{{ route('tickets.store.client') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
@@ -144,7 +145,7 @@
 
         <!-- Client Information -->
         <fieldset class="border border-gray-200 rounded-2xl p-8 bg-white card-hover shadow-sm">
-            <legend class="text-xl font-bold text-gray-800 px-4 flex items-center gap-2">
+            <legend class="text-xl font-bold text-indigo-700 px-3 flex items-center gap-2">
                 Client Information
             </legend>
             <div class="space-y-6 mt-4">

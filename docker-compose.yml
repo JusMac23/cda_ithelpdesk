@@ -1,65 +1,90 @@
 services:
+
+  db:
+    image: mariadb:10.11
+    ports:
+      - "3306:3306"
+    env_file:
+      - .env
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    networks:
+      - frontend
+      
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - frontend
+
   app:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
-    container_name: cda-helpdesk-app
     volumes:
-      - ./:/var/www/html
-      - storage_data:/var/www/html/storage
-    networks:
-      - laravel
+      - ./:/var/www/html:cached       # Bind mount for your app code
+      - laravel_storage:/var/www/html/storage
+      - laravel_cache:/var/www/html/bootstrap/cache
+    restart: unless-stopped
     depends_on:
       - db
-
-  nginx:
+    networks:
+      - frontend
+    environment:
+      - RECAPTCHA_SITE_KEY=6Lc7UOwrAAAAAAoKAEsF1Xzs_yqX8zBtU29JuGZW
+      - RECAPTCHA_SECRET_KEY=6Lc7UOwrAAAAAEfSNgsq3vOdBpNlVphKDZgZhBON
+    
+  ingress:
     image: nginx:alpine
-    container_name: cda-helpdesk-nginx
     ports:
       - "8000:80"
     volumes:
-      - ./:/var/www/html
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - storage_data:/var/www/html/storage
+      - laravel_storage:/var/www/html/storage
+      - laravel_cache:/var/www/html/bootstrap/cache
+      - ./:/var/www/html:cached
+    restart: unless-stopped
     depends_on:
       - app
     networks:
-      - laravel
+      - frontend
 
-  db:
-    image: mariadb:10.11
-    container_name: cda-helpdesk-db
+  reverse-proxy:
+    image: 'docker.io/jc21/nginx-proxy-manager:latest'
     ports:
-      - "3307:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: CD@it1432
-      MYSQL_DATABASE: cda-helpdesk
-      MYSQL_USER: cdauser
-      MYSQL_PASSWORD: CD@it1432
+      - '80:80'
+      - '17443:81'
+      - '443:443'
+    restart: unless-stopped
     volumes:
-      - db_data:/var/lib/mysql
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
     networks:
-      - laravel
+      - frontend
 
-  phpmyadmin:
-    image: phpmyadmin:5
-    container_name: cda-helpdesk-phpmyadmin
-    ports:
-      - "8081:80"
-    environment:
-      PMA_HOST: db
-      PMA_PORT: 3306
-      PMA_USER: cdauser
-      PMA_PASSWORD: CD@it1432
-    depends_on:
-      - db
+  cloudflaretunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    command: tunnel --no-autoupdate run
     networks:
-      - laravel
+      - frontend
+
 
 volumes:
   db_data:
-  storage_data:
+  laravel_storage:
+  laravel_cache:
 
 networks:
-  laravel:
-    driver: bridge
+  frontend:
+    external: true

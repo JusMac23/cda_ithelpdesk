@@ -3,19 +3,17 @@
 .gitignore
 
 # Ignore environment & config files
-.env
-.env.*
+# .env
+# .env.*
 Homestead.json
 Homestead.yaml
 
 # Ignore development dependencies
-node_modules
-vendor
+# node_modules
 
 # Ignore local caches and build artifacts
-/public/storage
+# /public/storage
 /public/hot
-/public/build
 /storage/*.key
 /storage/pail
 npm-debug.log
