@@ -14,5 +14,5 @@
 
 
 Thanks,  
-**CDA Data Breach Notification System**
+**CDA Data Breach Reporting System**
 @endcomponent

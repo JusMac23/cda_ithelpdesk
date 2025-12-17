@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>CDA-ITHelpdesk - Create Incident Report</title>
+    <title>CDA-DBRS</title>
     <link rel="icon" href="{{ asset('images/CDA-logo-RA11364-PNG.png') }}" type="image/png">
 
     <!-- Fonts & Icons -->
@@ -21,7 +21,7 @@
     <!-- Styles & Scripts (Vite handles Tailwind + JS build) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/assets/js/sweetalert2.min.js"></script>
 
     <style>
         @keyframes fade-in-down {
@@ -73,7 +73,7 @@
             <img src="{{ asset('images/CDA-logo-RA11364-PNG.png') }}" 
                  alt="Cooperative Development Authority Seal" 
                  class="w-12 h-12 object-contain drop-shadow-sm transition-transform duration-300 hover:scale-105"/>
-            <span class="tracking-tight">CDA IT-Helpdesk System</span>
+            <span class="tracking-tight">CDA-DBRS</span>
         </h1>
 
         <!-- Navigation -->
@@ -155,14 +155,14 @@
                     <label for="sender_fullname" class="block text-sm font-semibold text-gray-700">
                         Full Name <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" id="sender_fullname" name="sender_fullname" placeholder="John A. Doe" required
+                    <input type="text" id="sender_fullname" name="sender_fullname" placeholder="e.g., Juan A. Dela Cruz" required
                         class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
                 <div>
                     <label for="sender_email" class="block text-sm font-semibold text-gray-700">
                         Email Address <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" id="sender_email" name="sender_email" placeholder="Email Address" required
+                    <input type="text" id="sender_email" name="sender_email" placeholder="e.g., j_delacruz@cda.gov.ph" required
                         class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
             </div>
@@ -187,9 +187,11 @@
                     <label for="date_notification" class="block text-sm font-semibold text-gray-700">
                         Date of Notification <span class="text-red-500">*</span>
                     </label>
-                    <input type="datetime-local" id="date_notification" name="date_notification" required
-                        class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="datetime-local" id="date_notification" name="date_notification" required readonly
+                        class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        value="{{ now()->format('Y-m-d\TH:i') }}">
                 </div>
+
             </div>
 
             <!-- Personal Information Controller -->

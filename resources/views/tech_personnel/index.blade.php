@@ -47,7 +47,7 @@
                                     name="search_query" 
                                     value="{{ request('search_query') }}" 
                                     placeholder="Search..." 
-                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring focus:ring-indigo-200">
+                                    class="px-2 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring focus:ring-indigo-200">
                                 
                                 <!-- Search Button -->
                                 <button type="submit" 

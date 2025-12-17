@@ -21,7 +21,7 @@
     <!-- Styles & Scripts (Vite handles Tailwind + JS build) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/assets/js/sweetalert2.min.js"></script>
 
     <style>
         @keyframes fade-in-down {

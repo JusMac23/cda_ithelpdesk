@@ -1,18 +1,67 @@
 <x-app-layout>
-@can('create_databreach')
+    
+    <style>
+        .responsive-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        /* Make each label/input stack vertically */
+        .responsive-grid > div {
+            margin-top: 0.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+        /* Inputs full width */
+        .responsive-grid input {
+            margin-top: 0.25rem; 
+            width: 100%;
+            border: 1px solid #d1d5db; 
+            border-radius: 0.75rem; 
+            padding: 0.75rem 1rem; 
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        .responsive-grid input:focus {
+            outline: none;
+            border-color: #6366f1; 
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5); 
+        }
+        /* Mobile: single column */
+        @media (max-width: 768px) {
+            .responsive-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        /* Responsive reCAPTCHA scaling */
+        @media (max-width: 500px) {
+            #recaptcha {
+                transform: scale(0.85);
+                transform-origin: top left;
+            }
+        }
+        @media (max-width: 450px) {
+            #recaptcha {
+                transform: scale(0.77);
+                transform-origin: top left;
+            }
+        }
+    </style>
+    @can('create_databreach')
     <div id="main-content" class="min-h-screen bg-gray-50 py-10 transition-all duration-300 ease-in-out">
-        <div class="max-w-6xl mx-auto px-8">
-            <div class="relative bg-white rounded-2xl p-8 border border-gray-200 shadow-sm transition-all duration-300 sm:rounded-lg">
+        <div class="max-w-5xl mx-auto px-8 sm:px-10">
+            <div class="relative bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm transition-all duration-300 sm:rounded-lg">
 
                 <!-- Header -->
                 <div class="flex justify-between items-center mb-8">
                     <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">
-                        Create Incident Report
+                        Incident Report Form
                     </h2>
-                    <div class="flex items-center justify-center w-12 h-12 bg-gray-600 rounded-full border-2 border-white transition-colors duration-300 ease-in-out hover:bg-gray-800">
+                    <div class="flex items-center justify-center w-12 h-12 bg-gray-600 rounded-full border-2 border-white hover:bg-gray-800 transition-colors duration-300">
                         <button id="close" 
                             onclick="window.location.href='{{ route('databreach.index') }}'" 
-                            class="text-gray-800 text-xl focus:outline-none transition-colors duration-300 ease-in-out hover:text-white">
+                            class="text-gray-800 text-xl focus:outline-none hover:text-white transition-colors duration-300">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -20,19 +69,19 @@
 
                 <!-- Error Handling -->
                 @if ($errors->any())
-                    <div class="bg-red-50 border border-red-200 text-red-800 px-6 py-4 mb-8 rounded-xl">
-                        <div class="flex items-start space-x-3">
-                            <i class="fas fa-exclamation-circle text-2xl mt-1"></i>
-                            <div>
-                                <h4 class="font-semibold text-sm mb-2">Please fix the following errors:</h4>
-                                <ul class="list-disc pl-5 space-y-1 text-sm">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
+                <div class="bg-red-50 border border-red-200 text-red-800 px-6 py-4 mb-8 rounded-xl">
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-exclamation-circle text-2xl mt-1"></i>
+                        <div>
+                            <h4 class="font-semibold text-sm mb-2">Please fix the following errors:</h4>
+                            <ul class="list-disc pl-5 space-y-1 text-sm">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
                         </div>
                     </div>
+                </div>
                 @endif
 
                 <!-- Form -->
@@ -41,54 +90,58 @@
 
                     <fieldset class="border border-gray-200 rounded-3xl p-8 bg-white shadow-sm hover:shadow-md transition-all duration-300 sm:rounded-lg">
                         <legend class="text-xl font-bold text-indigo-700 px-3 flex items-center gap-2">
-                            <i class="fas fa-info-circle text-indigo-500 mr-2"></i> Incident Information
+                            Incident Information
                         </legend>
 
                         <!-- Sender Information -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                            <div>
+                            <!-- Full Name -->
+                            <div class="flex flex-col">
                                 <label for="sender_fullname" class="block text-sm font-semibold text-gray-700">
                                     Full Name <span class="text-red-500">*</span>
                                 </label>
-                                <input type="text" id="sender_fullname" name="sender_fullname" placeholder="John A. Doe" required
-                                    class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <input type="text" id="sender_fullname" name="sender_fullname" placeholder="e.g., Juan A. Dela Cruz" required
+                                    class="mt-1 w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                             </div>
-                            <div>
+
+                            <!-- Email Address -->
+                            <div class="flex flex-col">
                                 <label for="sender_email" class="block text-sm font-semibold text-gray-700">
                                     Email Address <span class="text-red-500">*</span>
                                 </label>
-                                <input type="text" id="sender_email" name="sender_email" placeholder="Email Address" required
-                                    class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <input type="email" id="sender_email" name="sender_email" placeholder="e.g., j_delacruz@cda.gov.ph" required
+                                    class="mt-1 w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                             </div>
                         </div>
 
                         <!-- Dates (Chronology) -->
-                        <div class="overflow-x-auto mt-6">
-                            <div class="flex flex-row flex-nowrap gap-6 w-full">
-                                <div class="flex flex-col flex-1 min-w-0">
-                                    <label for="date_occurrence" class="block text-sm font-semibold text-gray-700">
-                                        Date of Occurrence <span class="text-red-500">*</span>
-                                    </label>
-                                    <input type="datetime-local" id="date_occurrence" name="date_occurrence" required
-                                        class="w-full min-w-0 border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                </div>
-
-                                <div class="flex flex-col flex-1 min-w-0">
-                                    <label for="date_discovery" class="block text-sm font-semibold text-gray-700">
-                                        Date of Discovery <span class="text-red-500">*</span>
-                                    </label>
-                                    <input type="datetime-local" id="date_discovery" name="date_discovery" required
-                                        class="w-full min-w-0 border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                </div>
-
-                                <div class="flex flex-col flex-1 min-w-0">
-                                    <label for="date_notification" class="block text-sm font-semibold text-gray-700">
-                                        Date of Notification <span class="text-red-500">*</span>
-                                    </label>
-                                    <input type="datetime-local" id="date_notification" name="date_notification" required
-                                        class="w-full min-w-0 border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                </div>
+                        <div class="responsive-grid">
+                            <!-- Date of Occurrence -->
+                            <div>
+                                <label for="date_occurrence" class="block text-sm font-semibold text-gray-700">
+                                    Date of Occurrence <span style="color:#ef4444">*</span>
+                                </label>
+                                <input type="datetime-local" id="date_occurrence" name="date_occurrence" required>
                             </div>
+
+                            <!-- Date of Discovery -->
+                            <div>
+                                <label for="date_discovery" class="block text-sm font-semibold text-gray-700">
+                                    Date of Discovery <span style="color:#ef4444">*</span>
+                                </label>
+                                <input type="datetime-local" id="date_discovery" name="date_discovery" required>
+                            </div>
+
+                            <!-- Date of Notification -->
+                            <div>
+                                <label for="date_notification" class="block text-sm font-semibold text-gray-700">
+                                    Date of Notification <span class="text-red-500">*</span>
+                                </label>
+                                <input type="datetime-local" id="date_notification" name="date_notification" required readonly
+                                    class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    value="{{ now()->format('Y-m-d\TH:i') }}">
+                            </div>
+
                         </div>
 
                         <!-- Personal Information Controller -->
@@ -131,16 +184,18 @@
                         </div>
                     </fieldset>
 
-                    <div class="mt-6">
-                        <div class="g-recaptcha"
-                            data-sitekey="{{ config('services.recaptcha.site_key') }}"
-                            data-callback="enableSubmitButton"
-                            data-expired-callback="disableSubmitButton"
-                            data-error-callback="disableSubmitButton"></div>
+                    <!-- reCAPTCHA -->
+                    <div class="mt-6 w-full max-w-sm mx-auto sm:mx-0">
+                        <div class="g-recaptcha scale-100 origin-top-left w-full" id="recaptcha"
 
-                        @if ($errors->has('g-recaptcha-response'))
-                            <x-input-error :messages="$errors->get('g-recaptcha-response')" class="mt-2" />
-                        @endif
+                        data-sitekey="{{ config('services.recaptcha.site_key') }}"
+                        data-callback="enableSubmitButton"
+                        data-expired-callback="disableSubmitButton"
+                        data-error-callback="disableSubmitButton"></div>
+
+                    @if ($errors->has('g-recaptcha-response'))
+                        <x-input-error :messages="$errors->get('g-recaptcha-response')" class="mt-2" />
+                    @endif
                     </div>
 
                     <div class="flex justify-end pt-8 border-t border-gray-200 mt-6">

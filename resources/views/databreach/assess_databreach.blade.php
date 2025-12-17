@@ -138,7 +138,7 @@
                                         Date of Notification <span class="text-red-500">*</span>
                                     </label>
                                     <input type="datetime-local" id="date_notification" name="date_notification"
-                                        value="{{ old('date_notification', $notification->date_notification) }}" required
+                                        value="{{ old('date_notification', $notification->date_notification) }}" required readonly
                                         class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
                             </div>

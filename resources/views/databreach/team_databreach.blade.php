@@ -5,7 +5,7 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-8">
                     <div class="p-2 text-gray-900">
                         <h3 class="text-xl font-bold text-gray-900 mb-4" style="font-weight: 900;">
-                            Data Breach Team
+                            Data Breach Response Team
                         </h3> 
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center space-x-3">
@@ -26,7 +26,7 @@
                                         <th class="px-6 py-2 font-semibold uppercase text-left">Fullname</th>
                                         <th class="px-6 py-2 font-semibold uppercase text-left">Email</th>
                                         <th class="px-6 py-2 font-semibold uppercase text-left">Region</th>
-                                        <th class="px-6 py-2 font-semibold uppercase text-left">Actions</th>
+                                        <th class="px-9 py-2 font-semibold uppercase text-left">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>

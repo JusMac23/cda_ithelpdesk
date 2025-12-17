@@ -25,6 +25,10 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // 🔥 DESTROY ANY EXISTING SESSION BEFORE PROCESSING LOGIN
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
         // Validate credentials and reCAPTCHA
         $request->validate([
             'email' => ['required', 'string', 'email'],
@@ -32,11 +36,14 @@ class AuthenticatedSessionController extends Controller
             'g-recaptcha-response' => [
                 'required',
                 function ($attribute, $value, $fail) use ($request) {
-                    $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-                        'secret' => config('services.recaptcha.secret_key'),
-                        'response' => $value,
-                        'remoteip' => $request->ip(),
-                    ]);
+                    $response = Http::asForm()->post(
+                        'https://www.google.com/recaptcha/api/siteverify',
+                        [
+                            'secret' => config('services.recaptcha.secret_key'),
+                            'response' => $value,
+                            'remoteip' => $request->ip(),
+                        ]
+                    );
 
                     if (!($response->json()['success'] ?? false)) {
                         $fail('CAPTCHA verification failed.');
@@ -52,26 +59,19 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
 
-        // Regenerate session on successful login
+        // 🔥 REGENERATE SESSION ONCE AUTHENTICATED
         $request->session()->regenerate();
 
         $user = Auth::user();
 
         // Role-based redirection
         if ($user->hasRole('Super Admin')) {
-
             return redirect()->route('dashboard');
-
         } elseif ($user->hasRole('User')) {
-
             return redirect()->route('assignedtome_tickets.index');
-
         } elseif ($user->hasRole('DPO')) {
-
             return redirect()->route('databreach.index');
-
         } elseif ($user->hasRole('DBRT')) {
-
             return redirect()->route('databreach.index');
         }
 

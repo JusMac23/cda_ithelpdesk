@@ -18,7 +18,7 @@ class DashboardController extends Controller
         $resolved = Tickets::where('status', 'Resolved')->count();
 
         // Count overdue (older than 3 days and not resolved)
-        $overdue = Tickets::where('status', '!=', 'Resolved')
+        $overdue = Tickets::whereIn('status', ['Pending', 'Pending/Re-Assigned'])
             ->whereDate('date_created', '<', now()->subDays(3))
             ->count();
 

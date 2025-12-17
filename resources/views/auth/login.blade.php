@@ -137,7 +137,7 @@
     <p class="text-center text-xs text-gray-500 mt-4">
         &copy; {{ date('Y') }} CDA ICTD. All rights reserved.
     </p>
-
+    <script src="/assets/js/sweetalert2.min.js"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script>
         @if(session('success'))
@@ -160,6 +160,14 @@
                     text: '{{ session('error') }}',
                     confirmButtonColor: '#2563eb',
                 });
+            });
+        @endif
+
+        @if(session('error_swal'))
+            Swal.fire({
+                icon: 'error',
+                title: 'User not found',
+                text: '{{ session("error_message") }}',
             });
         @endif
 

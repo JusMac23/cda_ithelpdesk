@@ -5,26 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>CDA-ITHelpdesk</title>
+    <title>CDA-DBRS</title>
     <link rel="icon" href="{{ asset('images/CDA-logo-RA11364-PNG.png') }}" type="image/png">
 
-    <!-- Fonts -->
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Outlined" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Icons -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <!-- Styles & Scripts (Vite handles Tailwind + JS build) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/assets/js/sweetalert2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="font-sans antialiased bg-gray-100 text-gray-800">
-    <div class="min-h-screen flex">
+    <div class="min-h-screen">
 
         <!-- Sidebar -->
         @include('layouts.navigation')
@@ -33,27 +30,27 @@
         <div id="main-content" class="flex-1 flex flex-col transition-all duration-300 ease-in-out">
             <!-- Top bar -->
             <div id="page-header" class="flex justify-end items-center h-16 px-6 bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 transition-all duration-300 ease-in-out">
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
                     @php
-                        $nowPH = \Carbon\Carbon::now('Asia/Manila')->format('F j, Y - h:i A');
+                        $nowPH = \Carbon\Carbon::now('Asia/Manila')->format('M j, Y - h:i A');
                         $user = Auth::user();
                         $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=4F46E5&color=fff&size=64';
                     @endphp
 
                     <!-- Date Display -->
-                    <div class="flex items-center gap-1 text-gray-500 dark:text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                    <div class="flex items-center text-gray-500 dark:text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
                         <span class="material-icons-outlined text-xl">today</span>
-                        <span class="text-sm ml-1">{{ $nowPH }}</span>
+                        <span class="text-sm mr-1">{{ $nowPH }}</span>
                     </div>
 
-                    <!-- Notifications Dropdown -->
+                    <!-- Notifications Dropdown 
                     <x-dropdown align="right">
                         <x-slot name="trigger">
                             <div class="relative" x-data="notificationHandler()" x-init="init()">
                                 <button @click="toggleNotifications()" 
-                                        class="flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 relative p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+                                        class="flex items-center text-gray-500 dark:text-gray-400 relative p-1 rounded-lg transition-colors duration-200">
 
-                                    <span class="material-icons-outlined text-2xl">notifications</span>
+                                    <span class="material-icons-outlined text-1xl">notifications</span>
                                     <template x-if="unreadCount > 0">
                                         <span class="absolute top-0 right-0 w-4 h-4 bg-red-600 text-white rounded-full flex items-center justify-center shadow">
                                             <span class="text-xs leading-none" x-text="unreadCount"></span>
@@ -86,7 +83,7 @@
                                 <template x-for="notification in notifications" :key="notification.id">
                                     <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                                         <div class="flex justify-between items-start">
-                                            <!-- 🔹 Black for readability -->
+                                            
                                             <p class="text-sm text-black break-words flex-1 mr-2" x-text="notification.message"></p>
                                             <button @click="deleteNotification(notification.id)" 
                                                     class="text-xs text-red-600 dark:text-red-400 hover:underline whitespace-nowrap ml-2 focus:outline-none">
@@ -99,19 +96,16 @@
                             </div>
                         </x-slot>
                     </x-dropdown>
-
+                    -->
 
                     <!-- User Dropdown -->
                     <x-dropdown align="right" width="64">
             
                         <x-slot name="trigger">
-                            <button class="flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none transition group">
-
-                                <!-- Divider -->
-                                <span class="text-gray-300 dark:text-gray-600">|</span>
+                            <button class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none transition group">
 
                                 <!-- Avatar and Name -->
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 ml-1">
                                     <img src="{{ $avatarUrl }}" alt="User Avatar" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600" />
                                     <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 ml-1">{{ $user->name }}</span>
                                 </div>
@@ -163,9 +157,23 @@
             <main class="p-8 flex-1">
                 {{ $slot }}
             </main>
+
+            <!-- Footer -->
+            <footer class="w-full border-t border-gray-300 bg-white">
+                <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between">
+                    <p class="text-gray-500 text-sm sm:text-base text-center sm:text-left">
+                        &copy; {{ date('Y') }} 2025 CDA ICTD. All rights reserved.
+                    </p>
+                    <div class="mt-2 sm:mt-0 flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-gray-600 text-sm sm:text-base">Contact us at ictd@cda.gov.ph</a>
+                    </div>
+                </div>
+            </footer>
+
         </div>
     </div>
 
+    <!-- Notifications 
     <script>
         function notificationHandler() {
             return {
@@ -293,6 +301,7 @@
             }
         }
     </script>
+    -->
 
 </body>
 </html>

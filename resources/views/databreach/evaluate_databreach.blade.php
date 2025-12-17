@@ -89,14 +89,14 @@
                                 </div>
 
                                 <div class="mb-4">
-                                <label for="email" class="block text-sm font-semibold text-gray-700">
-                                    Email Address <span class="text-red-500">*</span>
-                                </label>
-                                <input type="text" id="email" name="email" value="{{ old('email', $notification->team_email ?? $notification->email) }}"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-700"
-                                    readonly
-                                >
-                            </div>
+                                    <label for="email" class="block text-sm font-semibold text-gray-700">
+                                        Email Address <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" id="email" name="email" value="{{ old('email', $notification->team_email ?? $notification->email) }}"
+                                        class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-700"
+                                        readonly
+                                    >
+                                </div>
                             </div>
 
                             <!-- Representative Info -->
@@ -138,7 +138,7 @@
                                         Date of Notification <span class="text-red-500">*</span>
                                     </label>
                                     <input type="datetime-local" id="date_notification" name="date_notification"
-                                        value="{{ old('date_notification', $notification->date_notification) }}" required
+                                        value="{{ old('date_notification', $notification->date_notification) }}" required readonly
                                         class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
                             </div>

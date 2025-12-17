@@ -2,10 +2,10 @@
     <div class="flex items-center justify-between px-4 py-3 bg-gray border-b border-gray-200">
         <a href="{{ route('dashboard') }}" class="flex items-center space-x-1 text-indigo-700 hover:text-indigo-800 transition overflow-hidden">
             <img src="{{ asset('images/CDA-logo-RA11364-PNG.png') }}" alt="CDA Logo" class="h-10 w-auto logo">
-            <span class="text-lg font-bold whitespace-nowrap sidebar-label">CDA-ITHelpdesk</span>
+            <span class="text-lg font-bold whitespace-nowrap sidebar-label">CDA-DBRS</span>
         </a>
         <button id="collapseSidebar" aria-label="Toggle Sidebar" class="ml-auto flex items-center justify-center w-8 h-8 rounded-full text-indigo-600 hover:text-indigo-800 hover:bg-gray-100">
-            <span class="material-icons-outlined text-2xl">menu_open</span>
+            <span class="material-icons-outlined text-2xl">menu</span>
         </button>
     </div>
 
@@ -17,7 +17,7 @@
             <div class="icon-wrapper">
                 <span class="material-icons-outlined text-xl">dashboard</span>
             </div>
-            <span class="sidebar-label ml-2">Dashboard</span>
+            <span class="sidebar-label ml-2">Tickets Overview</span>
         </a>
         @endif
 
@@ -44,7 +44,7 @@
                     <a href="{{ route('tickets.index') }}"
                         class="sidebar-label menu-link flex w-full px-3 py-2 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition @if(request()->routeIs('tickets.index')) font-semibold text-indigo-600 @endif">
                         <span class="sidebar-label px-4 flex items-center">
-                            <span class="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span> <!-- Small Dot -->
+                            <span class="w-2 h-2 bg-indigo-600 rounded-full mr-2"></span> 
                             All Tickets
                         </span>
                     </a>
@@ -90,7 +90,37 @@
             </ul>
         </div>
 
-        <!--Databreach Management with toggle -->
+        <!-- Data Breach Overview -->
+        @if(auth()->user()->can('view_overview_databreach'))
+        <a href="{{ url('overview_databreach') }}" class="menu-link flex items-center px-3 py-0 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition">
+            <div class="icon-wrapper">
+                <span class="material-icons-outlined text-xl">analytics</span>
+            </div>
+            <span class="sidebar-label ml-2">Overview</span>
+        </a>
+        @endif
+
+        <!-- All Reports -->
+        @if(auth()->user()->can('view_all_databreach'))
+        <a href="{{ route('databreach.index') }}" class="menu-link flex items-center px-3 py-0 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition">
+            <div class="icon-wrapper">
+                <span class="material-icons-outlined text-xl">article</span>
+            </div>
+            <span class="sidebar-label ml-2">All Reports</span>
+        </a>
+        @endif
+
+        <!-- Data Breach Response Team -->
+        @if(auth()->user()->can('view_dbrt') || auth()->user()->can('create_dbrt') || auth()->user()->can('edit_dbrt') || auth()->user()->can('delete_dbrt'))
+        <a href="{{ route('databreach.team_databreach') }}" class="menu-link flex items-center px-3 py-0 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition">
+            <div class="icon-wrapper">
+                <span class="material-icons-outlined text-xl">group</span>
+            </div>
+            <span class="sidebar-label ml-2">DBRT</span>
+        </a>
+        @endif
+
+        <!--Databreach Management with toggle 
         <div x-data="{ open: false }">
             @if(auth()->user()->can('view_all_databreach') || auth()->user()->can('view_overview_databreach') || auth()->user()->can('view_dbrt'))
             <button @click="open = !open" type="button"
@@ -131,7 +161,7 @@
                 </li>
                 @endif
 
-                <!--
+               
                 <li>   
                     <a href="{{ route('databreach.per_region_databreach') }}"
                         class="sidebar-label menu-link flex w-full px-3 py-2 text-gray-800 rounded-full font-medium hover:bg-gray-100 hover:text-indigo-600 transition @if(request()->routeIs('databreach.team_databreach')) font-semibold text-indigo-600 @endif">
@@ -141,7 +171,7 @@
                         </span>
                     </a>
                 </li>
-                -->
+                
 
                 @if(auth()->user()->can('view_dbrt') || auth()->user()->can('create_dbrt') || auth()->user()->can('edit_dbrt') || auth()->user()->can('delete_dbrt'))
                 <li>   
@@ -156,6 +186,7 @@
                 @endif
             </ul>
         </div>
+        -->
 
         <!-- Technical Personnel -->
         @if(auth()->user()->can('view_technical_personnel') || auth()->user()->can('create_technical_personnel') || auth()->user()->can('edit_technical_personnel') || auth()->user()->can('delete_technical_personnel') || auth()->user()->can('search_technical_personnel'))
@@ -210,7 +241,7 @@
     <div class="px-3 py-4 border-t border-gray-200">
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit" class="menu-link w-full flex items-center px-3 py-0 text-red-600 font-medium rounded-full hover:bg-red-100 transition">
+            <button type="submit" class="menu-link w-full flex items-center px-4 py-1 text-red-600 font-medium rounded-full hover:bg-red-100 transition">
                 <div class="icon-wrapper">
                     <span class="material-icons-outlined text-xl">logout</span>
                 </div>

@@ -1,13 +1,42 @@
 <x-app-layout>
-@can('view_overview_databreach')
+
     <style>
-        .grid {
-            display: grid !important;
-            grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-            flex-wrap: wrap !important;
-            width: 100%;
+        /* Mobile: always 1 column */
+        @media (max-width: 400px) {
+            .cause-grid {
+                grid-template-columns: 1fr !important;     
+            }
+        }
+
+        /* Desktop: always 4 columns */
+        @media (min-width: 1024px) {
+            .cause-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+            }
+        }
+        .chart-wrapper {
+            display: flex;
+            justify-content: center;  
+            align-items: center;     
+            height: 100%;          
+        }
+
+        /* Chart container size */
+        .chart-container {
+            width: 100%;             
+            max-width: 520px;        
+            height: auto;             
+        }
+
+        /* Responsive adjustments for small screens */
+        @media (max-width: 640px) {
+            .chart-container {
+                max-width: 350px;    
+            }
         }
     </style>
+
+    @can('view_overview_databreach')
     <div id="main-content" class="min-h-screen transition-all duration-300 ease-in-out">
         <div id="dashboardContent">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-8">
@@ -24,119 +53,229 @@
                         </div>
                     </div>
 
-                    <!-- Summary Cards -->
-                    <div class="mt-6 w-full">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full mb-8">
-                            @php
-                                // Default values (in case controller data is missing)
-                                $causeCards = $causeCards ?? [
-                                    ['label' => 'Theft', 'icon' => 'fa-lock', 'count' => 0],
-                                    ['label' => 'Identity Fraud', 'icon' => 'fa-id-card', 'count' => 0],
-                                    ['label' => 'Sabotage / Physical Damage', 'icon' => 'fa-hammer', 'count' => 0],
-                                    ['label' => 'Malicious Code', 'icon' => 'fa-bug', 'count' => 0],
-                                    ['label' => 'Hacking', 'icon' => 'fa-user-secret', 'count' => 0],
-                                    ['label' => 'Misuse of Resources', 'icon' => 'fa-network-wired', 'count' => 0],
-                                    ['label' => 'Hardware Failure', 'icon' => 'fa-microchip', 'count' => 0],
-                                    ['label' => 'Software Failure', 'icon' => 'fa-code', 'count' => 0],
-                                    ['label' => 'Communication Failure', 'icon' => 'fa-wifi', 'count' => 0],
-                                    ['label' => 'Natural Disaster', 'icon' => 'fa-cloud-bolt', 'count' => 0],
-                                    ['label' => 'Design Error', 'icon' => 'fa-drafting-compass', 'count' => 0],
-                                    ['label' => 'User Error', 'icon' => 'fa-user-xmark', 'count' => 0],
-                                    ['label' => 'Operations Error', 'icon' => 'fa-cogs', 'count' => 0],
-                                    ['label' => 'Software Maintenance Error', 'icon' => 'fa-screwdriver-wrench', 'count' => 0],
-                                    ['label' => 'Third Party / Service Provider', 'icon' => 'fa-people-arrows', 'count' => 0],
-                                    ['label' => 'Others', 'icon' => 'fa-ellipsis-h', 'count' => 0],
-                                ];
+                    <form method="GET" action="{{ route('databreach.overview') }}"
+                        class="flex flex-col md:flex-row gap-4 flex-wrap">
 
-                                // Color palette mapping
-                                $colorPalettes = [
-                                    'Theft' => ['bg' => 'bg-white', 'border' => 'border-gray-900', 'iconBg' => 'bg-gray-100', 'textColor' => 'text-gray-900', 'valueColor' => 'text-gray-700', ],
-                                    'Identity Fraud' => ['bg' => 'bg-white', 'border' => 'border-gray-800', 'iconBg' => 'bg-gray-100', 'textColor' => 'text-gray-800', 'valueColor' => 'text-gray-700', ],
-                                    'Sabotage / Physical Damage' => ['bg' => 'bg-white', 'border' => 'border-gray-700', 'iconBg' => 'bg-gray-100', 'textColor' => 'text-gray-800', 'valueColor' => 'text-gray-700', ],
-                                    'Malicious Code' => ['bg' => 'bg-white', 'border' => 'border-gray-600', 'iconBg' => 'bg-gray-100', 'textColor' => 'text-gray-800', 'valueColor' => 'text-gray-700', ],
-                                    'Hacking' => ['bg' => 'bg-white', 'border' => 'border-gray-500', 'iconBg' => 'bg-gray-100', 'textColor' => 'text-gray-800', 'valueColor' => 'text-gray-700', ],
-                                    'Misuse of Resources' => [ 'bg' => 'bg-white', 'border' => 'border-gray-400', 'iconBg' => 'bg-gray-100', 'textColor' => 'text-gray-800', 'valueColor' => 'text-gray-700', ],
-                                    'Hardware Failure' => ['bg' => 'bg-white', 'border' => 'border-gray-500', 'iconBg' => 'bg-gray-100', 'textColor' => 'text-gray-800', 'valueColor' => 'text-gray-700', ],
-                                    'Software Failure' => ['bg' => 'bg-white', 'border' => 'border-gray-400', 'iconBg' => 'bg-gray-100', 'textColor' => 'text-gray-800', 'valueColor' => 'text-gray-700', ],
-                                    'Communication Failure' => ['bg' => 'bg-white', 'border' => 'border-gray-400', 'iconBg' => 'bg-gray-100', 'textColor' => 'text-gray-800', 'valueColor' => 'text-gray-700', ],
-                                    'Natural Disaster' => ['bg' => 'bg-white', 'border' => 'border-gray-500', 'iconBg' => 'bg-gray-100', 'textColor' => 'text-gray-900', 'valueColor' => 'text-gray-700', ],
-                                    'Design Error' => ['bg' => 'bg-white','border' => 'border-gray-600', 'iconBg' => 'bg-gray-100', 'textColor' => 'text-gray-800', 'valueColor' => 'text-gray-700', ],
-                                    'User Error' => ['bg' => 'bg-white', 'border' => 'border-gray-800', 'iconBg' => 'bg-gray-100', 'textColor' => 'text-gray-800','valueColor' => 'text-gray-700', ],
-                                    'Operations Error' => ['bg' => 'bg-white', 'border' => 'border-gray-700', 'iconBg' => 'bg-gray-100', 'textColor' => 'text-gray-800', 'valueColor' => 'text-gray-700', ],
-                                    'Software Maintenance Error' => ['bg' => 'bg-white', 'border' => 'border-gray-600', 'iconBg' => 'bg-gray-100', 'textColor' => 'text-gray-800', 'valueColor' => 'text-gray-700', ],
-                                    'Third Party / Service Provider' => ['bg' => 'bg-white', 'border' => 'border-gray-700', 'iconBg' => 'bg-gray-100', 'textColor' => 'text-gray-800', 'valueColor' => 'text-gray-700', ],
-                                    'Others' => ['bg' => 'bg-white', 'border' => 'border-gray-400', 'iconBg' => 'bg-gray-100', 'textColor' => 'text-gray-800', 'valueColor' => 'text-gray-700',],
-                                ];
-                            @endphp
-
-                            @foreach ($causeCards as $card)
-                                @php
-                                    $colors = $colorPalettes[$card['label']] ?? $colorPalettes['Others'];
-                                @endphp
-
-                                <div class="{{ $colors['bg'] }} {{ $colors['border'] }} border-l-4 rounded-xl shadow-md p-4 hover:shadow-lg transition-all duration-300 flex justify-between items-center">
-                                    <div class="flex items-center gap-4">
-                                        <div class="{{ $colors['iconBg'] }} p-4 rounded-full flex items-center justify-center">
-                                            <i class="fa-solid {{ $card['icon'] }} text-2xl {{ $colors['textColor'] }}"></i>
-                                        </div>
-                                        <h4 class="text-md font-semibold {{ $colors['textColor'] }}">{{ $card['label'] }}</h4>
-                                    </div>
-                                    <p class="text-3xl font-bold {{ $colors['valueColor'] }}">{{ $card['count'] }}</p>
-                                </div>
-                            @endforeach
+                        <!-- Year Filter -->
+                        <div class="flex flex-col">
+                            <label for="year" class="font-semibold text-gray-700 mb-1">
+                                Filter by Year:
+                            </label>
+                            <select name="year" id="year"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm px-4 py-2">
+                                <option value="">All Years</option>
+                                @foreach($years as $y)
+                                    <option value="{{ $y }}" @if(isset($year) && $year == $y) selected @endif>
+                                        {{ $y }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
+
+                        <!-- Status Filter -->
+                        <div class="flex flex-col">
+                            <label for="status" class="font-semibold text-gray-700 mb-1">
+                                Filter by Status:
+                            </label>
+                            <select name="status" id="status"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm px-4 py-2">
+                                <option value="">All Status</option>
+                                @foreach($statuses as $s)
+                                    <option value="{{ $s }}" @if(isset($statusFilter) && $statusFilter == $s) selected @endif>
+                                        {{ $s }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Apply Filter -->
+                        <div class="flex flex-col justify-end">
+                            <div class="mb-1 h-[1.25rem]"></div>
+
+                            <button type="submit"
+                                class="inline-flex items-center justify-center text-sm px-4 py-2 rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700
+                                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                <i class="fas fa-filter mr-2"></i> Apply Filter
+                            </button>
+                        </div>
+
+                        <!-- Generate Report -->
+                        <div class="flex flex-col justify-end">
+                            <div class="mb-1 h-[1.25rem]"></div>
+
+                            <button type="submit" name="action" value="generate"
+                                class="inline-flex items-center justify-center text-sm px-4 py-2 rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700
+                                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <i class="fas fa-download mr-2"></i> Generate Report
+                            </button>
+                        </div>
+
+                    </form>
+
+                    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- LEFT SIDE: Vertical Cards -->
+                        <div class="flex flex-col space-y-4 gap-6">
+                            
+                            <!-- Total Security Incidents -->
+                            <div class="bg-white border-l-4 border-blue-600 rounded-xl shadow p-6 flex items-center justify-between hover:shadow-lg transition">
+                                <div class="ml-3">
+                                    <h4 class="text-lg font-semibold text-gray-800">Total Security Incidents</h4>
+                                    <p class="text-3xl font-bold text-gray-700">
+                                        {{ $totalNotifications ?? 0 }}
+                                    </p>
+                                </div>
+                                <div class="bg-blue-100 p-4 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-shield-alt text-blue-700 text-3xl"></i>
+                                </div>
+                            </div>
+
+                            <!-- Mandatory Incidents -->
+                            <div class="bg-white border-l-4 border-red-600 rounded-xl shadow p-6 flex items-center justify-between hover:shadow-lg transition">
+                                <div class="ml-3">
+                                    <h4 class="text-lg font-semibold text-gray-800">Mandatory Incidents</h4>
+                                    <p class="text-3xl font-bold text-gray-700">
+                                        {{ $totalMandatory ?? 0 }}
+                                    </p>
+                                </div>
+                                <div class="bg-red-100 p-4 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-exclamation-triangle text-red-700 text-3xl"></i>
+                                </div>
+                            </div>
+
+                            <!-- Voluntary Incidents -->
+                            <div class="bg-white border-l-4 border-yellow-600 rounded-xl shadow p-6 flex items-center justify-between hover:shadow-lg transition">
+                                <div class="ml-3">
+                                    <h4 class="text-lg font-semibold text-gray-800">Voluntary Incidents</h4>
+                                    <p class="text-3xl font-bold text-gray-700">
+                                        {{ $totalVoluntary ?? 0 }}
+                                    </p>
+                                </div>
+                                <div class="bg-yellow-100 p-4 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-clipboard-list text-yellow-700 text-3xl"></i>
+                                </div>
+                            </div>
+
+                            <!-- Total Reported -->
+                            <div class="bg-white border-l-4 border-green-600 rounded-xl shadow p-6 flex items-center justify-between hover:shadow-lg transition">
+                                <div class="ml-3">
+                                    <h4 class="text-lg font-semibold text-gray-800">Total Reported</h4>
+                                    <p class="text-3xl font-bold text-gray-700">
+                                        {{ $totalReported ?? 0 }}
+                                    </p>
+                                </div>
+                                <div class="bg-green-100 p-4 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check-circle text-green-700 text-3xl"></i>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- RIGHT SIDE: Pie Chart -->
+                        <div class="bg-white shadow-md rounded-lg p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">
+                                Incidents per Specific Causes
+                            </h3>
+
+                            <div class="chart-wrapper">
+                                <div class="chart-container">
+                                    <canvas id="causePieChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
+                    @php
+                        $labels = array_column($causeCards, 'label');
+                        $values = array_column($causeCards, 'count');
+                    @endphp
+
+
                     <!-- Recently Submitted Notifications -->
-                    <div class="mt-4 bg-white rounded-lg shadow p-6">
-                        <h4 class="text-lg font-semibold mb-4 text-gray-700 flex items-center">
-                            <i class="fa-solid fa-clock-rotate-left mr-2 text-blue-600"></i> Recently Reported Notifications
-                        </h4>
-                        <div class="overflow-x-auto bg-white shadow-lg rounded-lg border border-gray-200">
-                            <table class="min-w-full table-fixed divide-y divide-gray-200 text-left text-gray-800">
-                                <thead class="bg-gray-100 text-gray-700">
-                                    <tr>
-                                        <th class="px-6 py-2 font-semibold uppercase text-left">DBN No.</th>
-                                        <th class="px-6 py-2 font-semibold uppercase text-left">Sender</th>
-                                        <th class="px-6 py-2 font-semibold uppercase text-left">PIC</th>
-                                        <th class="px-6 py-2 font-semibold uppercase text-left">Date of Occurrence</th>
-                                        <th class="px-6 py-2 font-semibold uppercase text-left">Date of Discovery</th>
-                                        <th class="px-6 py-2 font-semibold uppercase text-left">General Cause</th>
-                                        <th class="px-6 py-2 font-semibold uppercase text-left">Status</th>
+                    <h4 class="text-lg font-semibold mb-4 text-gray-700 flex items-center mt-6">
+                        <i class="fa-solid fa-clock-rotate-left mr-2 text-blue-600"></i> Recently Reported Notifications
+                    </h4>
+                    <div class="overflow-x-auto bg-white shadow-lg rounded-lg border border-gray-200">
+                        <table class="min-w-full table-fixed divide-y divide-gray-200 text-left text-gray-800">
+                            <thead class="bg-gray-100 text-gray-700">
+                                <tr>
+                                    <th class="px-6 py-2 font-semibold uppercase text-left">DBN No.</th>
+                                    <th class="px-6 py-2 font-semibold uppercase text-left">Sender</th>
+                                    <th class="px-6 py-2 font-semibold uppercase text-left">PIC</th>
+                                    <th class="px-6 py-2 font-semibold uppercase text-left">Date of Occurrence</th>
+                                    <th class="px-6 py-2 font-semibold uppercase text-left">Date of Discovery</th>
+                                    <th class="px-6 py-2 font-semibold uppercase text-left">General Cause</th>
+                                    <th class="px-6 py-2 font-semibold uppercase text-left">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($recentlyReported as $dbn)
+                                    <tr class="hover:bg-gray-50 border-b">
+                                        <td class="px-6 py-4">{{ $dbn->dbn_number }}</td>
+                                        <td class="px-6 py-4">{{ $dbn->sender_fullname }}</td>
+                                        <td class="px-6 py-4">{{ $dbn->pic }}</td>
+                                        <td class="px-4 py-4 text-gray-600">{{ \Carbon\Carbon::parse($dbn->date_occurrence)->format('M d, Y h:i A') }}</td>
+                                        <td class="px-4 py-4 text-gray-600">{{ \Carbon\Carbon::parse($dbn->date_discovery)->format('M d, Y h:i A') }}</td>
+                                        <td class="px-6 py-4">{{ $dbn->general_cause }}</td>
+                                        <td class="px-6 py-4 text-left">
+                                            <span class="px-2 py-1 rounded-full text-sm font-semibold
+                                                {{ 
+                                                    $dbn->status === 'For Evaluation' ? 'bg-green-100 text-blue-700' : 
+                                                    ($dbn->status === 'Reported' ? 'bg-blue-100 text-blue-700' : 
+                                                    'bg-yellow-100 text-yellow-700') 
+                                                }}">
+                                                {{ $dbn->status }}
+                                            </span>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse ($recentlyReported as $dbn)
-                                        <tr class="hover:bg-gray-50 border-b">
-                                            <td class="px-6 py-4">{{ $dbn->dbn_number }}</td>
-                                            <td class="px-6 py-4">{{ $dbn->sender_fullname }}</td>
-                                            <td class="px-6 py-4">{{ $dbn->pic }}</td>
-                                            <td class="px-4 py-4 text-gray-600">{{ \Carbon\Carbon::parse($dbn->date_occurrence)->format('M d, Y h:i A') }}</td>
-                                            <td class="px-4 py-4 text-gray-600">{{ \Carbon\Carbon::parse($dbn->date_discovery)->format('M d, Y h:i A') }}</td>
-                                            <td class="px-6 py-4">{{ $dbn->general_cause }}</td>
-                                            <td class="px-6 py-4 text-left">
-                                                <span class="px-2 py-1 rounded-full text-sm font-semibold
-                                                    {{ 
-                                                        $dbn->status === 'For Evaluation' ? 'bg-green-100 text-blue-700' : 
-                                                        ($dbn->status === 'Reported' ? 'bg-blue-100 text-blue-700' : 
-                                                        'bg-yellow-100 text-yellow-700') 
-                                                    }}">
-                                                    {{ $dbn->status }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="7" class="text-center py-6 text-gray-500 text-lg">No recently submitted notifications to display.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center py-6 text-gray-500 text-lg">No recently submitted notifications to display.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 @endcan
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const ctx = document.getElementById('causePieChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: @json($labels),
+                datasets: [{
+                    data: @json($values),
+                    backgroundColor: [
+                        '#2563EB','#DC2626','#16A34A','#CA8A04','#7C3AED','#EA580C','#0891B2',
+                        '#9D174D','#4B5563','#1D4ED8','#B91C1C','#15803D',
+                        '#92400E','#6D28D9','#4338CA','#000000'
+                    ],
+                    borderColor: '#FFFFFF',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, 
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            boxWidth: 12,
+                            font: { size: 12 }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+
 </x-app-layout>

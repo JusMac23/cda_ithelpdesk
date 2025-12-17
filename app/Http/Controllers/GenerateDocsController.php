@@ -3,72 +3,119 @@
 namespace App\Http\Controllers;
 
 use App\Models\DataBreachNotification;
-use PhpOffice\PhpWord\PhpWord;
-use PhpOffice\PhpWord\IOFactory;
+use FPDF;
 
 class GenerateDocsController extends Controller
 {
-    public function generateDocx($dbn_id)
+    public function generatePdf($dbn_id)
     {
-        // Clean ALL output buffers (prevent DOCX corruption)
-        while (ob_get_level() > 0) {
-            ob_end_clean();
-        }
-
         $notification = DataBreachNotification::findOrFail($dbn_id);
 
-        $phpWord = new PhpWord();
-        $phpWord->getCompatibility()->setOoxmlVersion(12);
-
-        $section = $phpWord->addSection();
-
-        // Helper to ensure all data are strings
         $safe = function ($value) {
             return is_null($value) ? '' : (string)$value;
         };
 
-        // Title
-        $section->addText('DATA BREACH INCIDENT REPORT', ['bold' => true, 'size' => 18], ['alignment' => 'center']);
+        // Initialize PDF
+        $pdf = new FPDF();
+        $pdf->AddPage();
+        $pdf->SetFont('Arial','B',16);
 
-        $section->addTextBreak(1);
-        $section->addText('Facts / Scenario:', ['bold' => true, 'size' => 14]);
-        $section->addText($safe($notification->brief_summary));
+        // Get page width
+        $pageWidth = $pdf->GetPageWidth();
+        $marginInInches = 1;
+        $margin = $marginInInches * 25.4;
+
+        // Logos
+        $logoMarginTop = 8;
+        $cdaWidth = 18;
+        $bpWidth  = 18;
+        $logoSpacing = 3; 
+
+        // CDA logo (leftmost)
+        $pdf->Image(public_path('images/CDA-logo-RA11364-PNG.png'), $margin, $logoMarginTop, $cdaWidth);
+
+        $pdf->Image(
+            public_path('images/Bagong_Pilipinas_logo.png'),
+            $margin + $cdaWidth + $logoSpacing,
+            $logoMarginTop,
+            $bpWidth
+        );
+
+        // Right logo (IYC)
+        $rightLogoWidth = 22;
+        $pdf->Image(
+            public_path('images/iyc.png'),
+            $pageWidth - $margin - $rightLogoWidth,
+            $logoMarginTop,
+            $rightLogoWidth
+        );
+
+        $margin = 25.4; // your margin
+        $headerShift = 12; // shift to the right
+
+        $centerWidth = $pageWidth - ($margin * 2) - 10;
+
+        // First line
+        $pdf->SetXY($margin + $headerShift, 10);
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell($centerWidth, 5, 'COOPERATIVE DEVELOPMENT AUTHORITY', 0, 1, 'C');
+
+        // Second line
+        $pdf->SetX($margin + $headerShift);
+        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->Cell($centerWidth, 5, 'HEAD OFFICE', 0, 1, 'C');
+
+        // Third line
+        $pdf->SetX($margin + $headerShift);
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->Cell($centerWidth, 5, '827 Aurora Blvd., Service Road, Brgy. Immaculate Conception Cubao', 0, 1, 'C');
+
+        // Fourth line
+        $pdf->SetX($margin + $headerShift);
+        $pdf->Cell($centerWidth, 5, '1111 Quezon City, Philippines', 0, 1, 'C');
+
+
+        $pdf->Ln(15); // smaller gap before next section
+
+        $pdf->SetFont('Arial', 'B', 14);
+        $pdf->Cell(0, 10, 'DATA BREACH INCIDENT REPORT', 0, 1, 'C');
+        $pdf->Ln(5); // gap before content
+
+
+        // Facts / Scenario
+        $pdf->SetFont('Arial','B',14);
+        $pdf->Cell(0,10,'Facts / Scenario:',0,1);
+        $pdf->SetFont('Arial','',12);
+        $pdf->MultiCell(0,7,$safe($notification->brief_summary));
+        $pdf->Ln(3);
 
         // Notification Type Table
-        $section->addTextBreak(1);
-        $section->addText('NOTIFICATION TYPE', ['bold' => true, 'size' => 14]);
+        $pdf->SetFont('Arial','B',14);
+        $pdf->Cell(0,10,'NOTIFICATION TYPE',0,1);
+        $pdf->SetFont('Arial','',12);
 
-        $table = $section->addTable([
-            'borderSize' => 6,
-            'borderColor' => '999999',
-            'cellMargin' => 80
-        ]);
+        $tableData = [
+            'PIC' => $notification->pic,
+            'Email Address' => $notification->email,
+            'Representative' => $notification->representative,
+            'Representative Email' => $notification->representative_email_address,
+            'Date/Time of Occurrence' => $notification->date_occurrence ? $notification->date_occurrence->format('F d, Y - h:i A') : '',
+            'Date/Time of Discovery' => $notification->date_discovery ? $notification->date_discovery->format('F d, Y - h:i A') : '',
+        ];
 
-        $addRow = function ($label, $value) use ($table, $safe) {
-            $table->addRow();
-            $table->addCell(4000)->addText($label);
-            $table->addCell(8000)->addText($safe($value));
-        };
-
-        $addRow('PIC', $notification->pic);
-        $addRow('Email Address', $notification->email);
-        $addRow('Representative', $notification->representative);
-        $addRow('Representative Email', $notification->representative_email_address);
-
-        $addRow(
-            'Date/Time of Occurrence',
-            $notification->date_occurrence ? $notification->date_occurrence->format('F d, Y - h:i A') : ''
-        );
-
-        $addRow(
-            'Date/Time of Discovery',
-            $notification->date_discovery ? $notification->date_discovery->format('F d, Y - h:i A') : ''
-        );
+        foreach ($tableData as $label => $value) {
+            $pdf->SetFont('Arial','B',12);
+            $pdf->Cell(60,7,$label,1);
+            $pdf->SetFont('Arial','',12);
+            $pdf->Cell(0,7,$safe($value),1,1);
+        }
 
         // Notification Type Description
         if (!empty($notification->notification_type_description)) {
-            $section->addTextBreak(1);
-            $section->addText('Notification Type Description:', ['bold' => true]);
+            $pdf->Ln(5);
+            $pdf->SetFont('Arial','B',12);
+            $pdf->Cell(0,7,'Notification Type Description:',0,1);
+            $pdf->SetFont('Arial','',12);
 
             $types = json_decode($notification->notification_type_description, true);
             if (!is_array($types)) {
@@ -76,20 +123,17 @@ class GenerateDocsController extends Controller
             }
 
             foreach ($types as $type) {
-                $section->addText("• " . $safe(trim($type)));
+                $pdf->Cell(5);
+                $pdf->Cell(0,6,'- '.$safe(trim($type)),0,1);
             }
         }
 
         // Data Breach Details
-        $section->addTextBreak(2);
-        $section->addText('DATA BREACH NOTIFICATION DETAILS', ['bold' => true, 'size' => 14]);
+        $pdf->Ln(5);
+        $pdf->SetFont('Arial','B',14);
+        $pdf->Cell(0,10,'DATA BREACH NOTIFICATION DETAILS',0,1);
 
-        $detailsTable = $section->addTable([
-            'borderSize' => 6,
-            'borderColor' => '999999',
-            'cellMargin' => 80
-        ]);
-
+        $pdf->SetFont('Arial','',12);
         $fields = [
             'Sector Name' => $notification->sector_name,
             'Subsector Name' => $notification->subsector_name,
@@ -101,12 +145,13 @@ class GenerateDocsController extends Controller
         ];
 
         foreach ($fields as $label => $value) {
-            $detailsTable->addRow();
-            $detailsTable->addCell(4000)->addText($label);
-            $detailsTable->addCell(8000)->addText($safe($value));
+            $pdf->SetFont('Arial','B',12);
+            $pdf->Cell(60,7,$label,1);
+            $pdf->SetFont('Arial','',12);
+            $pdf->Cell(0,7,$safe($value),1,1);
         }
 
-        // Long text fields
+        // Long Text Fields
         $longFields = [
             'How the Breach Occurred + DPS Vulnerability' => $notification->how_breach_occured,
             'Chronology of Events' => $notification->chronology,
@@ -118,17 +163,17 @@ class GenerateDocsController extends Controller
         ];
 
         foreach ($longFields as $title => $content) {
-            $section->addTextBreak(1);
-            $section->addText($title . ':', ['bold' => true]);
-
-            // Use TextRun for safer long text handling
-            $textRun = $section->addTextRun();
-            $textRun->addText($safe($content));
+            $pdf->Ln(5);
+            $pdf->SetFont('Arial','B',12);
+            $pdf->Cell(0,7,$title.':',0,1);
+            $pdf->SetFont('Arial','',12);
+            $pdf->MultiCell(0,6,$safe($content));
         }
 
         // Measures Taken
-        $section->addTextBreak(2);
-        $section->addText('MEASURES TAKEN TO ADDRESS THE BREACH', ['bold' => true, 'size' => 14]);
+        $pdf->Ln(5);
+        $pdf->SetFont('Arial','B',14);
+        $pdf->Cell(0,10,'MEASURES TAKEN TO ADDRESS THE BREACH',0,1);
 
         $measures = [
             'Measures to address breach' => $notification->measures_to_address,
@@ -139,41 +184,39 @@ class GenerateDocsController extends Controller
         ];
 
         foreach ($measures as $label => $value) {
-            $section->addTextBreak(1);
-            $section->addText($label . ':', ['bold' => true]);
-            $textRun = $section->addTextRun();
-            $textRun->addText($safe($value));
+            $pdf->SetFont('Arial','B',12);
+            $pdf->Cell(0,7,$label.':',0,1);
+            $pdf->SetFont('Arial','',12);
+            $pdf->MultiCell(0,6,$safe($value));
         }
 
         // Record Type & Data Subjects
-        $section->addTextBreak(2);
-        $section->addText('RECORD TYPE & DATA SUBJECTS', ['bold' => true, 'size' => 14]);
+        $pdf->Ln(5);
+        $pdf->SetFont('Arial','B',14);
+        $pdf->Cell(0,10,'RECORD TYPE & DATA SUBJECTS',0,1);
 
-        $section->addText('Record Type:', ['bold' => true]);
-        $section->addText($safe($notification->record_type));
+        $pdf->SetFont('Arial','B',12);
+        $pdf->Cell(0,7,'Record Type:',0,1);
+        $pdf->SetFont('Arial','',12);
+        $pdf->MultiCell(0,6,$safe($notification->record_type));
 
-        $section->addTextBreak(1);
-        $section->addText('Data Subjects:', ['bold' => true]);
+        if(!empty($notification->data_subjects)) {
+            $pdf->Ln(2);
+            $pdf->SetFont('Arial','B',12);
+            $pdf->Cell(0,7,'Data Subjects:',0,1);
+            $pdf->SetFont('Arial','',12);
 
-        $subjects = !empty($notification->data_subjects)
-            ? explode(',', $notification->data_subjects)
-            : [];
-
-        foreach ($subjects as $subject) {
-            $section->addText("• " . $safe(trim($subject)));
+            foreach(explode(',', $notification->data_subjects) as $subject) {
+                $pdf->Cell(5);
+                $pdf->Cell(0,6,'- '.$safe(trim($subject)),0,1);
+            }
         }
 
-        // File name
-        $fileName = 'Data_Breach_Report_' . $notification->id . '.docx';
+        $fileName = 'Data_Breach_Incident_Report' . $notification->id . '.pdf';
 
-        // Save to temporary file
-        $tempFile = tempnam(sys_get_temp_dir(), 'docx');
-        $writer = new \PhpOffice\PhpWord\Writer\Word2007($phpWord);
-        $writer->save($tempFile);
-
-        // Force download
-        return response()->download($tempFile, $fileName, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        ])->deleteFileAfterSend(true);
+        // Output PDF for download
+        return response($pdf->Output('S'), 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', "attachment; filename=\"$fileName\"");
     }
 }

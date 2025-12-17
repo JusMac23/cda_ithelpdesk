@@ -23,7 +23,7 @@
                                        name="search_query"
                                        value="{{ request('search_query') }}"
                                        placeholder="Search..."
-                                       class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring focus:ring-indigo-200">
+                                       class="px-2 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring focus:ring-indigo-200">
                                 <button type="submit"
                                         class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 focus:outline-none">
                                     <i class="fas fa-search"></i>

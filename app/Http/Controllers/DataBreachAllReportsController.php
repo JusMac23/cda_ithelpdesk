@@ -2,18 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use FPDF;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
+
+use App\Http\Controllers\UsersController;
+
 use App\Models\DataBreachNotification;
 use App\Models\DatabreachForAssessment;
 use App\Models\DatabreachTeam;
 use App\Models\Role;
-use App\Models\Users;
-use App\Mail\IncidentSubmitted; 
+use App\Models\User;
+
+use App\Mail\IncidentSubmitted;     
 use App\Mail\IncidentForEvaluation;
 use App\Mail\IncidentEvaluated;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http; 
-use Illuminate\Support\Facades\Mail;
 
 class DataBreachAllReportsController extends Controller
 {
@@ -58,14 +63,40 @@ class DataBreachAllReportsController extends Controller
             ->orderBy('region', 'asc')
             ->pluck('region')
             ->filter()
-            ->values();
+            ->values();    
 
         return view('databreach.index', compact('notifications', 'pic'));
     }
 
     // Handle Overview
-    public function overview()
+    public function overview(Request $request)
     {
+        // Get filters from request
+        $year = $request->input('year');
+        $statusFilter = $request->input('status'); 
+        $action = $request->input('action'); 
+
+        // Base query
+        $notificationsQuery = DataBreachNotification::query();
+
+        // Apply annual filter
+        if (!empty($year)) {
+            $notificationsQuery->whereYear('created_at', $year);
+        }
+
+        // Apply status filter
+        if (!empty($statusFilter)) {
+            $notificationsQuery->where('status', $statusFilter);
+        }
+
+        // Calculate totals (for PDF and view)
+        $totalNotifications = (clone $notificationsQuery)->count();
+        $totalReported = (clone $notificationsQuery)->where('status', 'Reported')->count();
+        $totalMandatory = (clone $notificationsQuery)->where('notification_type', 'Mandatory')->count();
+        $totalVoluntary = (clone $notificationsQuery)->where('notification_type', 'Voluntary')->count();
+        $totalOther = $totalNotifications - ($totalMandatory + $totalVoluntary);
+
+        // Causes list
         $causes = [
             'Theft', 'Identity Fraud', 'Sabotage / Physical Damage', 'Malicious Code', 'Hacking',
             'Misuse of Resources', 'Hardware Failure', 'Software Failure', 'Communication Failure',
@@ -73,10 +104,65 @@ class DataBreachAllReportsController extends Controller
             'Software Maintenance Error', 'Third Party / Service Provider', 'Others',
         ];
 
-        $causeCounts = DataBreachNotification::select('specific_cause', DB::raw('COUNT(*) as total'))
+        // Count notifications per specific cause
+        $causeCounts = (clone $notificationsQuery)
+            ->select('specific_cause', DB::raw('COUNT(*) as total'))
             ->groupBy('specific_cause')
             ->pluck('total', 'specific_cause');
 
+        // Handle PDF generation
+        if ($action === 'generate') {
+            $pdf = new FPDF('P', 'mm', 'A4'); // Portrait
+            $pdf->AddPage();
+            $pdf->SetFont('Arial', 'B', 14);
+
+            // Header Section
+            $displayYear = $year ?? (DataBreachNotification::latest('created_at')->first()?->created_at->format('Y') ?? 'YYYY');
+
+            $pdf->Cell(0, 8, 'Year: ' . $displayYear, 0, 1);
+            $pdf->SetFont('Arial', '', 12);
+            $pdf->Cell(95, 8, 'Sector Name: GOVERNMENT', 1);
+            $pdf->Cell(95, 8, 'Sub-Sector Name: Executive Department', 1, 1);
+            $pdf->Cell(95, 8, 'City / Municipality: ', 1);
+            $pdf->Cell(95, 8, 'PIC: Cooperative Development Authority', 1, 1);
+            $pdf->Ln(5);
+
+            // Summary Section
+            $pdf->SetFont('Arial', 'B', 12);
+            $pdf->Cell(0, 8, 'Summary of Security Incidents and Privacy Breaches', 0, 1);
+            $pdf->SetFont('Arial', '', 12);
+
+            // First row: A and B
+            $pdf->Cell(95, 8, 'A. Mandatory Breach Notification: ' . $totalMandatory, 1);
+            $pdf->Cell(95, 8, 'B. Voluntary Data Breach Notification: ' . $totalVoluntary, 1, 1);
+
+            // Second row: C and Total
+            $pdf->Cell(95, 8, 'C. Other Security Incidents: ' . $totalOther, 1);
+            $pdf->Cell(95, 8, 'Total Security Incidents: ' . $totalNotifications, 1, 1);
+
+            $pdf->Ln(5);
+
+
+            // Specific Causes Table
+            $pdf->SetFont('Arial', 'B', 12);
+            $pdf->Cell(0, 8, 'Specific Causes of Incidents', 0, 1);
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->Cell(120, 8, 'Cause', 1, 0, 'C');
+            $pdf->Cell(30, 8, 'Count', 1, 1, 'C');
+            $pdf->SetFont('Arial', '', 10);
+
+            foreach ($causes as $cause) {
+                $count = $causeCounts[$cause] ?? 0;
+                $pdf->Cell(120, 8, $cause, 1);
+                $pdf->Cell(30, 8, $count, 1, 1, 'C');
+            }
+
+            $filename = 'data_breach_report_' . now()->format('Ymd_His') . '.pdf';
+            $pdf->Output('D', $filename);
+            exit;
+        }
+
+        // Map causes to cards with icons for the view
         $causeCards = collect($causes)->map(function ($specific_cause) use ($causeCounts) {
             $icons = [
                 'Theft' => 'fa-lock',
@@ -104,13 +190,38 @@ class DataBreachAllReportsController extends Controller
             ];
         })->toArray();
 
-        $recentlyReported = DataBreachNotification::where('status', 'Reported')
+        // Recently reported notifications (filtered by year/status)
+        $recentlyReported = (clone $notificationsQuery)
+            ->where('status', 'Reported')
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
 
-        return view('databreach.overview_databreach', compact('causeCards', 'recentlyReported'));
+        // Available years for dropdown
+        $years = DataBreachNotification::selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        // Available statuses for dropdown
+        $statuses = DataBreachNotification::select('status')
+            ->distinct()
+            ->pluck('status');
+
+        return view('databreach.overview_databreach', compact(
+            'totalNotifications',
+            'totalReported',
+            'totalMandatory',
+            'totalVoluntary',
+            'causeCards',
+            'recentlyReported',
+            'years',
+            'year',
+            'statuses',
+            'statusFilter'
+        ));
     }
+
 
     // Handle Create
     public function create()
@@ -280,7 +391,7 @@ class DataBreachAllReportsController extends Controller
         $dpoRoleId = Role::where('name', 'DPO')->value('id');
 
         // Get emails of all users with DPO role
-        $emailDPO = User::where('role_id', $dpoRoleId)->pluck('email');
+        $emailDPO = User::where('role', $dpoRoleId)->pluck('email');
 
         // Send email to each DPO
         foreach ($emailDPO as $email) {
@@ -325,6 +436,10 @@ class DataBreachAllReportsController extends Controller
     {
         $notification = DataBreachNotification::findOrFail($dbn_id);
 
+        $request->merge([
+            'status' => $request->has('status') ? 'Reported' : 'Not Reported'
+        ]);
+
         $data = $request->validate([
             'dbn_number'                        => 'required|string|max:100',
             'pic'                               => 'required|string|max:255',
@@ -367,6 +482,7 @@ class DataBreachAllReportsController extends Controller
             $data['notification_type_description'] = json_encode($data['notification_type_description']);
         }
     
+        $data['status'] = 'For Evaluation';
         $notification->update($data);
 
         // Send email to ALL Databreach Team
@@ -380,6 +496,16 @@ class DataBreachAllReportsController extends Controller
             ->with('success', 'Incident report evaluated successfully. Status: For reporting to the NPC by the DPO.');
     }
 
+    public function report_to_npc($dbn_id)
+    {
+        $notification = DataBreachNotification::findOrFail($dbn_id);
+
+        $notification->status = 'Reported';
+        $notification->save();
+
+        return redirect()->route('databreach.index')
+            ->with('success', 'Incident report has been reported to the NPC successfully.');
+    }
 
     // Handle Delete
     public function destroy($dbn_id)

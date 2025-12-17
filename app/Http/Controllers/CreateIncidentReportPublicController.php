@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\DatabreachForAssessment;
 use App\Models\DataBreachNotification;
-use App\Models\DataBreachTeam;
+use App\Models\DatabreachTeam;
 use App\Mail\IncidentSubmitted; 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http; 

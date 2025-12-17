@@ -263,7 +263,7 @@
                             </div>
                         @endif
                     <h2 class="text-2xl font-bold text-gray-900 mb-8 border-b pb-4">
-                        Create a New Ticket
+                        Tickets Form
                     </h2>
 
                     <form action="{{ route('tickets.store') }}" method="POST" enctype="multipart/form-data" class="space-y-10">
@@ -579,6 +579,7 @@
             </div>
         </div>
     </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 

@@ -63,7 +63,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('permission:view_dashboard');
 
     // Profile Management
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit')->middleware('permission:view_profile|edit_profile|update_password|delete_profile');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit')->middleware('permission:view_profile');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update')->middleware('permission:edit_profile|update_password');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy')->middleware('permission:delete_profile');
 
@@ -89,20 +89,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
      // Create Data Breach Notification
     Route::get('/databreach', [DataBreachAllReportsController::class, 'index'])->name('databreach.index')
-        ->middleware('permission:view_all_databreach|view_overview_databreach|create_databreach|view_databreach|assess_databreach|evaluate_databreach|delete_databreach|search_databreach');
+        ->middleware('permission:view_all_databreach|view_overview_databreach|create_databreach|view_databreach|assess_databreach|evaluate_databreach|report_databreach|delete_databreach|search_databreach');
     Route::get('/overview_databreach', [DataBreachAllReportsController::class, 'overview'])->name('databreach.overview')->middleware('permission:view_overview_databreach');
     Route::get('/create_databreach', [DataBreachAllReportsController::class, 'create'])->name('databreach.create')->middleware('permission:create_databreach');
     Route::post('/create_databreach', [DataBreachAllReportsController::class, 'store'])->name('databreach.store')->middleware('permission:create_databreach');
     Route::get('/databreach/{dbn_id}', [DataBreachAllReportsController::class, 'show'])->name('databreach.show')->middleware('permission:view_databreach');
     Route::get('/assess_databreach/{dbn_id}/assess', [DataBreachAllReportsController::class, 'assess'])->name('databreach.assess')->middleware('permission:assess_databreach');
     Route::get('/evaluate_databreach/{dbn_id}/evaluate', [DataBreachAllReportsController::class, 'evaluate'])->name('databreach.evaluate')->middleware('permission:evaluate_databreach');
-    Route::get('/get-dbrt-email/{region}', [DataBreachAllReportsController::class, 'getDbrtEmail']);
+    Route::patch('/databreach/{dbn_id}/report', [DataBreachAllReportsController::class, 'report_to_npc'])->name('databreach.report_to_npc')->middleware('permission:report_databreach');
+    Route::get('/get-dbrt-email/{region}', [DataBreachAllReportsController::class, 'assess_getDbrtEmail']);
+    Route::get('/get-dbrt-email/{region}', [DataBreachAllReportsController::class, 'evaluate_getDbrtEmail']);
     Route::put('/assess_databreach/{dbn_id}', [DataBreachAllReportsController::class, 'update_assessment'])->name('databreach.update_assessment')->middleware('permission:assess_databreach');
     Route::put('/evaluate_databreach/{dbn_id}', [DataBreachAllReportsController::class, 'update_evaluation'])->name('databreach.update_evaluation')->middleware('permission:evaluate_databreach');
     Route::delete('/databreach/{dbn_id}', [DataBreachAllReportsController::class, 'destroy'])->name('databreach.destroy')->middleware('permission:delete_databreach');
 
     // Generate Data Breach Report
-    Route::get('/databreach/{id}/generate-docx', [GenerateDocsController::class, 'generateDocx'])->name('databreach.generateDocx');
+    Route::get('/databreach/{id}/generate-pdf', [GenerateDocsController::class, 'generatePdf'])->name('databreach.generatePdf');
 
 
     // Create Data Breach Notification Per Region

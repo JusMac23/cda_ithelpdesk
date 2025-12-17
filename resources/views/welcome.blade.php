@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>CDA-ITHelpdesk</title>
+    <title>CDA-DBRS</title>
     <link rel="icon" href="{{ asset('images/CDA-logo-RA11364-PNG.png') }}" type="image/png">
 
     <!-- Fonts & Material Icons -->
@@ -57,7 +57,7 @@
             <img src="{{ asset('images/CDA-logo-RA11364-PNG.png') }}" 
                  alt="Cooperative Development Authority Seal" 
                  class="w-12 h-12 object-contain drop-shadow-sm transition-transform duration-300 hover:scale-105"/>
-            <span class="tracking-tight">CDA IT-Helpdesk System</span>
+            <span class="tracking-tight">CDA-DBRS</span>
         </h1>
 
         <!-- Navigation -->
@@ -107,19 +107,21 @@
     <!-- Content -->
     <div class="relative z-10 text-center px-6 py-16 lg:py-28 max-w-4xl animate-fade-in">
         <h1 class="text-4xl md:text-6xl font-extrabold mb-6 drop-shadow-[0_5px_10px_rgba(0,0,0,0.6)] leading-tight">
-            Your Seamless Gateway to <span class="text-blue-400">CDA IT-Helpdesk</span>
+            Your Seamless Gateway to the <span class="text-blue-400">CDA Data Breach Reporting System</span>
         </h1>
 
         <p class="text-lg md:text-xl text-gray-200 mb-12 leading-relaxed">
-            Fast, reliable, and secure assistance for all your technical and security concerns across all CDA offices nationwide.
+            Experience real-time, efficient, and nationwide monitoring of CDA’s incidents and data breach reports across all CDA offices.
         </p>
 
         <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <!--
             <a href="{{ url('create_ticket') }}"
                class="inline-flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg hover:shadow-blue-400/40 transform hover:-translate-y-1 transition-all duration-300">
                 <i class="fa-solid fa-ticket text-white text-xl"></i>
                 Submit Tickets Report
             </a>
+            -->
             <a href="{{ url('create_incident') }}"
                class="inline-flex items-center justify-center gap-3 bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg hover:shadow-red-400/40 transform hover:-translate-y-1 transition-all duration-300">
                 <i class="fa-solid fa-shield-alt text-red text-xl"></i>
@@ -139,7 +141,7 @@
         <h3 class="text-3xl lg:text-3xl font-bold text-gray-800 mb-10 text-center mb-2">How We Can Help You</h3>
         
         <div class="flex flex-wrap justify-center gap-6">
-            <!-- Box 1 -->
+            <!-- Box 1 
             <div class="flex-1 min-w-[280px] max-w-sm bg-white shadow-md rounded-xl p-6 flex flex-col items-center text-center interactive-link">
                 <div class="p-4 bg-blue-100 rounded-full mb-4">
                     <span class="material-icons-outlined text-blue-600 text-4xl">computer</span>
@@ -147,8 +149,9 @@
                 <h4 class="text-xl font-bold text-gray-900 mb-2">Technical Support</h4>
                 <p class="text-gray-600 text-sm">Assistance with hardware, software, and system issues.</p>
             </div>
+            -->
 
-            <!-- Box 2 -->
+            <!-- Box 2 
             <div class="flex-1 min-w-[280px] max-w-sm bg-white shadow-md rounded-xl p-6 flex flex-col items-center text-center interactive-link">
                 <div class="p-4 bg-green-100 rounded-full mb-4">
                     <span class="material-icons-outlined text-green-600 text-4xl">wifi</span>
@@ -156,14 +159,17 @@
                 <h4 class="text-xl font-bold text-gray-900 mb-2">Network & Connectivity</h4>
                 <p class="text-gray-600 text-sm">Resolving internet, LAN, and other network problems.</p>
             </div>
+            -->
 
             <!-- Box 3 -->
             <div class="flex-1 min-w-[280px] max-w-sm bg-white shadow-md rounded-xl p-6 flex flex-col items-center text-center interactive-link">
                 <div class="p-4 bg-purple-100 rounded-full mb-4">
                     <span class="material-icons-outlined text-purple-600 text-4xl">security</span>
                 </div>
-                <h4 class="text-xl font-bold text-gray-900 mb-2">Security & Data</h4>
-                <p class="text-gray-600 text-sm">Guidance on data security, backups, and access control.</p>
+                <h4 class="text-xl font-bold text-gray-900 mb-2">Security & Incident Management</h4>
+                <p class="text-gray-600 text-sm">
+                    Essential guidance on data protection, incident handling, system backups, and access control.
+                </p>
             </div>
 
             <!-- Box 4 -->
@@ -171,8 +177,10 @@
                 <div class="p-4 bg-yellow-100 rounded-full mb-4">
                     <span class="material-icons-outlined text-yellow-600 text-4xl">miscellaneous_services</span>
                 </div>
-                <h4 class="text-xl font-bold text-gray-900 mb-2">Other Services</h4>
-                <p class="text-gray-600 text-sm">Guidance on Website, database, Google Workspace, and etc.</p>
+                <h4 class="text-xl font-bold text-gray-900 mb-2">Other ICT & Incident Services</h4>
+                <p class="text-gray-600 text-sm">
+                    Assistance with website management, database support, Google Workspace, and other ICT services related to incident reporting and resolution.
+                </p>
             </div>
         </div>
     </div>
