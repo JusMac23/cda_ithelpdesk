@@ -136,7 +136,6 @@
     @endif
 
     <h2 class="text-2xl font-bold text-gray-900 mb-10 border-b-2 border-gray-200 pb-4 flex items-center gap-3">
-        <i class="fas fa-file-alt text-indigo-600"></i>
         Incident Report Form
     </h2>
 
@@ -189,7 +188,7 @@
                     </label>
                     <input type="datetime-local" id="date_notification" name="date_notification" required readonly
                         class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        value="{{ now()->format('Y-m-d\TH:i') }}">
+                        value="{{ \Carbon\Carbon::now('Asia/Manila')->format('Y-m-d\TH:i') }}">
                 </div>
 
             </div>

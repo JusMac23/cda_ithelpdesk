@@ -94,6 +94,7 @@ class DataBreachAllReportsController extends Controller
         $totalReported = (clone $notificationsQuery)->where('status', 'Reported')->count();
         $totalMandatory = (clone $notificationsQuery)->where('notification_type', 'Mandatory')->count();
         $totalVoluntary = (clone $notificationsQuery)->where('notification_type', 'Voluntary')->count();
+        $totalOthers = (clone $notificationsQuery)->where('notification_type', 'Voluntary')->count();
         $totalOther = $totalNotifications - ($totalMandatory + $totalVoluntary);
 
         // Causes list
@@ -104,11 +105,12 @@ class DataBreachAllReportsController extends Controller
             'Software Maintenance Error', 'Third Party / Service Provider', 'Others',
         ];
 
-        // Count notifications per specific cause
+        // Count notifications per general_incident
         $causeCounts = (clone $notificationsQuery)
-            ->select('specific_cause', DB::raw('COUNT(*) as total'))
-            ->groupBy('specific_cause')
-            ->pluck('total', 'specific_cause');
+            ->select('general_incident', DB::raw('COUNT(*) as total'))
+            ->whereIn('status', ['For Evaluation', 'For Reporting to NPC', 'Reported'])
+            ->groupBy('general_incident')
+            ->pluck('total', 'general_incident');
 
         // Handle PDF generation
         if ($action === 'generate') {
@@ -116,54 +118,126 @@ class DataBreachAllReportsController extends Controller
             $pdf->AddPage();
             $pdf->SetFont('Arial', 'B', 14);
 
+            // Get page width
+            $pageWidth = $pdf->GetPageWidth();
+            $marginInInches = 1;
+            $margin = $marginInInches * 25.4;
+
+            // Page and layout settings
+            $margin = 25.4;
+            $logoTop = 8;
+
+            // Logo sizes
+            $cdaWidth = 18;
+            $bpWidth  = 22;
+
+            // Space between logos and text
+            $sideGap = 2;
+
+            // Available content width
+            $contentWidth = $pageWidth - ($margin * 2);
+
+            // Text block width (you can tweak this)
+            $textBlockWidth = 100;
+
+            // Calculate center X of page
+            $pageCenterX = $pageWidth / 2;
+
+            // Text block X (centered)
+            $textX = $pageCenterX - ($textBlockWidth / 2);
+
+            // Logo positions
+            $leftLogoX  = $textX - $sideGap - $cdaWidth;
+            $rightLogoX = $textX + $textBlockWidth + $sideGap;
+
+            // Logos
+            $pdf->Image(public_path('images/CDA-logo-RA11364-PNG.png'), $leftLogoX, $logoTop, $cdaWidth);
+
+            $pdf->Image(public_path('images/Bagong_Pilipinas_logo.png'), $rightLogoX, $logoTop, $bpWidth);
+
+            // Header Text
+            $pdf->SetXY($textX, 10);
+            $pdf->SetFont('Arial', 'B', 12);
+            $pdf->MultiCell($textBlockWidth, 5, "COOPERATIVE DEVELOPMENT AUTHORITY", 0, 'C');
+
+            $pdf->SetX($textX);
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->MultiCell($textBlockWidth, 5, "HEAD OFFICE", 0, 'C');
+
+            $pdf->SetX($textX);
+            $pdf->SetFont('Arial', '', 8);
+            $pdf->MultiCell( $textBlockWidth, 4, "827 Aurora Blvd., Service Road, Brgy. Immaculate Conception Cubao\n1111 Quezon City, Philippines", 0, 'C');
+
+            $pdf->Ln(15); 
+
+            $margin = 25.4; // 1 inch
+            $pdf->SetLeftMargin($margin);
+            $pdf->SetRightMargin($margin);
+            $pdf->SetAutoPageBreak(true, $margin);
+
+            $pageWidth = $pdf->GetPageWidth();
+            $contentWidth = $pageWidth - ($margin * 2);
+
             // Header Section
             $displayYear = $year ?? (DataBreachNotification::latest('created_at')->first()?->created_at->format('Y') ?? 'YYYY');
 
-            $pdf->Cell(0, 8, 'Year: ' . $displayYear, 0, 1);
+            $pdf->SetFont('Arial', 'B', 14);
+            $pdf->Cell($contentWidth, 8, 'Year: ' . $displayYear, 0, 1);
+
             $pdf->SetFont('Arial', '', 12);
-            $pdf->Cell(95, 8, 'Sector Name: GOVERNMENT', 1);
-            $pdf->Cell(95, 8, 'Sub-Sector Name: Executive Department', 1, 1);
-            $pdf->Cell(95, 8, 'City / Municipality: ', 1);
-            $pdf->Cell(95, 8, 'PIC: Cooperative Development Authority', 1, 1);
+
+            // Two-column rows (50% / 50%)
+            $halfWidth = $contentWidth / 2;
+
+            $pdf->Cell($halfWidth, 8, 'Sector Name: GOVERNMENT', 1);
+            $pdf->Cell($halfWidth, 8, 'Sub-Sector Name: Executive Department', 1, 1);
+
+            $pdf->Cell($halfWidth, 8, 'City / Municipality: ', 1);
+            $pdf->Cell($halfWidth, 8, 'PIC: Cooperative Development Authority', 1, 1);
+
             $pdf->Ln(5);
 
             // Summary Section
             $pdf->SetFont('Arial', 'B', 12);
-            $pdf->Cell(0, 8, 'Summary of Security Incidents and Privacy Breaches', 0, 1);
+            $pdf->Cell($contentWidth, 8, 'Summary of Security Incidents and Privacy Breaches', 0, 1);
+
             $pdf->SetFont('Arial', '', 12);
 
-            // First row: A and B
-            $pdf->Cell(95, 8, 'A. Mandatory Breach Notification: ' . $totalMandatory, 1);
-            $pdf->Cell(95, 8, 'B. Voluntary Data Breach Notification: ' . $totalVoluntary, 1, 1);
+            $pdf->Cell($halfWidth, 8, 'A. Mandatory Breach Notification: ' . $totalMandatory, 1);
+            $pdf->Cell($halfWidth, 8, 'B. Voluntary Data Breach Notification: ' . $totalVoluntary, 1, 1);
 
-            // Second row: C and Total
-            $pdf->Cell(95, 8, 'C. Other Security Incidents: ' . $totalOther, 1);
-            $pdf->Cell(95, 8, 'Total Security Incidents: ' . $totalNotifications, 1, 1);
+            $pdf->Cell($halfWidth, 8, 'C. Other Security Incidents: ' . $totalOther, 1);
+            $pdf->Cell($halfWidth, 8, 'Total Security Incidents: ' . $totalNotifications, 1, 1);
 
             $pdf->Ln(5);
 
-
             // Specific Causes Table
             $pdf->SetFont('Arial', 'B', 12);
-            $pdf->Cell(0, 8, 'Specific Causes of Incidents', 0, 1);
+            $pdf->Cell($contentWidth, 8, 'Specific Causes of Incidents', 0, 1);
+
             $pdf->SetFont('Arial', 'B', 10);
-            $pdf->Cell(120, 8, 'Cause', 1, 0, 'C');
-            $pdf->Cell(30, 8, 'Count', 1, 1, 'C');
+
+            $causeWidth = $contentWidth * 0.8;
+            $countWidth = $contentWidth * 0.2;
+
+            $pdf->Cell($causeWidth, 8, 'Cause', 1, 0, 'C');
+            $pdf->Cell($countWidth, 8, 'Count', 1, 1, 'C');
+
             $pdf->SetFont('Arial', '', 10);
 
             foreach ($causes as $cause) {
                 $count = $causeCounts[$cause] ?? 0;
-                $pdf->Cell(120, 8, $cause, 1);
-                $pdf->Cell(30, 8, $count, 1, 1, 'C');
+                $pdf->Cell($causeWidth, 8, $cause, 1);
+                $pdf->Cell($countWidth, 8, $count, 1, 1, 'C');
             }
 
-            $filename = 'data_breach_report_' . now()->format('Ymd_His') . '.pdf';
+            $filename = 'Data_Breach_Report_' . now()->format('dmY') . '.pdf';
             $pdf->Output('D', $filename);
             exit;
         }
 
         // Map causes to cards with icons for the view
-        $causeCards = collect($causes)->map(function ($specific_cause) use ($causeCounts) {
+        $causeCards = collect($causes)->map(function ($general_incident) use ($causeCounts) {
             $icons = [
                 'Theft' => 'fa-lock',
                 'Identity Fraud' => 'fa-id-card',
@@ -184,9 +258,9 @@ class DataBreachAllReportsController extends Controller
             ];
 
             return [
-                'label' => $specific_cause,
-                'icon' => $icons[$specific_cause] ?? 'fa-circle-question',
-                'count' => $causeCounts[$specific_cause] ?? 0,
+                'label' => $general_incident,
+                'icon' => $icons[$general_incident] ?? 'fa-circle-question',
+                'count' => $causeCounts[$general_incident] ?? 0,
             ];
         })->toArray();
 
@@ -311,6 +385,11 @@ class DataBreachAllReportsController extends Controller
     // Handle Assessment
     public function assess($dbn_id)
     {
+        $dpoRoleId = Role::where('name', 'DPO')->value('id');
+        $dpoDetails = User::where('role', $dpoRoleId)->first();
+
+        $loggedInUser = DatabreachTeam::where('email', auth()->user()->email)->first();
+
         $notification = DataBreachNotification::findOrFail($dbn_id);
 
         // Decode JSON into array for Blade display
@@ -325,7 +404,7 @@ class DataBreachAllReportsController extends Controller
 
         $notification->team_email = $team ? $team->email : null;
 
-        return view('databreach.assess_databreach', compact('notification'));
+        return view('databreach.assess_databreach', compact('notification' , 'dpoDetails', 'loggedInUser'));
     }
 
     public function assess_getDbrtEmail($region)
@@ -342,6 +421,7 @@ class DataBreachAllReportsController extends Controller
     {
         $notification = DataBreachNotification::findOrFail($dbn_id);
 
+        // ---------------- VALIDATION ----------------
         $data = $request->validate([
             'dbn_number'                        => 'required|string|max:100',
             'pic'                               => 'required|string|max:255',
@@ -358,8 +438,9 @@ class DataBreachAllReportsController extends Controller
             'sector_name'                       => 'required|string|max:255',
             'subsector_name'                    => 'required|string|max:255',
             'timeliness'                        => 'required|string|max:255',
-            'general_cause'                     => 'nullable|string|max:255',
-            'specific_cause'                    => 'nullable|string|max:255',
+            'general_cause'                     => 'required|string|max:255',
+            'specific_cause'                    => 'required|string|max:255',
+            'general_incident'                  => 'required|string|max:255',
             'with_request'                      => 'required|in:Yes,No',
             'how_breach_occured'                => 'required|string',
             'chronology'                        => 'required|string',
@@ -368,7 +449,6 @@ class DataBreachAllReportsController extends Controller
             'num_records_provide_details'       => 'required|string',
             'description_nature'                => 'required|string',
             'likely_consequences'               => 'required|string',
-            'dpo'                               => 'required|string|max:255',
             'spi'                               => 'required|string|max:255',
             'other_info'                        => 'required|string',
             'measures_to_address'               => 'required|string',
@@ -380,31 +460,42 @@ class DataBreachAllReportsController extends Controller
             'data_subjects'                     => 'required|string|max:255',
         ]);
 
-        if (isset($data['notification_type_description']) && is_array($data['notification_type_description'])) {
+        if (!empty($data['notification_type_description'])) {
             $data['notification_type_description'] = json_encode($data['notification_type_description']);
         }
 
+        // Get DPO user
+        $dpoRoleId = Role::where('name', 'DPO')->value('id');
+        $dpo = User::where('role', $dpoRoleId)->first(); 
+
+        // Prepare DPO display
+        $data['dpo'] = implode(' | ', array_filter([
+            $dpo->name ?? null,
+            $dpo->email ?? null,
+            $dpo->contact_number ?? null,
+        ]));
+
         $data['status'] = 'For Evaluation';
+
         $notification->update($data);
 
-        // Get the role ID for DPO
-        $dpoRoleId = Role::where('name', 'DPO')->value('id');
+        User::where('role', $dpoRoleId)
+            ->pluck('email')
+            ->each(fn ($email) =>
+                Mail::to($email)->send(new IncidentForEvaluation($notification))
+            );
 
-        // Get emails of all users with DPO role
-        $emailDPO = User::where('role', $dpoRoleId)->pluck('email');
-
-        // Send email to each DPO
-        foreach ($emailDPO as $email) {
-            Mail::to($email)->send(new IncidentForEvaluation($data));
-        }
-
-        return redirect()->route('databreach.index')
+        return redirect()
+            ->route('databreach.index')
             ->with('success', 'Incident report assessed successfully. Status: For Evaluation by DPO.');
     }
 
     // Handle Evaluation
     public function evaluate($dbn_id)
     {
+        $dpoRoleId = Role::where('name', 'DPO')->value('id');
+        $dpoDetails = User::where('role', $dpoRoleId)->first();
+
         $notification = DataBreachNotification::findOrFail($dbn_id);
 
         // Decode JSON into array for Blade display
@@ -419,7 +510,7 @@ class DataBreachAllReportsController extends Controller
 
         $notification->team_email = $team ? $team->email : null;
 
-        return view('databreach.evaluate_databreach', compact('notification'));
+        return view('databreach.evaluate_databreach', compact('notification', 'dpoRoleId', 'dpoDetails'));
     }
 
     public function evaluate_getDbrtEmail($region)
@@ -456,8 +547,9 @@ class DataBreachAllReportsController extends Controller
             'sector_name'                       => 'required|string|max:255',
             'subsector_name'                    => 'required|string|max:255',
             'timeliness'                        => 'required|string|max:255',
-            'general_cause'                     => 'nullable|string|max:255',
-            'specific_cause'                    => 'nullable|string|max:255',
+            'general_cause'                     => 'required|string|max:255',
+            'specific_cause'                    => 'required|string|max:255',
+            'general_incident'                  => 'required|string|max:255',
             'with_request'                      => 'required|in:Yes,No',
             'how_breach_occured'                => 'required|string',
             'chronology'                        => 'required|string',
@@ -466,7 +558,6 @@ class DataBreachAllReportsController extends Controller
             'num_records_provide_details'       => 'required|string',
             'description_nature'                => 'required|string',
             'likely_consequences'               => 'required|string',
-            'dpo'                               => 'required|string|max:255',
             'spi'                               => 'required|string|max:255',
             'other_info'                        => 'required|string',
             'measures_to_address'               => 'required|string',
@@ -481,8 +572,19 @@ class DataBreachAllReportsController extends Controller
         if (isset($data['notification_type_description']) && is_array($data['notification_type_description'])) {
             $data['notification_type_description'] = json_encode($data['notification_type_description']);
         }
+
+        // Get DPO user
+        $dpoRoleId = Role::where('name', 'DPO')->value('id');
+        $dpo = User::where('role', $dpoRoleId)->first(); 
+
+        // Prepare DPO display
+        $data['dpo'] = implode(' | ', array_filter([
+            $dpo->name ?? null,
+            $dpo->email ?? null,
+            $dpo->contact_number ?? null,
+        ]));
     
-        $data['status'] = 'For Evaluation';
+        $data['status'] = 'For Reporting to NPC';
         $notification->update($data);
 
         // Send email to ALL Databreach Team

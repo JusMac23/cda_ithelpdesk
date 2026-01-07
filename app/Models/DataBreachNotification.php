@@ -34,6 +34,7 @@ class DataBreachNotification extends Model
         'timeliness',
         'general_cause',
         'specific_cause',
+        'general_incident',
         'with_request',
         'how_breach_occured',
         'chronology',

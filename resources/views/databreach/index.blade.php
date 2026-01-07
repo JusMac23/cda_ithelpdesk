@@ -57,6 +57,7 @@
                                     <option value="">All Status</option>
                                     <option value="For Assessment" {{ request('status') == 'For Assessment' ? 'selected' : '' }}>For Assessment</option>
                                     <option value="For Evaluation" {{ request('status') == 'For Evaluation' ? 'selected' : '' }}>For Evaluation</option>
+                                    <option value="For Reporting to NPC" {{ request('status') == 'For Reporting to NPC' ? 'selected' : '' }}>For Reporting to NPC</option>
                                     <option value="Reported" {{ request('status') == 'Reported' ? 'selected' : '' }}>Reported</option>
                                 </select>
                             </div>
@@ -109,9 +110,11 @@
                                                     <span class="px-6 py-2 rounded-full text-xs font-semibold
                                                         {{
                                                             $notification->status === 'For Evaluation' ? 'bg-green-100 text-blue-700' :
+                                                            ($notification->status === 'For Reporting to NPC' ? 'bg-red-50 text-red-700' :
                                                             ($notification->status === 'Reported' ? 'bg-blue-100 text-blue-700' :
-                                                            'bg-yellow-100 text-yellow-700')
+                                                            'bg-yellow-100 text-yellow-500'))
                                                         }}">
+
                                                         {{ $notification->status }}
                                                     </span>
                                                 </td>
@@ -136,7 +139,7 @@
                                                         @endcan
 
                                                         @can('evaluate_databreach')
-                                                            @if (!in_array($notification->status, ['Reported', 'For Assessment']))
+                                                            @if (!in_array($notification->status, ['Reported', 'For Assessment' , 'For Reporting to NPC']))
                                                                 <a href="{{ route('databreach.evaluate', $notification->dbn_id) }}"
                                                                     class="flex items-center px-2 py-1 text-green-600 hover:bg-green-50 hover:text-green-800 text-sm whitespace-nowrap">
                                                                     <i class="fas fa-check mr-2"></i> Evaluate
@@ -145,12 +148,12 @@
                                                         @endcan
 
                                                         @can('report_databreach')
-                                                            @if ($notification->status ==='For Evaluation')
+                                                            @if ($notification->status ==='For Reporting to NPC')
                                                         <div x-data="{ open: false }" class="whitespace-nowrap">
                                                             <button 
                                                                 @click="open = true" 
                                                                 class="flex items-center px-2 py-1 text-red-600 hover:bg-red-50 hover:text-red-800 text-sm whitespace-nowrap">
-                                                                <i class="fas fa-paper-plane mr-2"></i> Report to NPC
+                                                                <i class="fas fa-paper-plane mr-2"></i> Report
                                                             </button>
                                                             @endif
                                                             <div 
@@ -204,7 +207,7 @@
                                         @empty
                                             <tr>
                                                 <td colspan="8" class="text-center py-4 text-gray-500">
-                                                    No Notification Reports found.
+                                                    No Incident Reports found.
                                                 </td>
                                             </tr>
                                         @endforelse

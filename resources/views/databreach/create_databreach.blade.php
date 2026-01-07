@@ -55,10 +55,10 @@
 
                 <!-- Header -->
                 <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">
+                    <h2 class="text-2xl font-bold text-gray-900 border-b-2 border-gray-200 pb-4 flex-1">
                         Incident Report Form
                     </h2>
-                    <div class="flex items-center justify-center w-12 h-12 bg-gray-600 rounded-full border-2 border-white hover:bg-gray-800 transition-colors duration-300">
+                    <div class="flex items-center justify-center w-12 h-12 bg-gray-600 rounded-full border-2 border-white hover:bg-gray-800 transition-colors duration-300 ml-4">
                         <button id="close" 
                             onclick="window.location.href='{{ route('databreach.index') }}'" 
                             class="text-gray-800 text-xl focus:outline-none hover:text-white transition-colors duration-300">
@@ -139,7 +139,7 @@
                                 </label>
                                 <input type="datetime-local" id="date_notification" name="date_notification" required readonly
                                     class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    value="{{ now()->format('Y-m-d\TH:i') }}">
+                                    value="{{ \Carbon\Carbon::now('Asia/Manila')->format('Y-m-d\TH:i') }}">
                             </div>
 
                         </div>

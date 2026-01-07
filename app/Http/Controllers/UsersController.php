@@ -25,6 +25,7 @@ class UsersController extends Controller
                 $q->where('users.id', 'like', "%{$search}%")
                     ->orWhere('users.name', 'like', "%{$search}%")
                     ->orWhere('users.email', 'like', "%{$search}%")
+                    ->orWhere('users.contact_number', 'like', "%{$search}%")
                     ->orWhere('users.created_at', 'like', "%{$search}%")
                     ->orWhere('users.updated_at', 'like', "%{$search}%");
             })
@@ -52,6 +53,7 @@ class UsersController extends Controller
         $validated = $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|max:255|unique:users,email',
+            'contact_number' => 'required|string|max:15|unique:users,contact_number',
             'password' => 'required|string|min:8|confirmed',
             'role'     => 'required|exists:roles,id',
         ]);
@@ -73,6 +75,7 @@ class UsersController extends Controller
         $user = User::create([
             'name'       => $validated['name'],
             'email'      => $validated['email'],
+            'contact_number' => $validated['contact_number'],
             'password'   => bcrypt($validated['password']),
             'role'       => $role->id,
             'created_at' => Carbon::now('Asia/Manila'),
@@ -100,6 +103,12 @@ class UsersController extends Controller
                 'max:255',
                 Rule::unique('users')->ignore($id),
             ],
+            'contact_number' => [
+                'required',
+                'string',
+                'max:15',
+                Rule::unique('users')->ignore($id),
+            ],
             'role'  => 'required|exists:roles,id',
         ]);
 
@@ -122,6 +131,7 @@ class UsersController extends Controller
         $user->update([
             'name'       => $validated['name'],
             'email'      => $validated['email'],
+            'contact_number' => $validated['contact_number'],
             'role'       => $role->id, 
             'updated_at' => Carbon::now('Asia/Manila'),
         ]);

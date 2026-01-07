@@ -7,7 +7,7 @@
                 <!-- Header -->
                 <div class="flex justify-between items-center mb-8">
                     <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">
-                        Assess Incident Report
+                        Incident Report Assessment
                     </h2>
                     <div class="flex items-center justify-center w-12 h-12 bg-gray-600 rounded-full border-2 border-white transition-colors duration-300 ease-in-out hover:bg-gray-800">
                         <button id="close" 
@@ -104,13 +104,13 @@
                                 <div>
                                     <label for="representative" class="block text-sm font-semibold text-gray-700">Representative <span class="text-red-500">*</span></label>
                                     <input type="text" id="representative" name="representative"
-                                        value="{{ old('representative', $notification->representative) }}" required
+                                        value="{{ $loggedInUser->firstname . ' ' . $loggedInUser->lastname }}" readonly
                                         class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
                                 <div>
                                     <label for="representative_email_address" class="block text-sm font-semibold text-gray-700">Email Address <span class="text-red-500">*</span></label>
                                     <input type="text" id="representative_email_address" name="representative_email_address"
-                                        value="{{ old('representative_email_address', $notification->representative_email_address) }}" required
+                                        value="{{ $loggedInUser->email }}" readonly
                                         class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
                             </div>
@@ -237,6 +237,7 @@
                                             <option value="">-- Select Notification Type --</option>
                                             <option value="Mandatory" {{ old('notification_type', $notification->notification_type) == 'Mandatory' ? 'selected' : '' }}>Mandatory</option>
                                             <option value="Voluntary" {{ old('notification_type', $notification->notification_type) == 'Voluntary' ? 'selected' : '' }}>Voluntary</option>
+                                            <option value="Others" {{ old('notification_type', $notification->notification_type) == 'Others' ? 'selected' : '' }}>Others</option>
                                         </select>
                                     </div>
 
@@ -250,7 +251,7 @@
                                     </div>
                                 </div>
 
-                                <!-- General and Specific Causes -->
+                                <!-- General Cause, Specific Causes and General Incident -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label for="general_cause" class="block text-sm font-semibold text-gray-700 mb-1">
@@ -275,6 +276,14 @@
                                             class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-white appearance-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                                             <option value="{{ old('specific_cause', $notification->specific_cause) }}">{{ old('specific_cause', $notification->specific_cause) }}</option>
                                         </select>
+
+                                        <label for="general_incident" class="block text-sm font-semibold text-gray-700 mt-2 mb-1">
+                                            General Incident <span class="text-red-500">*</span>
+                                        </label>
+
+                                        <input type="text" name="general_incident" id="general_incident" required readonly
+                                            value="{{ old('general_incident', $notification->general_incident) }}"
+                                            class="w-full border border-gray-300 rounded-xl px-4 py-3 bg-gray-100 cursor-not-allowed focus:ring-0 focus:border-gray-300 transition"/>
                                     </div>
                                 </div>
 
@@ -301,6 +310,7 @@
 
                                 <!-- Textarea fields -->
                                 @php
+                                    // List of fields
                                     $fields = [
                                         'how_breach_occured' => '1.A How Breach Occurred + DPS Vulnerability',
                                         'chronology' => '1.B Chronology',
@@ -323,8 +333,20 @@
                                         <label for="{{ $name }}" class="block text-sm font-semibold text-gray-700 mb-1">
                                             {{ $label }} <span class="text-red-500">*</span>
                                         </label>
-                                        <textarea id="{{ $name }}" name="{{ $name }}" required
-                                            class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition resize-none">{{ old($name, $notification->$name) }}</textarea>
+
+                                        @if ($name === 'dpo')
+                                            {{-- Display DPO name and email as readonly --}}
+                                            <div id="{{ $name }}" name="{{ $name }}"
+                                                class="w-full border border-gray-300 rounded-xl py-3 px-4 bg-gray-100 cursor-not-allowed m-0">
+                                                <p class="m-0">{{ $dpoDetails->name }}</p>
+                                                <p class="m-0">{{ $dpoDetails->email }}</p>
+                                                <p class="m-0">{{ $dpoDetails->contact_number }}</p>
+                                            </div>
+
+                                        @else
+                                            <textarea id="{{ $name }}" name="{{ $name }}"
+                                                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition resize-none">{{ old($name, $dpoDetails->$name) }}</textarea>
+                                        @endif
                                     </div>
 
                                     {{-- Insert the extra "Provide Details" field right after 1.C --}}
@@ -334,9 +356,7 @@
                                                 Number of Records - Provide Details
                                             </label>
                                             <textarea
-                                                name="num_records_provide_details"
-                                                id="num_records_provide_details"
-                                                rows="3"
+                                                name="num_records_provide_details" id="num_records_provide_details" rows="3"
                                                 class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition resize-none"
                                                 required>{{ old('num_records_provide_details', $notification->num_records_provide_details ?? '') }}</textarea>
 
@@ -511,6 +531,75 @@
                 });
             }
 
+            // GENERAL INCIDENT AUTO-TYPE
+            const specificCauseEl = document.getElementById("specific_cause");
+            const generalIncidentEl = document.getElementById("general_incident");
+
+            const categoryOptionsIncident = {
+                "Identity Fraud": "Identity Fraud",
+                "Social Engineering": "Identity Fraud",
+                "Phishing": "Identity Fraud",
+                "Smishing": "Identity Fraud",
+                "Hacking-Phishing": "Identity Fraud",
+                "Unauthorized Disclosure": "Identity Fraud",
+
+                "Malicious Code": "Malicious Code",
+                "Malware-Trojan Horse": "Malicious Code",
+                "Malware-Ransomware": "Malicious Code",
+                "Malware-Virus": "Malicious Code",
+
+                "Hacking-Cloud": "Hacking",
+                "Hacking-Database": "Hacking",
+                "Hacking-Email Account": "Hacking",
+                "Hacking-Infrastructure": "Hacking",
+                "Hacking-Server": "Hacking",
+                "Hacking-Website": "Hacking",
+                "Hacking-SQL Injection": "Hacking",
+                "Hacking-Man-In-The-Middle": "Hacking",
+                "Hacking-Others": "Hacking",
+
+                "Theft": "Theft",
+                "Stolen Device": "Theft",
+                "Loss of Equipment": "Theft",
+                "Loss of Documents": "Theft",
+
+                "Hardware Failure": "Hardware Failure",
+                "System Error": "Software Failure",
+                "Software Failure": "Software Failure",
+
+                "User Error": "User Error",
+                "Accidental Email": "User Error",
+                "Misdelivered Documents": "User Error",
+                "Undertrained Staff": "User Error",
+                "Negligence": "User Error",
+
+                "Misconfiguration": "Software Maintenance Error",
+                "System Misconfiguration": "Software Maintenance Error",
+                "Software Maintenance Error": "Software Maintenance Error",
+
+                "Sabotage / Physical Damage": "Sabotage / Physical Damage",
+                "Insider Threat": "Insider Threat",
+                "Misuse of Resources": "Misuse of Resources",
+
+                "Communication Failure": "Communication Failure",
+                "Connection Error": "Communication Failure",
+                "Operation Error": "Operation Error",
+                "Design Error": "Design Error",
+
+                "Natural Disaster": "Natural Disaster",
+                "Third Party / Service Provider": "Third Party / Service Provider",
+
+                "Others": "Others",
+                "Others (Specify)": "Others"
+            };
+
+            specificCauseEl.addEventListener("change", function () {
+                const selectedCause = this.value;
+
+                generalIncidentEl.value =
+                    categoryOptionsIncident[selectedCause] || "Others";
+            });
+
             // EMAIL AUTO-FILL BASED ON PIC REGION
             const picSelect = document.getElementById('pic');
             const emailField = document.getElementById('email');
@@ -535,29 +624,6 @@
                     });
             });
 
-            // SAVE AS DRAFT FUNCTIONALITY
-            const saveDraftBtns = document.querySelectorAll('.save-draft-btn');
-            saveDraftBtns.forEach(btn => {
-                btn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: 'Save as Draft?',
-                        text: 'Your incident report will be saved as a draft.',
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes, save it!',
-                        cancelButtonText: 'Cancel'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            Swal.fire('Saved!', 'Your incident report has been saved as draft.', 'success');
-                            // You can optionally trigger a hidden draft form submission here
-                            // e.g. document.getElementById('draftForm').submit();
-                        }
-                    });
-                });
-            });
 
             // FORM VALIDATION ENHANCEMENT
             const form = document.querySelector('form');

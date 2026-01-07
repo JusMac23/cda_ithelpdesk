@@ -25,13 +25,13 @@
         .chart-container {
             width: 100%;             
             max-width: 520px;        
-            height: auto;             
+            height: 520px;             
         }
 
         /* Responsive adjustments for small screens */
-        @media (max-width: 640px) {
+        @media (max-width: 400px) {
             .chart-container {
-                max-width: 350px;    
+                max-width: 300px;    
             }
         }
     </style>
@@ -100,6 +100,7 @@
                         </div>
 
                         <!-- Generate Report -->
+                         @can('generate_databreach')
                         <div class="flex flex-col justify-end">
                             <div class="mb-1 h-[1.25rem]"></div>
 
@@ -109,6 +110,7 @@
                                 <i class="fas fa-download mr-2"></i> Generate Report
                             </button>
                         </div>
+                        @endcan
 
                     </form>
 
@@ -124,7 +126,7 @@
                                         {{ $totalNotifications ?? 0 }}
                                     </p>
                                 </div>
-                                <div class="bg-blue-100 p-4 rounded-full flex items-center justify-center">
+                                <div class="p-4 rounded-full flex items-center justify-center">
                                     <i class="fas fa-shield-alt text-blue-700 text-3xl"></i>
                                 </div>
                             </div>
@@ -137,7 +139,7 @@
                                         {{ $totalMandatory ?? 0 }}
                                     </p>
                                 </div>
-                                <div class="bg-red-100 p-4 rounded-full flex items-center justify-center">
+                                <div class="p-4 rounded-full flex items-center justify-center">
                                     <i class="fas fa-exclamation-triangle text-red-700 text-3xl"></i>
                                 </div>
                             </div>
@@ -150,8 +152,21 @@
                                         {{ $totalVoluntary ?? 0 }}
                                     </p>
                                 </div>
-                                <div class="bg-yellow-100 p-4 rounded-full flex items-center justify-center">
+                                <div class="p-4 rounded-full flex items-center justify-center">
                                     <i class="fas fa-clipboard-list text-yellow-700 text-3xl"></i>
+                                </div>
+                            </div>
+
+                            <!-- Others Incidents -->
+                            <div class="bg-white border-l-4 border-gray-600 rounded-xl shadow p-6 flex items-center justify-between hover:shadow-xl hover:scale-105 transition transform">
+                                <div class="ml-3">
+                                    <h4 class="text-lg font-semibold text-gray-800">Others</h4>
+                                    <p class="text-3xl font-bold text-gray-700">
+                                        {{ $totalOthers ?? 0 }}
+                                    </p>
+                                </div>
+                                <div class="p-4 rounded-full flex items-center justify-center">
+                                    <i class="fa fa-question-circle text-gray-700 text-3xl"></i>
                                 </div>
                             </div>
 
@@ -163,7 +178,7 @@
                                         {{ $totalReported ?? 0 }}
                                     </p>
                                 </div>
-                                <div class="bg-green-100 p-4 rounded-full flex items-center justify-center">
+                                <div class="p-4 flex items-center justify-center">
                                     <i class="fas fa-check-circle text-green-700 text-3xl"></i>
                                 </div>
                             </div>
@@ -172,8 +187,8 @@
 
                         <!-- RIGHT SIDE: Pie Chart -->
                         <div class="bg-white shadow-md rounded-lg p-6">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-2">
-                                Incidents per Specific Causes
+                            <h3 class="text-lg font-semibold text-gray-800">
+                                Incidents per Specific Cause
                             </h3>
 
                             <div class="chart-wrapper">
@@ -189,7 +204,6 @@
                         $labels = array_column($causeCards, 'label');
                         $values = array_column($causeCards, 'count');
                     @endphp
-
 
                     <!-- Recently Submitted Notifications -->
                     <h4 class="text-lg font-semibold mb-4 text-gray-700 flex items-center mt-6">
@@ -230,7 +244,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center py-6 text-gray-500 text-lg">No recently submitted notifications to display.</td>
+                                        <td colspan="7" class="text-center py-6 text-gray-500 text-lg">No recently reported incidents to display.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -243,39 +257,69 @@
 @endcan
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const ctx = document.getElementById('causePieChart').getContext('2d');
+document.addEventListener("DOMContentLoaded", function () {
+    const ctx = document.getElementById('causePieChart').getContext('2d');
 
-        new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: @json($labels),
-                datasets: [{
-                    data: @json($values),
-                    backgroundColor: [
-                        '#2563EB','#DC2626','#16A34A','#CA8A04','#7C3AED','#EA580C','#0891B2',
-                        '#9D174D','#4B5563','#1D4ED8','#B91C1C','#15803D',
-                        '#92400E','#6D28D9','#4338CA','#000000'
-                    ],
-                    borderColor: '#FFFFFF',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false, 
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            boxWidth: 12,
-                            font: { size: 12 }
-                        }
-                    }
-                }
+    const labels = @json($labels); // incident labels
+    const values = @json($values); // actual values
+
+    const hasData = values.length && values.some(v => v > 0);
+
+    const chartData = {
+        labels: labels,
+        datasets: [{
+            data: hasData ? values : new Array(values.length).fill(1), // use 1 for each slice if no data
+            backgroundColor: hasData ? [
+                '#2563EB','#DC2626','#16A34A','#CA8A04','#7C3AED','#EA580C','#0891B2',
+                '#9D174D','#4B5563','#1D4ED8','#B91C1C','#15803D',
+                '#92400E','#6D28D9','#4338CA','#000000'
+            ] : new Array(values.length).fill('#E5E7EB'), // gray if no data
+            borderColor: '#FFFFFF',
+            borderWidth: 2
+        }]
+    };
+
+    // Custom plugin to display "No Data" in center
+    const noDataPlugin = {
+        id: 'noDataPlugin',
+        afterDraw: (chart) => {
+            if (!hasData) {
+                const { ctx, chartArea: { width, height } } = chart;
+                ctx.save();
+                ctx.font = 'bold 16px Arial';
+                ctx.fillStyle = '#6B7280';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('No Data', width / 2, height / 2);
+                ctx.restore();
             }
-        });
+        }
+    };
+
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'right',
+                labels: {
+                    boxWidth: 12,
+                    font: { size: 12 }
+                }
+            },
+            tooltip: {
+                enabled: hasData // hide tooltip if no data
+            }
+        }
+    };
+
+    new Chart(ctx, {
+        type: 'pie',
+        data: chartData,
+        options: chartOptions,
+        plugins: [noDataPlugin]
     });
+});
 </script>
 
 </x-app-layout>

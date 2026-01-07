@@ -23,22 +23,24 @@
                             <table class="min-w-full border-collapse">
                                 <thead class="bg-gray-100 text-gray-700">
                                     <tr>
-                                        <th class="px-6 py-2 font-semibold uppercase text-left">Fullname</th>
-                                        <th class="px-6 py-2 font-semibold uppercase text-left">Email</th>
-                                        <th class="px-6 py-2 font-semibold uppercase text-left">Region</th>
-                                        <th class="px-9 py-2 font-semibold uppercase text-left">Actions</th>
+                                        <th class="px-9 py-2 font-semibold uppercase text-left">Fullname</th>
+                                        <th class="px-9 py-2 font-semibold uppercase text-left">Email</th>
+                                        <th class="px-9 py-2 font-semibold uppercase text-left">Region</th>
+                                        @canany(['edit_dbrt', 'delete_dbrt'])
+                                            <th class="px-9 py-2 text-center font-semibold uppercase text-left">Actions</th>
+                                        @endcanany
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($dbrtTeam as $team)
                                         <tr class="hover:bg-gray-50 border-b">
-                                            <td class="px-6 py-4">
+                                            <td class="px-9 py-4">
                                                 {{ $team->firstname }} {{ $team->middle_initial ?? '' }} {{ $team->lastname ?? '' }}
                                             </td>
-                                            <td class="px-6 py-4">{{ $team->email ?? 'N/A' }}</td>
-                                            <td class="px-6 py-4">{{ $team->region ?? 'N/A' }}</td>
-                                            <td class="px-6 py-4 text-left">
-                                                <div class="flex justify-left items-left gap-3 h-full">
+                                            <td class="px-9 py-4">{{ $team->email ?? 'N/A' }}</td>
+                                            <td class="px-9 py-4">{{ $team->region ?? 'N/A' }}</td>
+                                            <td class="px-9 py-4 text-left">
+                                                <div class="flex justify-center items-center gap-3 h-full">
                                                     @can('edit_dbrt')
                                                     <button class="flex items-center border border-blue-400 space-x-1 text-sm text-blue-600 hover:text-blue-800 px-2 py-1 rounded-lg edit-btn"
                                                             data-id="{{ $team->dbrt_id }}"

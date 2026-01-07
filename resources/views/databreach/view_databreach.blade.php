@@ -171,6 +171,10 @@
                                     <td>{{ $notification->specific_cause }}</td>
                                 </tr>
                                 <tr>
+                                    <th>General Incident</th>
+                                    <td>{{ $notification->general_incident }}</td>
+                                </tr>
+                                <tr>
                                     <th>With Request (YES/NO)</th>
                                     <td>{{ $notification->with_request }}</td>
                                 </tr>
