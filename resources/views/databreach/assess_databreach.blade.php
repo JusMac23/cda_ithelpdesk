@@ -102,15 +102,18 @@
                             <!-- Representative Info -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                                 <div>
-                                    <label for="representative" class="block text-sm font-semibold text-gray-700">Representative <span class="text-red-500">*</span></label>
-                                    <input type="text" id="representative" name="representative"
-                                        value="{{ $loggedInUser->firstname . ' ' . $loggedInUser->lastname }}" readonly
+                                    <label for="representative" class="block text-sm font-semibold text-gray-700">
+                                        Representative <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" id="representative" name="representative" value="{{ $representativeName }}" readonly
                                         class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
+
                                 <div>
-                                    <label for="representative_email_address" class="block text-sm font-semibold text-gray-700">Email Address <span class="text-red-500">*</span></label>
-                                    <input type="text" id="representative_email_address" name="representative_email_address"
-                                        value="{{ $loggedInUser->email }}" readonly
+                                    <label for="representative_email_address" class="block text-sm font-semibold text-gray-700">
+                                        Email Address <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" id="representative_email_address" name="representative_email_address" value="{{ $loggedInUser->email }}" readonly
                                         class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
                             </div>
@@ -357,6 +360,7 @@
                                             </label>
                                             <textarea
                                                 name="num_records_provide_details" id="num_records_provide_details" rows="3"
+                                                placeholder="1000 employees consisting of names, contact details, and social security numbers."
                                                 class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition resize-none"
                                                 required>{{ old('num_records_provide_details', $notification->num_records_provide_details ?? '') }}</textarea>
 

@@ -388,7 +388,20 @@ class DataBreachAllReportsController extends Controller
         $dpoRoleId = Role::where('name', 'DPO')->value('id');
         $dpoDetails = User::where('role', $dpoRoleId)->first();
 
-        $loggedInUser = DatabreachTeam::where('email', auth()->user()->email)->first();
+        $email = auth()->user()->email;
+
+        // Try DatabreachTeam first
+        $loggedInUser = DatabreachTeam::where('email', $email)->first();
+
+        // If not found, fall back to User
+        if (!$loggedInUser) {
+            $loggedInUser = User::where('email', $email)->first();
+        }
+
+        // Build a unified full name
+        $representativeName = $loggedInUser instanceof DatabreachTeam
+            ? $loggedInUser->firstname . ' ' . $loggedInUser->lastname
+            : $loggedInUser->name;
 
         $notification = DataBreachNotification::findOrFail($dbn_id);
 
@@ -404,7 +417,7 @@ class DataBreachAllReportsController extends Controller
 
         $notification->team_email = $team ? $team->email : null;
 
-        return view('databreach.assess_databreach', compact('notification' , 'dpoDetails', 'loggedInUser'));
+        return view('databreach.assess_databreach', compact('notification' , 'dpoDetails', 'loggedInUser' ,'representativeName'));
     }
 
     public function assess_getDbrtEmail($region)

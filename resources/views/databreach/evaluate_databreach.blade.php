@@ -334,36 +334,37 @@
                                         </label>
 
                                         @if ($name === 'dpo')
-                                            {{-- Display DPO name and email as readonly --}}
-                                            <div id="{{ $name }}" name="{{ $name }}"
-                                                class="w-full border border-gray-300 rounded-xl py-3 px-4 bg-gray-100 cursor-not-allowed m-0">
+                                            {{-- DPO info (display-only) --}}
+                                            <div
+                                                class="w-full border border-gray-300 rounded-xl py-3 px-4 bg-gray-100 cursor-not-allowed">
                                                 <p class="m-0">{{ $dpoDetails->name }}</p>
                                                 <p class="m-0">{{ $dpoDetails->email }}</p>
                                                 <p class="m-0">{{ $dpoDetails->contact_number }}</p>
                                             </div>
 
                                         @else
-                                            <textarea id="{{ $name }}" name="{{ $name }}"
-                                                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition resize-none">{{ old($name, $dpoDetails->$name) }}</textarea>
+                                            <textarea
+                                                id="{{ $name }}"
+                                                name="{{ $name }}"
+                                                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition resize-none"
+                                            >{{ old($name, $notification->$name ?? '') }}</textarea>
                                         @endif
-                                    </div>  
+                                    </div>
 
-                                    {{-- Insert the extra "Provide Details" field right after 1.C --}}
+                                    {{-- Extra field after 1.C --}}
                                     @if ($name === 'num_records')
                                         <div class="mt-4">
-                                            <label for="num_records_provide_details" class="block text-gray-700 font-semibold mb-2">
-                                                Number of Records - Provide Details
+                                            <label for="num_records_provide_details"
+                                                class="block text-gray-700 font-semibold mb-2">
+                                                Number of Records – Provide Details
                                             </label>
+
                                             <textarea
                                                 name="num_records_provide_details"
                                                 id="num_records_provide_details"
                                                 rows="3"
                                                 class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition resize-none"
-                                                required>{{ old('num_records_provide_details', $notification->num_records_provide_details ?? '') }}</textarea>
-
-                                            @error('num_records_provide_details')
-                                                <span class="text-red-500 text-sm">{{ $message }}</span>
-                                            @enderror
+                                            >{{ old('num_records_provide_details', $notification->num_records_provide_details ?? '') }}</textarea>
                                         </div>
                                     @endif
                                 @endforeach

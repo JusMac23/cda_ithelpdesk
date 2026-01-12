@@ -7,6 +7,7 @@ use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\DatabreachTeam;
 
 class UsersController extends Controller
 {
@@ -25,6 +26,7 @@ class UsersController extends Controller
                 $q->where('users.id', 'like', "%{$search}%")
                     ->orWhere('users.name', 'like', "%{$search}%")
                     ->orWhere('users.email', 'like', "%{$search}%")
+                    ->orWhere('users.region', 'like', "%{$search}%")
                     ->orWhere('users.contact_number', 'like', "%{$search}%")
                     ->orWhere('users.created_at', 'like', "%{$search}%")
                     ->orWhere('users.updated_at', 'like', "%{$search}%");
@@ -51,39 +53,64 @@ class UsersController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|max:255|unique:users,email',
+            'name'           => 'required|string|max:255',
+            'email'          => 'required|email|max:255|unique:users,email',
+            'region'         => 'required|string|max:255',
             'contact_number' => 'required|string|max:15|unique:users,contact_number',
-            'password' => 'required|string|min:8|confirmed',
-            'role'     => 'required|exists:roles,id',
+            'password'       => 'required|string|min:8|confirmed',
+            'role'           => 'required|exists:roles,id',
+            'region'         => 'nullable|string|max:255', 
         ]);
 
         $role = Role::findOrFail($validated['role']);
 
-        $superAdminExists = User::whereHas('roles', function ($q) {
-            $q->where('name', 'Super Admin');
-        })->exists();
+        // Super Admin checks
+        if ($role->name === 'Super Admin') {
+            $superAdminExists = User::whereHas('roles', function ($q) {
+                $q->where('name', 'Super Admin');
+            })->exists();
 
-        if ($role->name === 'Super Admin' && $superAdminExists) {
-            return back()->withErrors(['role' => 'A Super Admin already exists.']);
-        }
+            if ($superAdminExists) {
+                return back()->withErrors(['role' => 'A Super Admin already exists.']);
+            }
 
-        if ($role->name === 'Super Admin' && !auth()->user()->hasRole('Super Admin')) {
-            return back()->withErrors(['role' => 'You are not authorized to assign Super Admin role.']);
+            if (!auth()->user()->hasRole('Super Admin')) {
+                return back()->withErrors(['role' => 'You are not authorized to assign Super Admin role.']);
+            }
         }
 
         $user = User::create([
-            'name'       => $validated['name'],
-            'email'      => $validated['email'],
+            'name'           => $validated['name'],
+            'email'          => $validated['email'],
+            'region'         => $validated['region'],
             'contact_number' => $validated['contact_number'],
-            'password'   => bcrypt($validated['password']),
-            'role'       => $role->id,
-            'created_at' => Carbon::now('Asia/Manila'),
+            'password'       => bcrypt($validated['password']),
+            'role'           => $role->id,
+            'created_at'     => Carbon::now('Asia/Manila'),
         ]);
 
         $user->syncRoles([$role->name]);
 
-        return redirect()->route('users.index')->with('success', 'User successfully added.');
+        if ($role->name === 'DBRT') {
+
+            // Split fullname
+            $nameParts = explode(' ', trim($validated['name']));
+
+            $firstname = $nameParts[0];
+            $lastname  = count($nameParts) > 1 ? array_pop($nameParts) : null;
+            $middlename = count($nameParts) > 1 ? $nameParts[1] : null;
+
+            DatabreachTeam::create([
+                'firstname'      => $firstname,
+                'middle_initial' => $middlename ? strtoupper(substr($middlename, 0, 1)) : null,
+                'lastname'       => $lastname,
+                'email'          => $validated['email'],
+                'region'         => $validated['region'],
+            ]);
+        }
+
+        return redirect()->route('users.index')
+            ->with('success', 'User successfully added.');
     }
 
     // Update User
@@ -103,6 +130,7 @@ class UsersController extends Controller
                 'max:255',
                 Rule::unique('users')->ignore($id),
             ],
+            'region' => 'required|string|max:255',
             'contact_number' => [
                 'required',
                 'string',
@@ -131,6 +159,7 @@ class UsersController extends Controller
         $user->update([
             'name'       => $validated['name'],
             'email'      => $validated['email'],
+            'region'     => $validated['region'],
             'contact_number' => $validated['contact_number'],
             'role'       => $role->id, 
             'updated_at' => Carbon::now('Asia/Manila'),

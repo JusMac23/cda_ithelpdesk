@@ -37,6 +37,7 @@
                                     <tr>
                                         <th class="px-6 py-2 font-semibold uppercase text-left">FullName</th>
                                         <th class="px-6 py-2 font-semibold uppercase text-left">Email</th>
+                                        <th class="px-6 py-2 font-semibold uppercase text-left">Region</th>
                                         <th class="px-6 py-2 font-semibold uppercase text-left">Contact Number</th>
                                         <th class="px-6 py-2 font-semibold uppercase text-left">Role</th>
                                         <th class="px-6 py-2 font-semibold uppercase text-left">Date Added</th>
@@ -49,6 +50,7 @@
                                         <tr class="hover:bg-gray-50 border-b">
                                             <td class="px-4 py-2">{{ $user->name }}</td>
                                             <td class="px-4 py-2">{{ $user->email }}</td>
+                                            <td class="px-4 py-2">{{ $user->region }}</td>
                                             <td class="px-4 py-2">{{ $user->contact_number }}</td>
 
                                             <td class="px-4 py-2">
@@ -83,6 +85,7 @@
                                                             data-id="{{ $user->id }}"
                                                             data-name="{{ $user->name }}"
                                                             data-email="{{ $user->email }}"
+                                                            data-region="{{ $user->region }}"
                                                             data-contact-number="{{ $user->contact_number }}"
                                                             data-role-id="{{ optional($user->roles->first())->id }}">
                                                             <i class="fas fa-edit"></i>
@@ -183,6 +186,19 @@
                                 <input type="email" name="email" id="email" required
                                         placeholder="j_doe@cda.gov.ph"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label for="region" class="block text-sm font-medium text-gray-700">Region</label>
+                                <select id="region" name="region" required class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500">
+                                    <option value="">-- Select Region --</option>
+                                    <option>CDA HO</option><option>CDA CAR</option><option>CDA NIR</option>
+                                    <option>CDA NCR</option><option>CDA Region I</option><option>CDA Region II</option>
+                                    <option>CDA Region III</option><option>CDA Region IV-A</option><option>CDA Region IV-B</option>
+                                    <option>CDA Region V</option><option>CDA Region VI</option><option>CDA Region VII</option>
+                                    <option>CDA Region VIII</option><option>CDA Region IX</option><option>CDA Region X</option>
+                                    <option>CDA Region XI</option><option>CDA Region XII</option><option>CDA Region XIII</option>
+                                </select>
                             </div>
 
                             <div class="sm:col-span-2">
@@ -287,6 +303,19 @@
                                 <label for="edit_email" class="block text-sm font-medium text-gray-700">Email</label>
                                 <input type="email" name="email" id="edit_email" value="" required
                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label for="edit_region" class="block text-sm font-medium text-gray-700">Region</label>
+                                <select id="edit_region" name="region" required class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500">
+                                    <option value="">-- Select Region --</option>
+                                    <option>CDA HO</option><option>CDA CAR</option><option>CDA NIR</option>
+                                    <option>CDA NCR</option><option>CDA Region I</option><option>CDA Region II</option>
+                                    <option>CDA Region III</option><option>CDA Region IV-A</option><option>CDA Region IV-B</option>
+                                    <option>CDA Region V</option><option>CDA Region VI</option><option>CDA Region VII</option>
+                                    <option>CDA Region VIII</option><option>CDA Region IX</option><option>CDA Region X</option>
+                                    <option>CDA Region XI</option><option>CDA Region XII</option><option>CDA Region XIII</option>
+                                </select>
                             </div>
 
                             <div class="sm:col-span-2">
@@ -407,6 +436,7 @@
 
             const editForm = document.getElementById("editForm");
             const editName = document.getElementById("edit_name");
+            const editRegion = document.getElementById("edit_region");
             const editEmail = document.getElementById("edit_email");
             const editContactNumber = document.getElementById("edit_contact_number");
 
@@ -417,12 +447,14 @@
                     const id = button.dataset.id;
                     const name = button.dataset.name;
                     const email = button.dataset.email;
+                    const region = button.dataset.region;
                     const contactNumber = button.dataset.contactNumber;
                     const roleId = button.dataset.roleId; // may be undefined
 
                     // Fill modal inputs
                     editName.value = name;
                     editEmail.value = email;
+                    editRegion.value = region;
                     editContactNumber.value = contactNumber;
 
                     // Update form action dynamically
