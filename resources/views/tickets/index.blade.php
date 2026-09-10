@@ -2,7 +2,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <style>
+ <style>
         /* --- Theme Variables --- */
         :root {
             --card-bg: #ffffff;
@@ -24,11 +24,19 @@
             --primary-indigo: #4f46e5; 
             --indigo-hover: #4338ca; 
             
-            /* Status Badges - Light */
-            --badge-res-bg: #dcfce7; --badge-res-text: #166534; /* Resolved */
-            --badge-pen-bg: #fef9c3; --badge-pen-text: #854d0e; /* Pending */
-            --badge-rea-bg: #eff6ff; --badge-rea-text: #1e40af; /* Reassigned */
-            --badge-def-bg: #f1f5f9; --badge-def-text: #475569; /* Default */
+            /* Enhanced Status Badges - Light */
+            --badge-new-bg: #f3e8ff; --badge-new-text: #6b21a8;     /* New/Open */
+            --badge-res-bg: #dcfce7; --badge-res-text: #166534;     /* Resolved */
+            --badge-pen-bg: #fef9c3; --badge-pen-text: #854d0e;     /* Pending */
+            --badge-rea-bg: #e0f2fe; --badge-rea-text: #0369a1;     /* Reassigned */
+            --badge-clo-bg: #f1f5f9; --badge-clo-text: #475569;     /* Closed/Default */
+
+            /* Enhanced Priority Badges - Light */
+            --prio-low-bg: #ecfdf5; --prio-low-border: #34d399; --prio-low-text: #059669;
+            --prio-med-bg: #fffbeb; --prio-med-border: #fbbf24; --prio-med-text: #d97706;
+            --prio-high-bg: #fff1f2; --prio-high-border: #f43f5e; --prio-high-text: #e11d48;
+            --prio-crit-bg: #ef4444; --prio-crit-border: #b91c1c; --prio-crit-text: #ffffff;
+            --prio-def-bg: #f8fafc; --prio-def-border: #94a3b8; --prio-def-text: #64748b;
         }
 
         body.dark {
@@ -49,11 +57,19 @@
             --btn-gray-hover-bg: #334155;
             --btn-gray-hover-text: #f8fafc;
 
-            /* Status Badges - Dark */
-            --badge-res-bg: rgba(22, 101, 52, 0.4); --badge-res-text: #4ade80;
-            --badge-pen-bg: rgba(133, 77, 14, 0.4); --badge-pen-text: #facc15;
-            --badge-rea-bg: rgba(30, 58, 138, 0.4); --badge-rea-text: #60a5fa;
-            --badge-def-bg: rgba(71, 85, 105, 0.4); --badge-def-text: #94a3b8;
+            /* Enhanced Status Badges - Dark */
+            --badge-new-bg: rgba(147, 51, 234, 0.2); --badge-new-text: #d8b4fe;
+            --badge-res-bg: rgba(22, 101, 52, 0.4);  --badge-res-text: #4ade80;
+            --badge-pen-bg: rgba(133, 77, 14, 0.4);  --badge-pen-text: #facc15;
+            --badge-rea-bg: rgba(3, 105, 161, 0.4);  --badge-rea-text: #38bdf8;
+            --badge-clo-bg: rgba(71, 85, 105, 0.4);  --badge-clo-text: #94a3b8;
+
+            /* Enhanced Priority Badges - Dark */
+            --prio-low-bg: rgba(5, 150, 105, 0.15); --prio-low-border: #059669; --prio-low-text: #34d399;
+            --prio-med-bg: rgba(217, 119, 6, 0.15); --prio-med-border: #d97706; --prio-med-text: #fbbf24;
+            --prio-high-bg: rgba(225, 29, 72, 0.15);--prio-high-border: #e11d48; --prio-high-text: #fb7185;
+            --prio-crit-bg: #dc2626; --prio-crit-border: #991b1b; --prio-crit-text: #ffffff;
+            --prio-def-bg: rgba(71, 85, 105, 0.15); --prio-def-border: #475569; --prio-def-text: #94a3b8;
         }
 
         /* Global Box Sizing & Font Fix */
@@ -115,7 +131,6 @@
 
         .btn-submit { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 2rem; background-color: var(--primary-indigo); color: #f8fafc; font-size: 0.95rem; font-weight: 600; border: none; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2); }
         .btn-submit:hover:not(:disabled) { background-color: var(--indigo-hover); color: #f8fafc; transform: translateY(-1px); }
-        .btn-submit:hover { background-color: var(--indigo-hover); color: #f8fafc; transform: translateY(-1px); }
         .btn-submit:disabled { background-color: #cbd5e1; color: #f8fafc; cursor: not-allowed; box-shadow: none; transform: none; }
 
         /* --- Search Form Group --- */
@@ -150,12 +165,34 @@
         .thumb-img { width: 3rem; height: 3rem; object-fit: cover; border-radius: 0.5rem; border: 1px solid var(--border-light); transition: all 0.2s; cursor: pointer; }
         .thumb-img:hover { opacity: 0.8; border-color: var(--text-muted); }
 
-        /* Status Badges */
-        .badge { display: inline-block; padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-align: center; white-space: nowrap; letter-spacing: 0.025em; transition: background-color 0.3s ease, color 0.3s ease; }
-        .status-resolved { background-color: var(--badge-res-bg); color: var(--text-dark); } 
-        .status-pending { background-color: var(--badge-pen-bg); color: var(--text-dark); }
-        .status-reassigned { background-color: var(--badge-rea-bg); color: var(--text-dark); }
-        .status-default { background-color: var(--badge-def-bg); color: var(--text-dark); }
+        /* --- Enhanced Status Badges --- */
+        .badge { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; transition: background-color 0.3s ease, color 0.3s ease; }
+        /* Status Indicator Dot */
+        .badge::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: currentColor; flex-shrink: 0; }
+        .status-new { background-color: var(--badge-new-bg); color: var(--badge-new-text); }
+        .status-resolved { background-color: var(--badge-res-bg); color: var(--badge-res-text); }
+        .status-pending { background-color: var(--badge-pen-bg); color: var(--badge-pen-text); }
+        .status-reassigned { background-color: var(--badge-rea-bg); color: var(--badge-rea-text); }
+        .status-closed { background-color: var(--badge-clo-bg); color: var(--badge-clo-text); }
+        
+        /* Modify dot behavior based on specific status context */
+        .status-closed::before { display: none; } /* Closed tickets don't need active indicators */
+        .status-resolved::before { opacity: 0.5; } /* Subdued dot for resolved */
+        .status-pending::before { animation: blink 1.5s infinite; } /* Pending requires attention */
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* --- Enhanced Priority Badges --- */
+        .badge-priority { display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.2; border-style: solid; border-width: 1px; border-radius: 9999px; transition: all 0.2s ease; }
+        .priority-low { background-color: var(--prio-low-bg); border-color: var(--prio-low-border); color: var(--prio-low-text); }
+        .priority-medium { background-color: var(--prio-med-bg); border-color: var(--prio-med-border); color: var(--prio-med-text); }
+        .priority-high { background-color: var(--prio-high-bg); border-color: var(--prio-high-border); color: var(--prio-high-text); }
+        .priority-default { background-color: var(--prio-def-bg); border-color: var(--prio-def-border); color: var(--prio-def-text); }
+        
+        /* Critical Priority gets solid fill + emergency pulse animation */
+        .priority-critical { background-color: var(--prio-crit-bg); border-color: var(--prio-crit-border); color: var(--prio-crit-text); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); animation: pulse-critical 2s infinite; }
+
+        @keyframes pulse-critical { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
         /* Action Links inside Table */
         .action-group { display: flex; flex-direction: column; gap: 0.5rem; min-width: 140px; }
@@ -391,8 +428,8 @@
                                 <th>Date & Time Created</th>
                                 <th>Date & Time Resolved</th>
                                 <th class="">Photo</th>
-                                <th class="text-center">Status</th>
                                 <th class="text-center">Priority</th>
+                                <th class="text-center">Status</th>
                                 <th class="text-center">Actions</th>
                             </tr>
                         </thead>
@@ -437,21 +474,32 @@
                                     
                                     <td class="text-center">
                                         @php
+                                            $priority = trim($ticket->priority);
+                                            $badgeClass = match($priority) {
+                                                'Low'       => 'priority-low',
+                                                'Medium'    => 'priority-medium',
+                                                'High'      => 'priority-high',
+                                                'Critical'  => 'priority-critical',
+                                                default     => 'priority-default',
+                                            };
+                                        @endphp
+                                        <span class="badge-priority {{ $badgeClass }}">
+                                            {{ $ticket->priority }}
+                                        </span>
+                                    </td>
+
+                                    <td class="text-center">
+                                        @php
                                             $status = trim($ticket->status);
                                             $badgeClass = match($status) {
-                                                'Resolved' => 'status-resolved',
-                                                'Pending' => 'status-pending',
-                                                'Pending/Re-Assigned' => 'status-reassigned',
-                                                default => 'status-default',
+                                                'Resolved'              => 'status-resolved',
+                                                'Pending'               => 'status-pending',
+                                                'Pending/Re-Assigned'   => 'status-reassigned',
+                                                default                 => 'status-default',
                                             };
                                         @endphp
                                         <span class="badge {{ $badgeClass }}">
                                             {{ $ticket->status }}
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span>
-                                            {{ $ticket->priority }}
                                         </span>
                                     </td>
 
@@ -667,9 +715,21 @@
         <div id="assignTicketModal" class="modal-overlay hidden">
             <div class="modal-box" style="max-width: 42rem;">
                 <button id="closeAssignModal" class="close-btn" aria-label="Close">&times;</button>
+
+                @if ($errors->any())
+                    <div style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid #fca5a5; color: #b91c1c; padding: 1.25rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">
+                        <h4 style="margin:0 0 0.5rem 0; font-weight: 700; color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> Please fix the following errors:</h4>
+                        <ul style="margin:0; padding-left: 1.5rem; font-size: 0.9rem; font-weight: 500;">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <h2 class="modal-title">Re-Assign Ticket</h2>
                 
-                <form id="assignForm" method="POST" action="{{ route('tickets.assign') }}">
+                <form id="assignForm" method="POST" action="{{ route('tickets.re_assign') }}">
                     @csrf
                     <input type="hidden" name="ticket_id" id="assignTicketId">
 
@@ -683,16 +743,31 @@
                                 @endforeach
                             </select>
                         </div>
+
+                        {{-- Fixed input name to re_assigned_to --}}
                         <div class="form-group">
-                            <label for="assigned_to" class="form-label">Assign To <span style="color:#ef4444;">*</span></label>
-                            <select name="assigned_to" id="assigned_to" required class="form-select">
+                            <label for="re_assigned_to" class="form-label">Assign To <span style="color:#ef4444;">*</span></label>
+                            <select name="re_assigned_to" id="re_assigned_to" required class="form-select">
                                 <option selected disabled value="">Select Personnel</option>
                             </select>
                         </div>
                         
+                        {{-- Fixed input name to re_assigned_it_email --}}
                         <div class="form-group col-span-2">
-                            <label for="assigned_it_email" class="form-label">Personnel Email</label>
-                            <input type="text" name="assigned_it_email" id="assigned_it_email" readonly class="form-input">
+                            <label for="re_assigned_it_email" class="form-label">Personnel Email</label>
+                            <input type="text" name="re_assigned_it_email" id="re_assigned_it_email" readonly class="form-input">
+                        </div>
+
+                        {{-- Added Priority selection so priority can also be adjusted --}}
+                        <div class="form-group col-span-2">
+                            <label for="re_assign_priority" class="form-label">Priority Level</label>
+                            <select name="priority" id="re_assign_priority" class="form-select">
+                                <option value="">Keep Current Priority</option>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                                <option value="Critical">Critical</option>
+                            </select>
                         </div>
                         
                         <div class="form-group col-span-2">
@@ -721,6 +796,18 @@
         <div id="editticketModal" class="modal-overlay hidden">
             <div class="modal-box" style="max-width: 42rem;">
                 <button id="closeEditModal" class="close-btn" aria-label="Close">&times;</button>
+                
+                @if ($errors->any())
+                    <div style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid #fca5a5; color: #b91c1c; padding: 1.25rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">
+                        <h4 style="margin:0 0 0.5rem 0; font-weight: 700; color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> Please fix the following errors:</h4>
+                        <ul style="margin:0; padding-left: 1.5rem; font-size: 0.9rem; font-weight: 500;">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <h2 class="modal-title">Update Ticket Status</h2>
                 
                 <form id="editForm" method="POST" enctype="multipart/form-data">
@@ -1001,6 +1088,7 @@
             // Currently logged-in user details from Laravel
             const currentUserEmail = @json(auth()->user()->email ?? '');
             const currentUserName = @json(auth()->user()->name ?? '');
+            const currentUserRole = @json(auth()->user()->role ?? '');
 
             // Parse mapping payload from Controller safely
             const rawItMapping = @json($itMapping ?? $reassignable_it_mapping ?? $it_mapping ?? []);
@@ -1010,8 +1098,10 @@
                 const closeAssignBtn = document.getElementById('closeAssignModal');
                 const cancelAssignBtn = document.getElementById('cancelAssignModal');
                 const regionSelectAssign = assignModal.querySelector('#it_area_assign') || assignModal.querySelector('select[name="it_area"]');
-                const assigneeSelect = assignModal.querySelector('#assigned_to') || assignModal.querySelector('select[name="it_personnel"]');
-                const assigneeEmail = assignModal.querySelector('#assigned_it_email') || assignModal.querySelector('input[name="it_email"]');
+                
+                // Updated Selectors to match new IDs and field names
+                const assigneeSelect = assignModal.querySelector('#re_assigned_to') || assignModal.querySelector('select[name="re_assigned_to"]');
+                const assigneeEmail = assignModal.querySelector('#re_assigned_it_email') || assignModal.querySelector('input[name="re_assigned_it_email"]');
 
                 // Open Modal Handler
                 document.querySelectorAll('.open-assign-modal').forEach(btn => {
@@ -1031,14 +1121,14 @@
                             return;
                         }
 
-                        // 2. Strict Ownership Check:
-                        // Only the CURRENTLY assigned IT personnel can reassign this ticket.
-                        // If Person A reassigned it to Person B, Person A can no longer reassign it—only Person B can.
-                        if ((currentAssigneeEmail || currentAssigneeName) && (currentStatus ==='Pending/Re-Assigned')) {
+                        // 2. Access Check: Only current assignee OR Super Admin / ICTS Admin can reassign
+                        const isAdmin = ['Super Admin', 'ICTS Admin'].includes(currentUserRole);
+
+                        if ((currentAssigneeEmail || currentAssigneeName) && (currentStatus === 'Pending/Re-Assigned')) {
                             const isAssignedUser = (currentUserEmail && currentUserEmail.toLowerCase() === currentAssigneeEmail) || 
                                                 (currentUserName && currentUserName.toLowerCase() === currentAssigneeName.toLowerCase());
 
-                            if (!isAssignedUser) {
+                            if (!isAssignedUser && !isAdmin) {
                                 if (typeof Swal !== 'undefined') {
                                     Swal.fire({
                                         title: 'Access Restricted',
@@ -1047,7 +1137,7 @@
                                         confirmButtonColor: '#4f46e5'
                                     });
                                 } else {
-                                    alert(`Only ${currentAssigneeName || 'the assigned personnel'} can reassign this ticket.`);
+                                    alert(`Only ${currentAssigneeName || 'the assigned personnel'} or an Admin can reassign this ticket.`);
                                 }
                                 return;
                             }
@@ -1056,7 +1146,7 @@
                         const assignTicketIdInput = document.getElementById('assignTicketId');
                         if (assignTicketIdInput) assignTicketIdInput.value = ticketId;
 
-                        // Store current assignee on modal to filter them out of the dropdown list
+                        // Store current assignee on modal dataset to filter them out of dropdown selection
                         assignModal.dataset.currentAssigneeEmail = currentAssigneeEmail;
                         assignModal.dataset.currentAssigneeName = currentAssigneeName;
 
@@ -1110,7 +1200,7 @@
                         const currentAssigneeEmail = (assignModal.dataset.currentAssigneeEmail || '').toLowerCase();
                         const currentAssigneeName = (assignModal.dataset.currentAssigneeName || '').toLowerCase();
 
-                        // 3. Filter out the currently assigned IT personnel (cannot reassign to oneself)
+                        // Filter out the currently assigned IT personnel
                         const availablePersonnel = personnelList.filter(p => {
                             const pEmail = (p.email || p.it_email || '').trim().toLowerCase();
 
@@ -1120,7 +1210,6 @@
                             const computedName = [fName, mName, lName].filter(Boolean).join(' ').toLowerCase();
                             const pName = (p.name || computedName).trim().toLowerCase();
 
-                            // Exclude if email or name matches the current assignee
                             if (currentAssigneeEmail && pEmail && pEmail === currentAssigneeEmail) return false;
                             if (currentAssigneeName && pName && pName === currentAssigneeName) return false;
 
@@ -1136,7 +1225,7 @@
                             return;
                         }
 
-                        // Populate personnel dropdown with filtered list
+                        // Populate personnel dropdown
                         availablePersonnel.forEach(p => {
                             const opt = document.createElement('option');
 

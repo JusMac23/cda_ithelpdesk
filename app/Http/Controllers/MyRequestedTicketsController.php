@@ -154,9 +154,17 @@ class MyRequestedTicketsController extends Controller
         // 5. Create ticket record
         $ticket = Tickets::create($validatedData);
 
-        // 6. Generate unique 6-character random ticket number
+        // 6. Generate unique 4-character random ticket number
+        $orgName = 'CDA'; 
+        $currentYear = now()->year;
+
         do {
-            $ticket_number = strtoupper(Str::random(6));
+            // Generate a 4-digit random number (1000 to 9999)
+            $randomNumber = random_int(1000, 9999);
+            
+            // Format: CDA-ICT-2026-1234
+            $ticket_number = "{$orgName}-ICT-{$currentYear}-{$randomNumber}";
+            
         } while (Tickets::where('ticket_number', $ticket_number)->exists());
 
         $ticket->ticket_number = $ticket_number;

@@ -18,7 +18,7 @@ class ReassignedTicketsController extends Controller
                 'reassigned_tickets.*',
                 'tickets.status as status' 
             )
-            ->orderBy('reassigned_tickets.assigned_at', 'desc')
+            ->orderBy('reassigned_tickets.re_assigned_at', 'desc')
             ->paginate(10);
 
         return view('tickets.reassigned_tickets', compact('tickets'));

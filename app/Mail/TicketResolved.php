@@ -91,7 +91,7 @@ class TicketResolved extends Mailable
         $pdf->SetFont('Arial', 'B', 8);
         $pdf->Cell(159.2, 7, 'Action Taken/Recommendation:', 'LTR', 1);
         $pdf->SetFont('Arial', '', 8);
-        $pdf->MultiCell(159.2, 21, $t->action ?? 'Resolved', 'LRB');
+        $pdf->MultiCell(159.2, 21, $t->action_taken ?? 'Resolved', 'LRB');
         $pdf->Ln(14);
 
         $pdf->SetFont('Arial', 'B', 10);

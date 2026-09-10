@@ -51,7 +51,7 @@ class CreateTicketPublicController extends Controller
         $email = $personnel->it_email 
             ?? $personnel->email 
             ?? $personnel->email_address 
-            ?? $personnel->assigned_it_email 
+            ?? $personnel->re_assigned_it_email 
             ?? null;
 
         // 2. Check linked User relationship if available
@@ -321,18 +321,17 @@ class CreateTicketPublicController extends Controller
 
         // Fallback to request input if round-robin didn't return personnel
         if (empty($assignedEmail)) {
-            $assignedEmail = trim($request->input('it_email', $request->input('assigned_it_email', '')));
+            $assignedEmail = trim($request->input('it_email', ''));
         }
         if (empty($assignedName)) {
-            $assignedName = trim($request->input('it_personnel', $request->input('assigned_to', '')));
+            $assignedName = trim($request->input('it_personnel', ''));
         }
 
         // Force merged assignment data into request prior to validation
+        // ONLY merging it_personnel and it_email to avoid prepopulating re-assignment fields
         $request->merge([
-            'it_personnel'      => $assignedName,
-            'it_email'          => $assignedEmail,
-            'assigned_to'       => $assignedName,
-            'assigned_it_email' => $assignedEmail,
+            'it_personnel' => $assignedName,
+            'it_email'     => $assignedEmail,
         ]);
 
         // 2. Validate form inputs
@@ -353,10 +352,8 @@ class CreateTicketPublicController extends Controller
             'priority'     => 'required|string|max:255',
         ]);
 
-        $validatedData['assigned_to']       = $assignedName;
-        $validatedData['assigned_it_email'] = $assignedEmail;
-        $validatedData['date_created']       = Carbon::now('Asia/Manila')->format('Y-m-d H:i:s');
-        $validatedData['date_resolved']      = null;
+        $validatedData['date_created']  = Carbon::now('Asia/Manila')->format('Y-m-d H:i:s');
+        $validatedData['date_resolved'] = null;
 
         // 3. Handle photo upload
         if ($request->hasFile('photo')) {
@@ -364,8 +361,16 @@ class CreateTicketPublicController extends Controller
         }
 
         // 4. Generate unique ticket number
+        $orgName = 'CDA'; // Replace with your dynamic organization name if needed
+        $currentYear = now()->year;
+
         do {
-            $ticket_number = strtoupper(Str::random(6));
+            // Generate a 4-digit random number (1000 to 9999)
+            $randomNumber = random_int(1000, 9999);
+            
+            // Format: CDA-ICT-2026-1234
+            $ticket_number = "{$orgName}-ICT-{$currentYear}-{$randomNumber}";
+            
         } while (Tickets::where('ticket_number', $ticket_number)->exists());
 
         $validatedData['ticket_number'] = $ticket_number;
@@ -374,7 +379,7 @@ class CreateTicketPublicController extends Controller
         $ticket = Tickets::create($validatedData);
 
         // 6. Resolve final recipient email
-        $targetEmail = trim($ticket->it_email ?? $ticket->assigned_it_email ?? '');
+        $targetEmail = trim($ticket->it_email ?? '');
 
         if (empty($targetEmail) || !filter_var($targetEmail, FILTER_VALIDATE_EMAIL)) {
             if (!empty($ticket->it_personnel)) {

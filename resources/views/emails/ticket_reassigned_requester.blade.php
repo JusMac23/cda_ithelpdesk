@@ -20,7 +20,7 @@
 
 Hello {{ $ticket->firstname }} {{ $ticket->lastname }},
 
-<p>Your ticket has been re-assigned to <strong>{{ $ticket->assigned_to }}</strong> by <strong>{{ $assignedBy }}</strong>.</p>
+<p>Your ticket has been re-assigned to <strong>{{ $ticket->re_assigned_to }}</strong> by <strong>{{ $assignedBy }}</strong>.</p>
 
 <p>Please check the details below.</p>
 

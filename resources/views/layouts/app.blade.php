@@ -284,11 +284,15 @@
                                     <div class="dropdown-email">{{ $user->email }}</div>
                                     <div class="dropdown-region">{{ $user->region }}</div>
                                     
-                                    @forelse($user->roles as $role)
-                                        <span class="dropdown-role">{{ $role->name }}</span>
-                                    @empty
-                                        <span class="dropdown-role" style="background: var(--dropdown-hover); color: var(--text-muted);">No Role</span>
-                                    @endforelse
+                                    @if($user->roles->isNotEmpty())
+                                        <span class="dropdown-role">
+                                            {{ $user->roles->pluck('name')->implode(' | ') }}
+                                        </span>
+                                    @else
+                                        <span class="dropdown-role" style="background: var(--dropdown-hover); color: var(--text-muted);">
+                                            No Role
+                                        </span>
+                                    @endif
                                 </div>
                             </div>
 

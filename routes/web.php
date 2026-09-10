@@ -72,7 +72,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets.index')
         ->middleware('permission:view_all_tickets|create_ticket|reassign_ticket|update_status_ticket|delete_ticket|search_ticket|generate_tsar|generate_report');
     Route::post('/tickets/store', [CreateTicketPrivateController::class, 'store'])->name('tickets.store')->middleware('permission:create_ticket');
-    Route::post('/tickets/assign', [TicketsController::class, 'assign'])->name('tickets.assign')->middleware('permission:reassign_ticket');
+    Route::post('/tickets/re_assign', [TicketsController::class, 're_assign'])->name('tickets.re_assign')->middleware('permission:reassign_ticket');
     Route::put('/tickets/{ticket_id}', [TicketsController::class, 'update'])->name('tickets.update')->middleware('permission:update_status_ticket');
     Route::delete('/tickets/{ticket_id}', [TicketsController::class, 'destroy'])->name('tickets.destroy')->middleware('permission:delete_ticket');
     Route::get('/tickets/{ticket_id}/generate-tsar', [GenerateTSARController::class, 'generateTSAR'])->name('tickets.generateTSAR')->middleware('permission:generate_tsar');

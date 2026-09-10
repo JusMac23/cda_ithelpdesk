@@ -24,11 +24,19 @@
             --primary-indigo: #4f46e5; 
             --indigo-hover: #4338ca; 
             
-            /* Status Badges - Light */
-            --badge-res-bg: #dcfce7; --badge-res-text: #166534; /* Resolved */
-            --badge-pen-bg: #fef9c3; --badge-pen-text: #854d0e; /* Pending */
-            --badge-rea-bg: #eff6ff; --badge-rea-text: #1e40af; /* Reassigned */
-            --badge-def-bg: #f1f5f9; --badge-def-text: #475569; /* Default */
+           /* Enhanced Status Badges - Light */
+            --badge-new-bg: #f3e8ff; --badge-new-text: #6b21a8;     /* New/Open */
+            --badge-res-bg: #dcfce7; --badge-res-text: #166534;     /* Resolved */
+            --badge-pen-bg: #fef9c3; --badge-pen-text: #854d0e;     /* Pending */
+            --badge-rea-bg: #e0f2fe; --badge-rea-text: #0369a1;     /* Reassigned */
+            --badge-clo-bg: #f1f5f9; --badge-clo-text: #475569;     /* Closed/Default */
+
+            /* Enhanced Priority Badges - Light */
+            --prio-low-bg: #ecfdf5; --prio-low-border: #34d399; --prio-low-text: #059669;
+            --prio-med-bg: #fffbeb; --prio-med-border: #fbbf24; --prio-med-text: #d97706;
+            --prio-high-bg: #fff1f2; --prio-high-border: #f43f5e; --prio-high-text: #e11d48;
+            --prio-crit-bg: #ef4444; --prio-crit-border: #b91c1c; --prio-crit-text: #ffffff;
+            --prio-def-bg: #f8fafc; --prio-def-border: #94a3b8; --prio-def-text: #64748b;
         }
 
         body.dark {
@@ -49,11 +57,19 @@
             --btn-gray-hover-bg: #334155;
             --btn-gray-hover-text: #f8fafc;
 
-            /* Status Badges - Dark */
-            --badge-res-bg: rgba(22, 101, 52, 0.4); --badge-res-text: #4ade80;
-            --badge-pen-bg: rgba(133, 77, 14, 0.4); --badge-pen-text: #facc15;
-            --badge-rea-bg: rgba(30, 58, 138, 0.4); --badge-rea-text: #60a5fa;
-            --badge-def-bg: rgba(71, 85, 105, 0.4); --badge-def-text: #94a3b8;
+            /* Enhanced Status Badges - Dark */
+            --badge-new-bg: rgba(147, 51, 234, 0.2); --badge-new-text: #d8b4fe;
+            --badge-res-bg: rgba(22, 101, 52, 0.4);  --badge-res-text: #4ade80;
+            --badge-pen-bg: rgba(133, 77, 14, 0.4);  --badge-pen-text: #facc15;
+            --badge-rea-bg: rgba(3, 105, 161, 0.4);  --badge-rea-text: #38bdf8;
+            --badge-clo-bg: rgba(71, 85, 105, 0.4);  --badge-clo-text: #94a3b8;
+
+            /* Enhanced Priority Badges - Dark */
+            --prio-low-bg: rgba(5, 150, 105, 0.15); --prio-low-border: #059669; --prio-low-text: #34d399;
+            --prio-med-bg: rgba(217, 119, 6, 0.15); --prio-med-border: #d97706; --prio-med-text: #fbbf24;
+            --prio-high-bg: rgba(225, 29, 72, 0.15);--prio-high-border: #e11d48; --prio-high-text: #fb7185;
+            --prio-crit-bg: #dc2626; --prio-crit-border: #991b1b; --prio-crit-text: #ffffff;
+            --prio-def-bg: rgba(71, 85, 105, 0.15); --prio-def-border: #475569; --prio-def-text: #94a3b8;
         }
 
         /* Global Box Sizing & Font Fix */
@@ -137,12 +153,35 @@
         .btn-submit:hover { background-color: var(--indigo-hover); color: #f8fafc; transform: translateY(-1px); }
         .btn-submit:disabled { background-color: #cbd5e1; color: #f8fafc; cursor: not-allowed; box-shadow: none; transform: none; }
 
-        /* Status Badges */
-        .badge { display: inline-block; padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-align: center; white-space: nowrap; letter-spacing: 0.025em; transition: background-color 0.3s ease, color 0.3s ease; }
-        .status-resolved { background-color: var(--badge-res-bg); color: var(--text-dark); } 
-        .status-pending { background-color: var(--badge-pen-bg); color: var(--text-dark); }
-        .status-reassigned { background-color: var(--badge-rea-bg); color: var(--text-dark); }
-        .status-default { background-color: var(--badge-def-bg); color: var(--text-dark); }
+        /* --- Enhanced Status Badges --- */
+        .badge { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; transition: background-color 0.3s ease, color 0.3s ease; }
+        /* Status Indicator Dot */
+        .badge::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: currentColor; flex-shrink: 0; }
+        .status-new { background-color: var(--badge-new-bg); color: var(--badge-new-text); }
+        .status-resolved { background-color: var(--badge-res-bg); color: var(--badge-res-text); }
+        .status-pending { background-color: var(--badge-pen-bg); color: var(--badge-pen-text); }
+        .status-reassigned { background-color: var(--badge-rea-bg); color: var(--badge-rea-text); }
+        .status-closed { background-color: var(--badge-clo-bg); color: var(--badge-clo-text); }
+        
+        /* Modify dot behavior based on specific status context */
+        .status-closed::before { display: none; } /* Closed tickets don't need active indicators */
+        .status-resolved::before { opacity: 0.5; } /* Subdued dot for resolved */
+        .status-pending::before { animation: blink 1.5s infinite; } /* Pending requires attention */
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* --- Enhanced Priority Badges --- */
+        .badge-priority { display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.2; border-style: solid; border-width: 1px; border-radius: 9999px; transition: all 0.2s ease; }
+        .priority-low { background-color: var(--prio-low-bg); border-color: var(--prio-low-border); color: var(--prio-low-text); }
+        .priority-medium { background-color: var(--prio-med-bg); border-color: var(--prio-med-border); color: var(--prio-med-text); }
+        .priority-high { background-color: var(--prio-high-bg); border-color: var(--prio-high-border); color: var(--prio-high-text); }
+        .priority-default { background-color: var(--prio-def-bg); border-color: var(--prio-def-border); color: var(--prio-def-text); }
+        
+        /* Critical Priority gets solid fill + emergency pulse animation */
+        .priority-critical { background-color: var(--prio-crit-bg); border-color: var(--prio-crit-border); color: var(--prio-crit-text); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); animation: pulse-critical 2s infinite; }
+
+        @keyframes pulse-critical { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+
 
         /* Action Links inside Table */
         .action-group { display: flex; flex-direction: column; gap: 0.5rem; min-width: 140px; }
@@ -303,8 +342,8 @@
                                 <th>Date Created</th>
                                 <th>Date Resolved</th>
                                 <th class="text-center">Photo</th>
-                                <th class="text-center">Status</th>
                                 <th class="text-center">Priority</th>
+                                <th class="text-center">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -346,23 +385,34 @@
                                         @endif
                                     </td>
                                     
+                                   <td class="text-center">
+                                        @php
+                                            $priority = trim($ticket->priority);
+                                            $badgeClass = match($priority) {
+                                                'Low'       => 'priority-low',
+                                                'Medium'    => 'priority-medium',
+                                                'High'      => 'priority-high',
+                                                'Critical'  => 'priority-critical',
+                                                default     => 'priority-default',
+                                            };
+                                        @endphp
+                                        <span class="badge-priority {{ $badgeClass }}">
+                                            {{ $ticket->priority }}
+                                        </span>
+                                    </td>
+
                                     <td class="text-center">
                                         @php
                                             $status = trim($ticket->status);
                                             $badgeClass = match($status) {
-                                                'Resolved' => 'status-resolved',
-                                                'Pending' => 'status-pending',
-                                                'Pending/Re-Assigned' => 'status-reassigned',
-                                                default => 'status-default',
+                                                'Resolved'              => 'status-resolved',
+                                                'Pending'               => 'status-pending',
+                                                'Pending/Re-Assigned'   => 'status-reassigned',
+                                                default                 => 'status-default',
                                             };
                                         @endphp
                                         <span class="badge {{ $badgeClass }}">
                                             {{ $ticket->status }}
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span>
-                                            {{ $ticket->priority }}
                                         </span>
                                     </td>
                                 </tr>

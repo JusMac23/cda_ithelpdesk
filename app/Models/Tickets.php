@@ -31,9 +31,16 @@ class Tickets extends Model
         'it_personnel',
         'it_email',
         'date_resolved',
-        'assigned_to',
-        'assigned_it_email',
+        're_assigned_to',
+        're_assigned_it_email',
         'notes',
+        're_assigned_at',
         'priority'
+    ];
+
+    protected $casts = [
+        'date_created' => 'datetime',
+        'date_resolved' => 'datetime',
+        're_assigned_at' => 'datetime',
     ];
 }

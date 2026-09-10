@@ -20,10 +20,14 @@ class ReassignedTicket extends Model
         'request',  
         'assigned_by',
         'previous_assigned',
-        'assigned_to',
+        're_assigned_to',
         'notes',
-        'assigned_at',
+        're_assigned_at',
         'status',
         'priority',
+    ];
+
+    protected $casts = [
+        're_assigned_at' => 'datetime',
     ];
 }
