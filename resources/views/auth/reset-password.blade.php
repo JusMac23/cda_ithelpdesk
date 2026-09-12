@@ -59,7 +59,6 @@
 
             <div>
                 <button type="submit" class="btn-primary">
-                    <i class="fa-solid fa-lock" style="margin-right: 0.5rem;"></i>
                     {{ __('Reset Password') }}
                 </button>
             </div>

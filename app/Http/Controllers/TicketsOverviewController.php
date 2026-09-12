@@ -10,7 +10,7 @@ use Carbon\Carbon;
 
 use App\Models\Tickets;
 use App\Models\TechnicalServices;
-use App\Models\RegionEmail; // ADDED: Missing model import for regions
+use App\Models\RegionEmail; 
 
 use App\PDF\TSARpdf;
 use FPDF;
@@ -67,8 +67,20 @@ class TicketsOverviewController extends Controller
 
     public function index(Request $request) 
     {
-        // Fetch regions for the dropdown
-        $regions = RegionEmail::pluck('region')->filter()->toArray();
+        $user = Auth::user();
+        $isSuperAdmin = false;
+        
+        if ($user) {
+            $hasRole = function($roleName) use ($user) {
+                return method_exists($user, 'hasRole') 
+                    ? $user->hasRole($roleName) 
+                    : (isset($user->role) && strcasecmp((string)$user->role, $roleName) === 0);
+            };
+            $isSuperAdmin = $hasRole('Super Admin');
+        }
+
+        // Fetch regions for the dropdown ONLY if Super Admin
+        $regions = $isSuperAdmin ? RegionEmail::pluck('region')->filter()->toArray() : [];
 
         // Total ticket counts
         $total = $this->getTicketQuery()->count();
@@ -79,11 +91,14 @@ class TicketsOverviewController extends Controller
         $overdueCollection = $this->getOverdueTicketsCollection();
         $overdue = $overdueCollection->count();
 
-        // Group by IT Area
-        $byItArea = $this->getTicketQuery()
-            ->select('it_area', DB::raw('count(*) as total'))
-            ->groupBy('it_area')
-            ->get();
+        // Group by IT Area (Region) - RESTRICTED to Super Admin
+        $byItArea = collect();
+        if ($isSuperAdmin) {
+            $byItArea = $this->getTicketQuery()
+                ->select('it_area', DB::raw('count(*) as total'))
+                ->groupBy('it_area')
+                ->get();
+        }
 
         // Group by IT Personnel
         $byItPersonnel = $this->getTicketQuery()
@@ -136,16 +151,14 @@ class TicketsOverviewController extends Controller
         $isIctd       = $hasRole('ICTD');
         $isIcts       = $hasRole('ICTS');
 
-        // Dynamically update the scope text based on selected region
+        // Dynamically update the scope value based on selected region
         if ($isSuperAdmin) {
-            $scopeText = request()->filled('region') ? 'Scope: ' . request('region') : 'Scope: All CDA Offices';
+            $scopeValue = request()->filled('region') ? request('region') : 'All CDA Offices';
         } elseif ($isIctd || $isIcts) {
-            $scopeText = 'Scope: Assigned to ' . ($user->email ?? 'User');
+            $scopeValue = 'Assigned to ' . ($user->email ?? 'User');
         } else {
-            $scopeText = empty($user->region) ? 'Scope: All CDA Offices' : 'Scope: ' . $user->region;
+            $scopeValue = empty($user->region) ? 'All CDA Offices' : $user->region;
         }
-
-        $regions = RegionEmail::pluck('region')->filter()->toArray();
 
         // 1. Fetch Metrics & Data
         $total    = $this->getTicketQuery()->count();
@@ -156,11 +169,14 @@ class TicketsOverviewController extends Controller
         $overdueCollection = $this->getOverdueTicketsCollection();
         $overdue = $overdueCollection->count();
 
-        // Group by IT Area
-        $byItArea = $this->getTicketQuery()
-            ->select('it_area', DB::raw('count(*) as total'))
-            ->groupBy('it_area')
-            ->get();
+        // Group by IT Area (Region) - RESTRICTED to Super Admin
+        $byItArea = collect();
+        if ($isSuperAdmin) {
+            $byItArea = $this->getTicketQuery()
+                ->select('it_area', DB::raw('count(*) as total'))
+                ->groupBy('it_area')
+                ->get();
+        }
 
         // Group by IT Personnel
         $byItPersonnel = $this->getTicketQuery()
@@ -181,12 +197,14 @@ class TicketsOverviewController extends Controller
         // 2. Initialize FPDF Instance
         $pdf = new FPDF('P', 'mm', 'A4');
         $pdf->SetAutoPageBreak(true, 15);
-        $pdf->AddPage();
 
-        // Page and layout settings
+        // Page and layout settings (1 inch = 25.4 mm)
         $pageWidth = $pdf->GetPageWidth();
-        $margin = 10; 
+        $margin = 25.4; 
+        $contentWidth = $pageWidth - ($margin * 2); // 159.2 mm
+
         $pdf->SetMargins($margin, 10, $margin);
+        $pdf->AddPage();
 
         // Logo sizes & positioning
         $logoTop = 10;
@@ -221,30 +239,57 @@ class TicketsOverviewController extends Controller
         $pdf->SetX($textX);
         $pdf->SetFont('Arial', '', 7.5);
         $pdf->SetTextColor(71, 85, 105);
-        $pdf->MultiCell($textBlockWidth, 3.5, "827 Aurora Blvd., Service Road, Brgy. Immaculate Conception Cubao, Quezon City\nWebsite: www.cda.gov.ph", 0, 'C');
+        $pdf->MultiCell($textBlockWidth, 3.5, "827 Aurora Blvd., Service Road, Brgy. Immaculate Conception Cubao, Quezon City\n1111 Quezon City, Philippines", 0, 'C');
 
-        // --- HEADER BANNER ---
+        // --- HEADER BANNER (PLAIN TEXT, NO BORDER) ---
         $bannerY = 36;
-        $pdf->SetFillColor(15, 23, 42); // Navy Dark (#0f172a)
-        $pdf->Rect($margin, $bannerY, 190, 18, 'F');
 
-        $pdf->SetTextColor(255, 255, 255);
-        $pdf->SetFont('Arial', 'B', 12);
-        $pdf->SetXY($margin + 4, $bannerY + 3);
-        $pdf->Cell(110, 5, 'Tickets Overview Report Summary', 0, 0, 'L');
+        // 1. Report Title (Bold)
+        $pdf->SetTextColor(15, 23, 42);
+        $pdf->SetFont('Arial', 'B', 11);
+        $pdf->SetXY($margin, $bannerY + 1);
+        $pdf->Cell(95, 5, 'Tickets Overview Report Summary', 0, 0, 'L');
 
-        $pdf->SetFont('Arial', '', 8);
-        $pdf->SetTextColor(203, 213, 225);
-        $pdf->SetXY(120, $bannerY + 3);
-        $pdf->Cell(75, 5, 'Generated: ' . Carbon::now('Asia/Manila')->format('M d, Y h:i A'), 0, 1, 'R');
+        // 2. Generated Line (Right aligned; Bold for dynamic data)
+        $genLabel = 'Generated: ';
+        $genValue = Carbon::now('Asia/Manila')->format('M d, Y h:i A');
 
         $pdf->SetFont('Arial', '', 8);
-        $pdf->SetTextColor(148, 163, 184);
-        $pdf->SetXY($margin + 4, $bannerY + 9.5);
-        $pdf->Cell(110, 5, 'Cooperative Development Authority - ICT Helpdesk', 0, 0, 'L');
+        $wGenLabel = $pdf->GetStringWidth($genLabel);
+        $pdf->SetFont('Arial', 'B', 8);
+        $wGenValue = $pdf->GetStringWidth($genValue);
+        $totalGenW = $wGenLabel + $wGenValue;
 
-        $pdf->SetXY(120, $bannerY + 9.5);
-        $pdf->Cell(75, 5, $scopeText, 0, 1, 'R');
+        $pdf->SetXY($margin + $contentWidth - $totalGenW, $bannerY + 1);
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetTextColor(71, 85, 105);
+        $pdf->Cell($wGenLabel, 5, $genLabel, 0, 0, 'L');
+        $pdf->SetFont('Arial', 'B', 8);
+        $pdf->SetTextColor(15, 23, 42);
+        $pdf->Cell($wGenValue, 5, $genValue, 0, 1, 'L');
+
+        // 3. Subtitle (Left aligned)
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetTextColor(71, 85, 105);
+        $pdf->SetXY($margin, $bannerY + 7.5);
+        $pdf->Cell(95, 5, 'Cooperative Development Authority - ICT Helpdesk', 0, 0, 'L');
+
+        // 4. Scope Line (Right aligned; Bold for dynamic data)
+        $scopeLabel = 'Scope: ';
+
+        $pdf->SetFont('Arial', '', 8);
+        $wScopeLabel = $pdf->GetStringWidth($scopeLabel);
+        $pdf->SetFont('Arial', 'B', 8);
+        $wScopeValue = $pdf->GetStringWidth($scopeValue);
+        $totalScopeW = $wScopeLabel + $wScopeValue;
+
+        $pdf->SetXY($margin + $contentWidth - $totalScopeW, $bannerY + 7.5);
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetTextColor(71, 85, 105);
+        $pdf->Cell($wScopeLabel, 5, $scopeLabel, 0, 0, 'L');
+        $pdf->SetFont('Arial', 'B', 8);
+        $pdf->SetTextColor(15, 23, 42);
+        $pdf->Cell($wScopeValue, 5, $scopeValue, 0, 1, 'L');
 
         // --- STAT CARDS ROW ---
         $cards = [
@@ -254,10 +299,10 @@ class TicketsOverviewController extends Controller
             ['lbl' => 'OVERDUE TICKETS', 'val' => $overdue, 'r' => 220, 'g' => 38, 'b' => 38],
         ];
 
-        $cardsY = $bannerY + 22;
+        $cardsY = $bannerY + 17;
         $startX = $margin;
-        $cardWidth = 44.5;
-        $cardGap = 4;
+        $cardGap = 3;
+        $cardWidth = ($contentWidth - ($cardGap * 3)) / 4;
 
         foreach ($cards as $i => $card) {
             $x = $startX + ($i * ($cardWidth + $cardGap));
@@ -273,152 +318,166 @@ class TicketsOverviewController extends Controller
             $pdf->Rect($x, $cardsY, $cardWidth, 2, 'F');
 
             // Label
-            $pdf->SetXY($x + 3, $cardsY + 3.5);
-            $pdf->SetFont('Arial', 'B', 6.5);
+            $pdf->SetXY($x + 2, $cardsY + 3.5);
+            $pdf->SetFont('Arial', 'B', 6);
             $pdf->SetTextColor(100, 116, 139);
-            $pdf->Cell($cardWidth - 6, 3, $card['lbl'], 0, 1, 'L');
+            $pdf->Cell($cardWidth - 4, 3, $card['lbl'], 0, 1, 'L');
 
             // Value
-            $pdf->SetXY($x + 3, $cardsY + 7.5);
-            $pdf->SetFont('Arial', 'B', 13);
+            $pdf->SetXY($x + 2, $cardsY + 7.5);
+            $pdf->SetFont('Arial', 'B', 12);
             $pdf->SetTextColor(15, 23, 42);
-            $pdf->Cell($cardWidth - 6, 7, (string)$card['val'], 0, 1, 'L');
+            $pdf->Cell($cardWidth - 4, 7, (string)$card['val'], 0, 1, 'L');
         }
 
-        // --- SECTION 1: REGION & TECHNICAL PERSONNEL (SIDE-BY-SIDE) ---
-        $startY1 = $cardsY + 23;
+        $nextSectionY = $cardsY + 23;
+        $col1Width = $contentWidth - 25;
+        $col2Width = 25;
 
-        // Header Titles
+        // --- SECTION 1: TICKETS BY REGION (IT AREA) - Restricted to Super Admin ---
+        if ($isSuperAdmin) {
+            $pdf->SetY($nextSectionY);
+            $pdf->SetFont('Arial', 'B', 9);
+            $pdf->SetFillColor(241, 245, 249);
+            $pdf->SetDrawColor(226, 232, 240);
+            $pdf->SetTextColor(55, 48, 163);
+            $pdf->Cell($contentWidth, 6.5, '  Tickets by Region', 1, 1, 'L', true);
+
+            // Column Titles
+            $pdf->SetFont('Arial', 'B', 7.5);
+            $pdf->SetTextColor(71, 85, 105);
+            $pdf->SetFillColor(248, 250, 252);
+            $pdf->Cell($col1Width, 5.5, ' IT Area', 1, 0, 'L', true);
+            $pdf->Cell($col2Width, 5.5, 'Total ', 1, 1, 'R', true);
+
+            $pdf->SetFont('Arial', '', 8);
+            $pdf->SetTextColor(51, 65, 85);
+
+            foreach ($byItArea as $area) {
+                if ($pdf->GetY() + 5.5 > $pdf->GetPageHeight() - 15) {
+                    $pdf->AddPage();
+                }
+                $pdf->Cell($col1Width, 5.5, ' ' . substr($area->it_area, 0, 80), 1, 0, 'L');
+                $pdf->Cell($col2Width, 5.5, $area->total . ' ', 1, 1, 'R');
+            }
+            
+            $pdf->Ln(6);
+        } else {
+            $pdf->SetY($nextSectionY);
+        }
+
+        // --- SECTION 2: TICKETS BY TECHNICAL PERSONNEL ---
         $pdf->SetFont('Arial', 'B', 9);
         $pdf->SetFillColor(241, 245, 249);
-        $pdf->SetDrawColor(226, 232, 240);
-
-        // Left Table Header Title
-        $pdf->SetTextColor(55, 48, 163);
-        $pdf->SetXY($margin, $startY1);
-        $pdf->Cell(92, 6.5, '  Tickets by Region (IT Area)', 1, 0, 'L', true);
-
-        // Right Table Header Title
         $pdf->SetTextColor(6, 95, 70);
-        $pdf->SetXY(108, $startY1);
-        $pdf->Cell(92, 6.5, '  Tickets by Technical Personnel', 1, 1, 'L', true);
+        $pdf->Cell($contentWidth, 6.5, '  Tickets by Technical Personnel', 1, 1, 'L', true);
 
         // Column Titles
         $pdf->SetFont('Arial', 'B', 7.5);
         $pdf->SetTextColor(71, 85, 105);
         $pdf->SetFillColor(248, 250, 252);
+        $pdf->Cell($col1Width, 5.5, ' Technical Personnel', 1, 0, 'L', true);
+        $pdf->Cell($col2Width, 5.5, 'Total ', 1, 1, 'R', true);
 
-        $pdf->SetXY($margin, $startY1 + 6.5);
-        $pdf->Cell(67, 5.5, ' IT Area', 1, 0, 'L', true);
-        $pdf->Cell(25, 5.5, 'Total ', 1, 0, 'R', true);
-
-        $pdf->SetXY(108, $startY1 + 6.5);
-        $pdf->Cell(67, 5.5, ' Technical Personnel', 1, 0, 'L', true);
-        $pdf->Cell(25, 5.5, 'Total ', 1, 1, 'R', true);
-
-        // Data Rows Loop
         $pdf->SetFont('Arial', '', 8);
         $pdf->SetTextColor(51, 65, 85);
 
-        $maxRows1 = max(count($byItArea), count($byItPersonnel));
-        $currY1 = $startY1 + 12;
-
-        for ($i = 0; $i < $maxRows1; $i++) {
-            $pdf->SetY($currY1);
-
-            // Left Side: Region
-            $pdf->SetX($margin);
-            if (isset($byItArea[$i])) {
-                $pdf->Cell(67, 5.5, ' ' . substr($byItArea[$i]->it_area, 0, 36), 1, 0, 'L');
-                $pdf->Cell(25, 5.5, $byItArea[$i]->total . ' ', 1, 0, 'R');
-            } else {
-                $pdf->Cell(67, 5.5, '', 1, 0, 'L');
-                $pdf->Cell(25, 5.5, '', 1, 0, 'R');
+        foreach ($byItPersonnel as $personnel) {
+            if ($pdf->GetY() + 5.5 > $pdf->GetPageHeight() - 15) {
+                $pdf->AddPage();
             }
-
-            // Right Side: Personnel
-            $pdf->SetX(108);
-            if (isset($byItPersonnel[$i])) {
-                $personnelName = $byItPersonnel[$i]->it_personnel ?? 'Unassigned';
-                $pdf->Cell(67, 5.5, ' ' . substr($personnelName, 0, 36), 1, 0, 'L');
-                $pdf->Cell(25, 5.5, $byItPersonnel[$i]->total . ' ', 1, 1, 'R');
-            } else {
-                $pdf->Cell(67, 5.5, '', 1, 0, 'L');
-                $pdf->Cell(25, 5.5, '', 1, 1, 'R');
-            }
-
-            $currY1 += 5.5;
+            $personnelName = $personnel->it_personnel ?? 'Unassigned';
+            $pdf->Cell($col1Width, 5.5, ' ' . substr($personnelName, 0, 80), 1, 0, 'L');
+            $pdf->Cell($col2Width, 5.5, $personnel->total . ' ', 1, 1, 'R');
         }
 
-        // --- SECTION 2: SERVICES & OVERDUE TICKETS (SIDE-BY-SIDE) ---
-        $startY2 = $currY1 + 6;
-
-        // Header Titles
+        // --- SECTION 3: TICKETS BY TECHNICAL SERVICE ---
+        $pdf->Ln(6);
         $pdf->SetFont('Arial', 'B', 9);
         $pdf->SetFillColor(241, 245, 249);
-
-        // Left Table Header Title
         $pdf->SetTextColor(146, 64, 14);
-        $pdf->SetXY($margin, $startY2);
-        $pdf->Cell(92, 6.5, '  Tickets by Technical Service', 1, 0, 'L', true);
-
-        // Right Table Header Title
-        $pdf->SetTextColor(153, 27, 27);
-        $pdf->SetXY(108, $startY2);
-        $pdf->Cell(92, 6.5, '  Overdue Tickets Summary', 1, 1, 'L', true);
+        $pdf->Cell($contentWidth, 6.5, '  Tickets by Technical Service', 1, 1, 'L', true);
 
         // Column Titles
         $pdf->SetFont('Arial', 'B', 7.5);
         $pdf->SetTextColor(71, 85, 105);
+        $pdf->SetFillColor(248, 250, 252);
+        $pdf->Cell($col1Width, 5.5, ' Service Category', 1, 0, 'L', true);
+        $pdf->Cell($col2Width, 5.5, 'Total ', 1, 1, 'R', true);
 
-        $pdf->SetXY($margin, $startY2 + 6.5);
-        $pdf->Cell(67, 5.5, ' Service Category', 1, 0, 'L', true);
-        $pdf->Cell(25, 5.5, 'Total ', 1, 0, 'R', true);
-
-        $pdf->SetXY(108, $startY2 + 6.5);
-        $pdf->Cell(60, 5.5, ' Request Details', 1, 0, 'L', true);
-        $pdf->Cell(32, 5.5, 'Assigned To ', 1, 1, 'L', true);
-
-        // Data Rows Loop
         $pdf->SetFont('Arial', '', 8);
         $pdf->SetTextColor(51, 65, 85);
 
-        $maxRows2 = max(count($byService), count($overdueTickets));
-        $currY2 = $startY2 + 12;
-
-        for ($i = 0; $i < $maxRows2; $i++) {
-            $pdf->SetY($currY2);
-
-            // Left Side: Services
-            $pdf->SetX($margin);
-            if (isset($byService[$i])) {
-                $pdf->Cell(67, 5.5, ' ' . substr($byService[$i]->service, 0, 36), 1, 0, 'L');
-                $pdf->Cell(25, 5.5, $byService[$i]->total . ' ', 1, 0, 'R');
-            } else {
-                $pdf->Cell(67, 5.5, '', 1, 0, 'L');
-                $pdf->Cell(25, 5.5, '', 1, 0, 'R');
+        foreach ($byService as $svc) {
+            $serviceText = $svc->service;
+            
+            $approxLines = ceil(strlen($serviceText) / 75);
+            $estHeight = max($approxLines, 1) * 5.5;
+            if ($pdf->GetY() + $estHeight > $pdf->GetPageHeight() - 15) {
+                $pdf->AddPage();
             }
 
-            // Right Side: Overdue Tickets
-            $pdf->SetX(108);
-            if (isset($overdueTickets[$i])) {
-                $reqDetail = $overdueTickets[$i]->request ?? 'Ticket #' . ($overdueTickets[$i]->ticket_id ?? $overdueTickets[$i]->ticket_number);
-                $pdf->Cell(60, 5.5, ' ' . substr($reqDetail, 0, 30), 1, 0, 'L');
-                $personnel = $overdueTickets[$i]->it_personnel ?? 'Unassigned';
-                $pdf->Cell(32, 5.5, ' ' . substr($personnel, 0, 17), 1, 1, 'L');
-            } else {
-                $pdf->Cell(60, 5.5, '', 1, 0, 'L');
-                $pdf->Cell(32, 5.5, '', 1, 1, 'L');
+            $x = $pdf->GetX();
+            $y = $pdf->GetY();
+            
+            $pdf->MultiCell($col1Width, 5.5, ' ' . $serviceText, 1, 'L');
+            $newY = $pdf->GetY();
+            $actualHeight = $newY - $y;
+            
+            $pdf->SetXY($x + $col1Width, $y);
+            $pdf->Cell($col2Width, $actualHeight, $svc->total . ' ', 1, 1, 'R');
+            
+            $pdf->SetY($newY);
+        }
+
+        // --- SECTION 4: OVERDUE TICKETS SUMMARY ---
+        $pdf->Ln(6);
+        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->SetFillColor(241, 245, 249);
+        $pdf->SetTextColor(153, 27, 27);
+        $pdf->Cell($contentWidth, 6.5, '  Overdue Tickets Summary', 1, 1, 'L', true);
+
+        $colOverdue1 = $contentWidth - 50;
+        $colOverdue2 = 50;
+
+        // Column Titles
+        $pdf->SetFont('Arial', 'B', 7.5);
+        $pdf->SetTextColor(71, 85, 105);
+        $pdf->SetFillColor(248, 250, 252);
+        $pdf->Cell($colOverdue1, 5.5, ' Request Details', 1, 0, 'L', true);
+        $pdf->Cell($colOverdue2, 5.5, ' Assigned To', 1, 1, 'L', true);
+
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetTextColor(51, 65, 85);
+
+        foreach ($overdueTickets as $ticket) {
+            $reqDetail = $ticket->request ?? 'Ticket #' . ($ticket->ticket_id ?? $ticket->ticket_number);
+            $personnel = $ticket->it_personnel ?? 'Unassigned';
+
+            $approxLines = ceil(strlen($reqDetail) / 60);
+            $estHeight = max($approxLines, 1) * 5.5;
+            if ($pdf->GetY() + $estHeight > $pdf->GetPageHeight() - 15) {
+                $pdf->AddPage();
             }
 
-            $currY2 += 5.5;
+            $x = $pdf->GetX();
+            $y = $pdf->GetY();
+            
+            $pdf->MultiCell($colOverdue1, 5.5, ' ' . $reqDetail, 1, 'L');
+            $newY = $pdf->GetY();
+            $actualHeight = $newY - $y;
+            
+            $pdf->SetXY($x + $colOverdue1, $y);
+            $pdf->Cell($colOverdue2, $actualHeight, ' ' . substr($personnel, 0, 30), 1, 1, 'L');
+            
+            $pdf->SetY($newY);
         }
 
         // --- FOOTER NOTE ---
-        $pdf->SetY(-15);
+        $pdf->Ln(5);
         $pdf->SetFont('Arial', 'I', 7.5);
         $pdf->SetTextColor(148, 163, 184);
-        $pdf->Cell(190, 4, 'This document is an automatically generated report from the CDA-ICT Helpdesk System.', 0, 1, 'C');
+        $pdf->Cell($contentWidth, 4, 'This document is an automatically generated report from the CDA-ICT Helpdesk System.', 0, 1, 'C');
 
         // Output to Browser Download
         $fileName = 'CDA_ICT_Tickets_Overview_Report_' . Carbon::now()->format('Y_m_d_His') . '.pdf';

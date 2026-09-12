@@ -90,16 +90,12 @@
         @csrf
         @method('patch')
 
-        @php
-            $isDpo = auth()->user()->hasRole('DPO'); 
-        @endphp
-
         <div class="form-group">
             <x-input-label for="name" :value="__('Name')" class="form-label" />
             <x-text-input id="name" name="name" type="text" class="form-input" 
                 :value="old('name', $user->name)" 
-                autocus autocomplete="name" 
-                :readonly="$isDpo" /> {{-- Conditionally apply readonly --}}
+                autofocus autocomplete="name" 
+                :readonly="!auth()->user()->hasRole('Super Admin')" />
             <x-input-error class="text-error" :messages="$errors->get('name')" />
         </div>
 
@@ -108,7 +104,7 @@
             <x-text-input id="email" name="email" type="email" class="form-input" 
                 :value="old('email', $user->email)" 
                 required autocomplete="username" 
-                :readonly="$isDpo" /> 
+                :readonly="!auth()->user()->hasRole('Super Admin')" /> 
             <x-input-error class="text-error" :messages="$errors->get('email')" />
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
@@ -116,8 +112,8 @@
                     <p class="text-sm mt-2" style="color: var(--text-muted); font-weight: 500; transition: color 0.3s ease;">
                         {{ __('Your email address is unverified.') }}
 
-                        {{-- Hide verification resend for DPOs --}}
-                        @if(!$isDpo)
+                        {{-- Only show resend link if user is Super Admin --}}
+                        @if(auth()->user()->hasRole('Super Admin'))
                         <button form="send-verification" class="link-text">
                             {{ __('Click here to re-send the verification email.') }}
                         </button>
@@ -132,8 +128,7 @@
                 </div>
             @endif
         </div>
-
-        @if(!$isDpo)
+        
         <div class="form-actions">
             @can('edit_profile')
             <button type="submit" class="btn-primary">
@@ -151,6 +146,5 @@
                 ><i class="fas fa-check" style="margin-right: 0.25rem; color: #10b981;"></i> {{ __('Saved successfully.') }}</p>
             @endif
         </div>
-        @endif
     </form>
 </section>

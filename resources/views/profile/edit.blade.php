@@ -71,13 +71,13 @@
                         @include('profile.partials.update-password-form')
                     </div>
                 </div>
-
+                @can('delete_profile')
                 <div class="profile-card profile-card-danger">
                     <div class="profile-card-content">
                         @include('profile.partials.delete-user-form')
                     </div>
                 </div>
-                
+                @endcan
             </div>
         </div>
     </div>

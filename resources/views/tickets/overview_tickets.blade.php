@@ -330,7 +330,7 @@
                                         @endforeach
                                     @empty
                                         <tr>
-                                            <td colspan="2" style="text-align: center; color: var(--text-muted); padding: 2rem;">No overdue tickets.</td>
+                                            <td colspan="2" style="text-align: center; color: var(--text-muted); padding: 2rem;">No data available.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>

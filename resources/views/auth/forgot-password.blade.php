@@ -48,7 +48,6 @@
 
             <div>
                 <button type="submit" class="btn-primary">
-                    <i class="fa-solid fa-paper-plane" style="margin-right: 0.5rem;"></i>
                     {{ __('Email Password Reset Link') }}
                 </button>
             </div>
