@@ -14,6 +14,8 @@ use App\Mail\TicketReassigned;
 use App\Mail\TicketResolved;
 use App\Mail\TicketUpdated;
 use App\Mail\NewTicketSubmitted;
+use App\Mail\CLientTicketNotification; // Added Client Mailable
+
 use App\Models\Divisions;
 use App\Models\ITPersonnel;
 use App\Models\ReassignedTicket;
@@ -126,20 +128,21 @@ class MyRequestedTicketsController extends Controller
 
         // 2. Validate input fields
         $validatedData = $request->validate([
-            'firstname'    => 'required|string|max:255',
-            'lastname'     => 'required|string|max:255',
-            'email'        => 'required|email|max:255',
-            'date_created' => 'required|date',
-            'division'     => 'required|string|max:255',
-            'device'       => 'required|string|max:255',
-            'service'      => 'required|string|max:255',
-            'request'      => 'required|string',
-            'it_area'      => 'required|string|max:255',
-            'it_personnel' => 'required|string',
-            'it_email'     => 'required|string|email',
-            'status'       => 'required|string|max:255',
-            'photo'        => 'nullable|image|max:10240',
-            'priority'     => 'required|string|max:255',
+            'firstname'         => 'required|string|max:255',
+            'lastname'          => 'required|string|max:255',
+            'middle_initial'    => 'nullable|string|max:10',
+            'email'             => 'required|email|max:255',
+            'date_created'      => 'required|date',
+            'division'          => 'required|string|max:255',
+            'device'            => 'required|string|max:255',
+            'service'           => 'required|string|max:255',
+            'request'           => 'required|string',
+            'it_area'           => 'required|string|max:255',
+            'it_personnel'      => 'required|string',
+            'it_email'          => 'required|string|email',
+            'status'            => 'required|string|max:255',
+            'photo'             => 'nullable|image|max:10240',
+            'priority'          => 'required|string|max:255',
         ]);
 
         // 3. Format timestamps
@@ -170,31 +173,48 @@ class MyRequestedTicketsController extends Controller
         $ticket->ticket_number = $ticket_number;
         $ticket->save();
 
-        // 7. Dispatch Email notification and In-App Alert
+        // 7. Dispatch Email notification and In-App Alert to IT Personnel
         if ($ticket->it_email && filter_var($ticket->it_email, FILTER_VALIDATE_EMAIL)) {
             try {
                 Mail::to($ticket->it_email)->send(new NewTicketSubmitted($ticket));
             } catch (\Exception $e) {
-                Log::error('Failed sending private ticket notification: ' . $e->getMessage());
+                Log::error('Failed sending private ticket notification to IT: ' . $e->getMessage());
             }
 
             $this->createNotification(
                 $ticket,
                 $ticket->it_email,
-                'ticket_created',
+                'ticket_assigned',
                 "New ticket #{$ticket->ticket_number} assigned to you"
             );
         }
 
-        // 8. Handle JSON/AJAX or standard redirects
+        // 8. Dispatch Email notification and In-App Alert to the Client
+        if ($ticket->email && filter_var($ticket->email, FILTER_VALIDATE_EMAIL)) {
+            try {
+                Mail::to($ticket->email)->send(new CLientTicketNotification($ticket));
+            } catch (\Exception $e) {
+                Log::error('Failed sending private ticket notification to client: ' . $e->getMessage());
+            }
+
+            $this->createNotification(
+                $ticket,
+                $ticket->email,
+                'ticket_created',
+                "Your ticket #{$ticket->ticket_number} has been created successfully."
+            );
+        }
+
+        // 9. Handle JSON/AJAX or standard redirects
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'status'  => 'success',
-                'message' => 'Ticket created successfully.'
+                'message' => "Ticket #{$ticket->ticket_number} created successfully. Confirmation emails sent."
             ]);
         }
 
-        return redirect()->back()->with('success', 'Ticket submitted successfully. Email notification sent to assigned IT personnel.');
+        // Fix: Use double quotes for string interpolation
+        return redirect()->back()->with('success', "Ticket #{$ticket->ticket_number} submitted successfully. Confirmation emails sent to you and assigned IT personnel.");
     }
 
     /**

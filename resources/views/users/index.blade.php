@@ -212,6 +212,14 @@
         .error-title { margin: 0 0 0.5rem 0; font-weight: 700; font-size: 0.95rem; color: var(--error-title); transition: color 0.3s ease; }
         .error-list { margin: 0; padding-left: 1.5rem; font-size: 0.9rem; font-weight: 500; }
 
+        /* Full-Screen Loading Overlay */
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: #ffffff; }
+        .loading-overlay.active { display: flex; }
+        .spinner { width: 44px; height: 44px; border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: #ffffff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* --------------------------------------------------- */
         /* Responsive Overrides                                */
         /* --------------------------------------------------- */
@@ -251,6 +259,12 @@
             .pagination-wrapper nav > div.hidden.sm\:flex-1 { display: flex !important; width: 100%; justify-content: space-between; align-items: center; }
         }
     </style>
+
+    <!-- Full-Screen Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p style="font-size: 1rem; font-weight: 600; letter-spacing: 0.025em;">Processing User, please wait...</p>
+    </div>
 
     <div id="main-content">
         <div class="panel">
@@ -535,223 +549,259 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
 
-        // Helper to get CSS variable colors for SweetAlert Dark Mode
-        const getComputedColor = (cssVar) => getComputedStyle(document.body).getPropertyValue(cssVar).trim();
-
-        @if(session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: '{!! addslashes(session("success")) !!}',
-                timer: 2500,
-                showConfirmButton: false,
-                background: getComputedColor('--card-bg'),
-                color: getComputedColor('--text-dark')
-            });
-        @endif
-
-        @if(session('error'))
-            Swal.fire({
-                icon: 'error',
-                title: 'Notice!',
-                text: '{!! addslashes(session("error")) !!}',
-                timer: 3000,
-                showConfirmButton: false,
-                background: getComputedColor('--card-bg'),
-                color: getComputedColor('--text-dark')
-            });
-        @endif
-
-        @if ($errors->any())
-            Swal.fire({
-                icon: 'error',
-                title: 'Validation Error',
-                html: `{!! implode('<br>', $errors->all()) !!}`,
-                showConfirmButton: true,
-                confirmButtonColor: '#4f46e5',
-                background: getComputedColor('--card-bg'),
-                color: getComputedColor('--text-dark')
-            });
-        @endif
-
-        // Add Modal Toggles
-        const addModal = document.getElementById("userModal");
-        const openAddBtn = document.getElementById("openModal");
-        const closeAddBtn = document.getElementById("closeModal");
-        const cancelAddBtn = document.getElementById("cancelAddModal");
-
-        if (openAddBtn && addModal) {
-            openAddBtn.addEventListener("click", () => {
-                addModal.classList.remove("hidden");
-                document.body.classList.add("overflow-hidden");
-            });
-        }
-
-        const closeAddModalFunc = () => { 
-            if(addModal) {
-                addModal.classList.add("hidden");
-                document.body.classList.remove("overflow-hidden");
+            // --- LOADING OVERLAY HELPER UTILITIES ---
+            function showLoading() {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) overlay.classList.add('active');
             }
-        };
-        if (closeAddBtn) closeAddBtn.addEventListener("click", closeAddModalFunc);
-        if (cancelAddBtn) cancelAddBtn.addEventListener("click", closeAddModalFunc);
 
-        if (addModal) {
-            addModal.addEventListener("click", (e) => {
-                if (e.target === addModal) closeAddModalFunc();
-            });
-        }
-
-        // Password Auto-Generate & Visibility Logic
-        const autoGenCheckbox = document.getElementById('auto_generate_password');
-        const passInput = document.getElementById('password');
-        const passConfirmInput = document.getElementById('password_confirmation');
-        const regenerateBtn = document.getElementById('regenerateBtn');
-
-        function generateRandomPassword(length = 12) {
-            const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
-            let password = "";
-            for (let i = 0; i < length; i++) {
-                password += charset.charAt(Math.floor(Math.random() * charset.length));
+            function hideLoading() {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) overlay.classList.remove('active');
             }
-            return password;
-        }
 
-        function applyRandomPassword() {
-            const newPassword = generateRandomPassword(12);
-            passInput.value = newPassword;
-            passConfirmInput.value = newPassword;
-        }
+            // Helper to get CSS variable colors for SweetAlert Dark Mode
+            const getComputedColor = (cssVar) => getComputedStyle(document.body).getPropertyValue(cssVar).trim();
 
-        if (autoGenCheckbox) {
-            autoGenCheckbox.addEventListener('change', function() {
-                if (this.checked) {
-                    passInput.type = "text";
-                    passConfirmInput.type = "text";
-                    passInput.readOnly = true;
-                    passConfirmInput.readOnly = true;
-                    regenerateBtn.classList.remove('hidden');
-
-                    applyRandomPassword();
-                } else {
-                    passInput.type = "password";
-                    passConfirmInput.type = "password";
-                    passInput.readOnly = false;
-                    passConfirmInput.readOnly = false;
-                    passInput.value = "";
-                    passConfirmInput.value = "";
-                    regenerateBtn.classList.add('hidden');
-                }
-            });
-        }
-
-        if (regenerateBtn) {
-            regenerateBtn.addEventListener('click', function() {
-                applyRandomPassword();
-            });
-        }
-
-        // Edit Modal Toggles & Existing Role Selection
-        const editModal = document.getElementById("editModal");
-        const closeEditBtn = document.getElementById("closeEditModal");
-        const cancelEditBtn = document.getElementById("cancelEditModal");
-        const editButtons = document.querySelectorAll(".editBtn");
-
-        const editForm = document.getElementById("editForm");
-        const editName = document.getElementById("edit_name");
-        const editRegion = document.getElementById("edit_region");
-        const editEmail = document.getElementById("edit_email");
-        const editContactNumber = document.getElementById("edit_contact_number");
-
-        editButtons.forEach(button => {
-            button.addEventListener("click", (e) => {
-                e.preventDefault();
-
-                const id = button.dataset.id;
-                const name = button.dataset.name;
-                const email = button.dataset.email;
-                const region = button.dataset.region;
-                const contactNumber = button.dataset.contactNumber;
-                
-                // Extract role IDs array from dataset
-                let existingRoleIds = [];
-                try {
-                    // Parses JSON format passed from data-role-ids="[1, 2]"
-                    existingRoleIds = JSON.parse(button.dataset.roleIds).map(String);
-                } catch (err) {
-                    // Fallback for comma separated string data-role-ids="1,2"
-                    if (button.dataset.roleIds) {
-                        existingRoleIds = String(button.dataset.roleIds).split(',').map(s => s.trim());
-                    }
-                }
-
-                // Populate form fields
-                editName.value = name;
-                editEmail.value = email;
-                editRegion.value = region;
-                editContactNumber.value = contactNumber;
-
-                // Set dynamic action URL
-                editForm.action = `/users/${id}`;
-
-                // Check existing assigned roles in modal checkboxes
-                document.querySelectorAll('input[name="roles[]"][id^="edit_role_"]').forEach(checkbox => {
-                    checkbox.checked = existingRoleIds.includes(String(checkbox.value));
-                });
-
-                // Open Modal
-                editModal.classList.remove("hidden");
-                document.body.classList.add("overflow-hidden");
-            });
-        });
-
-        const closeEditModalFunc = () => { 
-            if(editModal) {
-                editModal.classList.add("hidden");
-                document.body.classList.remove("overflow-hidden");
-            }
-        };
-        if (closeEditBtn) closeEditBtn.addEventListener("click", closeEditModalFunc);
-        if (cancelEditBtn) cancelEditBtn.addEventListener("click", closeEditModalFunc);
-
-        if (editModal) {
-            editModal.addEventListener("click", (e) => {
-                if (e.target === editModal) closeEditModalFunc();
-            });
-        }
-
-        // Delete confirmation
-        document.querySelectorAll('.delete-btn').forEach(function (button) {
-            button.addEventListener('click', function (event) {
-                event.preventDefault();
-                const form = this.closest('form');
-
+            // --- SWEETALERT NOTIFICATIONS ---
+            @if(session('success'))
                 Swal.fire({
-                    title: 'Delete this User?',
-                    text: "This action cannot be undone!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#ef4444',
-                    cancelButtonColor: '#64748b',
-                    confirmButtonText: 'Confirm',
-                    cancelButtonText: 'Cancel',
+                    icon: 'success',
+                    title: 'Success!',
+                    text: '{!! addslashes(session("success")) !!}',
+                    timer: 2500,
+                    showConfirmButton: false,
                     background: getComputedColor('--card-bg'),
                     color: getComputedColor('--text-dark')
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit();
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Notice!',
+                    text: '{!! addslashes(session("error")) !!}',
+                    timer: 3000,
+                    showConfirmButton: false,
+                    background: getComputedColor('--card-bg'),
+                    color: getComputedColor('--text-dark')
+                });
+            @endif
+
+            @if ($errors->any())
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    html: `{!! implode('<br>', $errors->all()) !!}`,
+                    showConfirmButton: true,
+                    confirmButtonColor: '#4f46e5',
+                    background: getComputedColor('--card-bg'),
+                    color: getComputedColor('--text-dark')
+                });
+            @endif
+
+            // Modal Helpers
+            const body = document.body;
+
+            function openModal(modal) {
+                if (!modal) return;
+                modal.classList.remove('hidden');
+                body.classList.add('overflow-hidden');
+            }
+
+            function closeModal(modal) {
+                if (!modal) return;
+                modal.classList.add('hidden');
+                body.classList.remove('overflow-hidden');
+            }
+
+            // --- ADD USER MODAL TOGGLES ---
+            const addModal = document.getElementById("userModal");
+            const openAddBtn = document.getElementById("openModal");
+            const closeAddBtn = document.getElementById("closeModal");
+            const cancelAddBtn = document.getElementById("cancelAddModal");
+
+            if (openAddBtn && addModal) {
+                openAddBtn.addEventListener("click", () => openModal(addModal));
+            }
+
+            const closeAddModalFunc = () => closeModal(addModal);
+
+            if (closeAddBtn) closeAddBtn.addEventListener("click", closeAddModalFunc);
+            if (cancelAddBtn) cancelAddBtn.addEventListener("click", closeAddModalFunc);
+
+            if (addModal) {
+                addModal.addEventListener("click", (e) => {
+                    if (e.target === addModal) closeAddModalFunc();
+                });
+
+                // Trigger loading spinner on Add User Form submission
+                const addForm = addModal.querySelector('form');
+                if (addForm) {
+                    addForm.addEventListener('submit', function () {
+                        showLoading();
+                    });
+                }
+            }
+
+            // --- PASSWORD AUTO-GENERATE & VISIBILITY LOGIC ---
+            const autoGenCheckbox = document.getElementById('auto_generate_password');
+            const passInput = document.getElementById('password');
+            const passConfirmInput = document.getElementById('password_confirmation');
+            const regenerateBtn = document.getElementById('regenerateBtn');
+
+            function generateRandomPassword(length = 12) {
+                const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+                let password = "";
+                for (let i = 0; i < length; i++) {
+                    password += charset.charAt(Math.floor(Math.random() * charset.length));
+                }
+                return password;
+            }
+
+            function applyRandomPassword() {
+                const newPassword = generateRandomPassword(12);
+                if (passInput) passInput.value = newPassword;
+                if (passConfirmInput) passConfirmInput.value = newPassword;
+            }
+
+            if (autoGenCheckbox) {
+                autoGenCheckbox.addEventListener('change', function () {
+                    if (this.checked) {
+                        if (passInput) {
+                            passInput.type = "text";
+                            passInput.readOnly = true;
+                        }
+                        if (passConfirmInput) {
+                            passConfirmInput.type = "text";
+                            passConfirmInput.readOnly = true;
+                        }
+                        if (regenerateBtn) regenerateBtn.classList.remove('hidden');
+
+                        applyRandomPassword();
+                    } else {
+                        if (passInput) {
+                            passInput.type = "password";
+                            passInput.readOnly = false;
+                            passInput.value = "";
+                        }
+                        if (passConfirmInput) {
+                            passConfirmInput.type = "password";
+                            passConfirmInput.readOnly = false;
+                            passConfirmInput.value = "";
+                        }
+                        if (regenerateBtn) regenerateBtn.classList.add('hidden');
                     }
                 });
+            }
+
+            if (regenerateBtn) {
+                regenerateBtn.addEventListener('click', function () {
+                    applyRandomPassword();
+                });
+            }
+
+            // --- EDIT USER MODAL TOGGLES ---
+            const editModal = document.getElementById("editModal");
+            const closeEditBtn = document.getElementById("closeEditModal");
+            const cancelEditBtn = document.getElementById("cancelEditModal");
+            const editButtons = document.querySelectorAll(".editBtn");
+
+            const editForm = document.getElementById("editForm");
+            const editName = document.getElementById("edit_name");
+            const editRegion = document.getElementById("edit_region");
+            const editEmail = document.getElementById("edit_email");
+            const editContactNumber = document.getElementById("edit_contact_number");
+
+            editButtons.forEach(button => {
+                button.addEventListener("click", (e) => {
+                    e.preventDefault();
+
+                    const id = button.dataset.id;
+                    const name = button.dataset.name;
+                    const email = button.dataset.email;
+                    const region = button.dataset.region;
+                    const contactNumber = button.dataset.contactNumber;
+
+                    // Extract role IDs array from dataset
+                    let existingRoleIds = [];
+                    try {
+                        existingRoleIds = JSON.parse(button.dataset.roleIds).map(String);
+                    } catch (err) {
+                        if (button.dataset.roleIds) {
+                            existingRoleIds = String(button.dataset.roleIds).split(',').map(s => s.trim());
+                        }
+                    }
+
+                    // Populate form fields
+                    if (editName) editName.value = name || '';
+                    if (editEmail) editEmail.value = email || '';
+                    if (editRegion) editRegion.value = region || '';
+                    if (editContactNumber) editContactNumber.value = contactNumber || '';
+
+                    // Set dynamic action URL
+                    if (editForm) editForm.action = `/users/${id}`;
+
+                    // Check existing assigned roles in modal checkboxes
+                    document.querySelectorAll('input[name="roles[]"][id^="edit_role_"]').forEach(checkbox => {
+                        checkbox.checked = existingRoleIds.includes(String(checkbox.value));
+                    });
+
+                    openModal(editModal);
+                });
+            });
+
+            const closeEditModalFunc = () => closeModal(editModal);
+
+            if (closeEditBtn) closeEditBtn.addEventListener("click", closeEditModalFunc);
+            if (cancelEditBtn) cancelEditBtn.addEventListener("click", closeEditModalFunc);
+
+            if (editModal) {
+                editModal.addEventListener("click", (e) => {
+                    if (e.target === editModal) closeEditModalFunc();
+                });
+            }
+
+            // Trigger loading spinner on Edit User Form submission
+            if (editForm) {
+                editForm.addEventListener('submit', function () {
+                    showLoading();
+                });
+            }
+
+            // --- DELETE USER CONFIRMATION & LOADING ---
+            document.querySelectorAll('.delete-btn').forEach(function (button) {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const form = this.closest('form');
+
+                    Swal.fire({
+                        title: 'Delete this User?',
+                        text: "This action cannot be undone!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#64748b',
+                        confirmButtonText: 'Confirm',
+                        cancelButtonText: 'Cancel',
+                        background: getComputedColor('--card-bg'),
+                        color: getComputedColor('--text-dark')
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            showLoading();
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
+            // --- KEYBOARD ACCESSIBILITY (ESC KEY) ---
+            document.addEventListener('keydown', function (event) {
+                if (event.key === "Escape") {
+                    closeAddModalFunc();
+                    closeEditModalFunc();
+                }
             });
         });
-        
-        // Close with Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === "Escape") {
-                closeAddModalFunc();
-                closeEditModalFunc();
-            }
-        });
-    });
     </script>
 </x-app-layout>

@@ -231,7 +231,7 @@
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 1; visibility: visible; transition: all 0.3s ease; }
         .modal-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         
-        .modal-box { position: relative; background-color: var(--card-bg); border-radius: 1rem; border: 1px solid var(--border-light); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 100%; max-width: 52rem; max-height: 90vh; overflow-y: auto; padding: 1.5rem; transform: scale(1); transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease; }
+        .modal-box { position: relative; background-color: var(--card-bg); border-radius: 1rem; border: 1px solid var(--border-light); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 100%; max-width: 60rem; max-height: 90vh; overflow-y: auto; padding: 1.5rem; transform: scale(1); transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease; }
         .modal-overlay.hidden .modal-box { transform: scale(0.95); }
         
         .close-btn { position: absolute; top: 1.25rem; right: 1.25rem; color: var(--text-muted); font-size: 2rem; background: none; border: none; cursor: pointer; transition: all 0.2s; line-height: 1; border-radius: 0.25rem; padding: 0 0.5rem; }
@@ -261,6 +261,13 @@
         input[type="file"]::file-selector-button { margin-right: 1rem; border: none; background: var(--btn-gray-bg); color: var(--btn-gray-text); padding: 0.4rem 0.8rem; border-radius: 0.25rem; cursor: pointer; transition: all 0.2s ease; font-weight: 600; font-size: 0.85rem; font-family: inherit; }
         input[type="file"]::file-selector-button:hover { background: var(--btn-gray-hover-bg); color: var(--btn-gray-hover-text); }
 
+        /* Full-Screen Loading Overlay */
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: #ffffff; }
+        .loading-overlay.active { display: flex; }
+        .spinner { width: 44px; height: 44px; border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: #ffffff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
 
         /* --------------------------------------------------- */
         /* Responsive Overrides                                */
@@ -293,6 +300,12 @@
             .pagination-wrapper nav > div.hidden.sm\:flex-1 { display: flex !important; width: 100%; justify-content: space-between; align-items: center; }
         }
     </style>
+
+    <!-- Full-Screen Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p style="font-size: 1rem; font-weight: 600; letter-spacing: 0.025em;">Processing Ticket, please wait...</p>
+    </div>
 
     <div id="main-content" class="page-wrapper">
         <div id="ticketsContent">
@@ -350,7 +363,7 @@
                             @forelse ($tickets as $ticket)
                                 <tr>
                                     <td class="text-center font-bold" style="font-size: 0.95rem;">{{ $ticket->ticket_number }}</td>
-                                    <td>{{ $ticket->firstname }} {{ $ticket->lastname }}</td>
+                                    <td>{{ $ticket->firstname }} {{ $ticket->middle_initial }} {{ $ticket->lastname }}</td>
                                     <td>{{ $ticket->division }}</td>
                                     <td>{{ $ticket->device }}</td>
                                     <td>{{ $ticket->service }}</td>
@@ -456,21 +469,41 @@
                     <!-- Client Information -->
                     <fieldset class="form-fieldset">
                         <legend>Client Information</legend>
-                        <div class="form-grid grid-cols-3">
+
+                        @php
+                            $parts = explode(' ', trim(auth()->user()->name));
+                            $lastName = count($parts) > 1 ? array_pop($parts) : '';
+                            $middleInitial = '';
+
+                            // Check if the new last element is a middle initial (e.g., "A." or "A")
+                            if (count($parts) > 0) {
+                                $lastPart = end($parts);
+                                if (preg_match('/^[A-Za-z]\.?$/', $lastPart)) {
+                                    $middleInitial = array_pop($parts);
+                                }
+                            }
+
+                            $firstName = implode(' ', $parts);
+                        @endphp
+
+                        <div class="form-grid" style="display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 1rem;">
                             <div class="form-group">
                                 <label for="firstname" class="form-label">First Name <span class="text-required">*</span></label>
-                                <input type="text" id="firstname" name="firstname" placeholder="e.g., Juan" required class="form-input">
+                                <input type="text" id="firstname" name="firstname" value="{{ $firstName }}" readonly class="form-input">
                             </div>
-
+                            <div class="form-group">
+                                <label for="middle_initial" class="form-label">Middle Initial<span class="text-required">*</span></label>
+                                <input type="text" id="middle_initial" name="middle_initial" value="{{ $middleInitial }}" readonly class="form-input">
+                            </div>
                             <div class="form-group">
                                 <label for="lastname" class="form-label">Last Name <span class="text-required">*</span></label>
-                                <input type="text" id="lastname" name="lastname" placeholder="e.g., Dela Cruz" required class="form-input">
+                                <input type="text" id="lastname" name="lastname" value="{{ $lastName }}" readonly class="form-input">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label for="email" class="form-label">Email <span class="text-required">*</span></label>
-                            <input type="email" id="email" name="email" placeholder="e.g., j_delacruz@cda.gov.ph" required class="form-input">
+                            <input type="email" id="email" name="email" value="{{ auth()->user()->email }}" readonly class="form-input">
                         </div>
 
                         <div class="form-grid grid-cols-2">
@@ -522,21 +555,23 @@
                             <textarea id="request" name="request" rows="4" placeholder="Describe the issue or request in detail..." required class="form-input"></textarea>
                         </div>
 
-                        <div class="form-group">
-                            <label for="photo" class="form-label">Attach Photo (Optional)</label>
-                            <input type="file" id="photo" name="photo" accept="image/*" class="form-input">
-                        </div>
+                        <div class="form-grid grid-cols-2">
+                            <div class="form-group">
+                                <label for="photo" class="form-label">Attach Photo (Optional)</label>
+                                <input type="file" id="photo" name="photo" accept="image/*" class="form-input">
+                            </div>
 
-                        <div class="form-group">
-                            <label for="priority" class="form-label">Priority <span class="text-required">*</span></label>
-                            <select id="priority" name="priority" required class="form-select">
-                                <option value="" disabled selected>Select Priority</option>
-                                <option value="High">High</option>
-                                <option value="Medium">Medium</option>
-                                <option value="Low">Low</option>
-                                <option value="Critical">Critical</option>
-                            </select>
-                        </div>
+                            <div class="form-group">
+                                <label for="priority" class="form-label">Priority <span class="text-required">*</span></label>
+                                <select id="priority" name="priority" required class="form-select">
+                                    <option value="" disabled selected>Select Priority</option>
+                                    <option value="High">High</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Low">Low</option>
+                                    <option value="Critical">Critical</option>
+                                </select>
+                            </div>
+                        </div> 
                     </fieldset>
 
                     <!-- Designated Personnel -->
@@ -585,8 +620,22 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            
-            // Flash Messages
+
+            // --- LOADING OVERLAY HELPER UTILITIES ---
+            function showLoading() {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) overlay.classList.add('active');
+            }
+
+            function hideLoading() {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) overlay.classList.remove('active');
+            }
+
+            // Helper to get CSS variable colors for SweetAlert Dark Mode
+            const getComputedColor = (cssVar) => getComputedStyle(document.body).getPropertyValue(cssVar).trim();
+
+            // --- SWEETALERT NOTIFICATIONS ---
             @if(session('success'))
                 Swal.fire({
                     icon: 'success',
@@ -594,8 +643,8 @@
                     text: '{!! addslashes(session("success")) !!}',
                     timer: 2500,
                     showConfirmButton: false,
-                    background: getComputedStyle(document.body).getPropertyValue('--card-bg').trim(),
-                    color: getComputedStyle(document.body).getPropertyValue('--text-dark').trim()
+                    background: getComputedColor('--card-bg'),
+                    color: getComputedColor('--text-dark')
                 });
             @endif
 
@@ -606,12 +655,12 @@
                     text: '{!! addslashes(session("error")) !!}',
                     timer: 3000,
                     showConfirmButton: false,
-                    background: getComputedStyle(document.body).getPropertyValue('--card-bg').trim(),
-                    color: getComputedStyle(document.body).getPropertyValue('--text-dark').trim()
+                    background: getComputedColor('--card-bg'),
+                    color: getComputedColor('--text-dark')
                 });
             @endif
-            
-            // === AUTO-RELOAD & COUNTDOWN ===
+
+            // --- AUTO-RELOAD & COUNTDOWN ---
             const checkbox = document.getElementById('autoReloadCheckbox');
             const countdownDisplay = document.getElementById('countdown');
             let intervalId = null;
@@ -653,23 +702,28 @@
                 if (countdownDisplay) countdownDisplay.textContent = countdown;
             }
 
-            // ======= Shared Modal Functions =======
+            // --- SHARED MODAL FUNCTIONS ---
             const body = document.body;
-            
+
             function openModal(modal) {
+                if (!modal) return;
                 modal.classList.remove('hidden');
                 body.classList.add('overflow-hidden');
             }
 
             function closeModal(modal) {
+                if (!modal) return;
                 modal.classList.add('hidden');
                 body.classList.remove('overflow-hidden');
             }
 
             const itMapping = @json($it_mapping ?? []);
 
-            // Add Ticket Modal Logic
+            // --- ADD TICKET MODAL LOGIC ---
             const addModal = document.getElementById('addticketModal');
+            const assignModal = document.getElementById('assignModal');
+            const editModal = document.getElementById('editModal');
+
             if (addModal) {
                 const closeAddBtn = addModal.querySelector('#closeModal');
                 const openAddBtns = document.querySelectorAll('#openAddTicketModalBtn, #openTicketModal, .open-ticket-modal, [data-modal-target="addticketModal"]');
@@ -696,7 +750,7 @@
                 // Get NextAssignment Map safely
                 const nextAssignmentMap = @json($nextAssignment ?? new \stdClass());
                 
-                // Use querySelector scoped to addModal to avoid ID conflicts
+                // Scope elements to addModal to avoid selector collisions
                 const serviceSelect = addModal.querySelector('select[name="service"]');
                 const regionSelect = addModal.querySelector('select[name="it_area"]');
                 const personnelInput = addModal.querySelector('input[name="it_personnel"]');
@@ -723,14 +777,15 @@
                     } else {
                         personnelInput.value = 'No personnel found for this region';
                         
-                        // Optional: Alert the user natively if they select an empty region
                         if (typeof Swal !== 'undefined') {
                             Swal.fire({
                                 icon: 'warning',
                                 title: 'No Personnel Found',
                                 text: 'There is no IT personnel assigned to this region/service yet.',
                                 timer: 2500,
-                                showConfirmButton: false
+                                showConfirmButton: false,
+                                background: getComputedColor('--card-bg'),
+                                color: getComputedColor('--text-dark')
                             });
                         }
                     }
@@ -739,7 +794,7 @@
                 if (serviceSelect) serviceSelect.addEventListener('change', updatePersonnelAndEmails);
                 if (regionSelect) regionSelect.addEventListener('change', updatePersonnelAndEmails);
 
-                // Form validation enhancement
+                // --- FORM VALIDATION & SUBMIT LOADING ---
                 const ticketForm = addModal.querySelector('#createTicketForm');
                 if (ticketForm) {
                     ticketForm.addEventListener('submit', function(e) {
@@ -762,11 +817,16 @@
                                     icon: 'error',
                                     title: 'Missing Information',
                                     text: 'Please fill in all required fields marked with *.',
-                                    confirmButtonColor: '#3085d6'
+                                    confirmButtonColor: '#4f46e5',
+                                    background: getComputedColor('--card-bg'),
+                                    color: getComputedColor('--text-dark')
                                 });
                             } else {
                                 alert('Please fill in all required fields marked with *.');
                             }
+                        } else {
+                            // Show loading overlay on valid form submission
+                            showLoading();
                         }
                     });
                 }
@@ -784,12 +844,12 @@
                 }
             }
             
-            // Allow closing modals with Escape key
+            // --- KEYBOARD ACCESSIBILITY (ESC KEY) ---
             document.addEventListener('keydown', function(event) {
                 if (event.key === "Escape") {
-                    if(addModal) closeModal(addModal);
-                    if(assignModal) closeModal(assignModal);
-                    if(editModal) closeModal(editModal);
+                    if (addModal) closeModal(addModal);
+                    if (assignModal) closeModal(assignModal);
+                    if (editModal) closeModal(editModal);
                 }
             });
         });

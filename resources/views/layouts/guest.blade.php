@@ -49,7 +49,7 @@
 
                     @if ($route === 'login')
                         <div class="login-header">
-                            <h2 class="login-title">Sign In</h2>
+                            <h2 class="login-title">Welcome Back</h2>
                             <p class="login-subtitle">A few more clicks to sign in to your account.</p>
                         </div>
                     @elseif ($route === 'register')

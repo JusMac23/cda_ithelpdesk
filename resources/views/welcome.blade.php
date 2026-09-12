@@ -184,6 +184,11 @@
         
         .faq-answer { padding: 0 1.5rem 1.5rem; color: var(--text-muted); font-size: 1rem; line-height: 1.6; border-top: 1px solid rgba(255, 255, 255, 0.05); margin-top: 0.25rem; padding-top: 1rem; }
 
+        /* Added: FAQ List Numbering Fix */
+        .faq-answer ol { padding-left: 1.5rem; list-style-type: decimal; margin-top: 0.5rem; }
+        .faq-answer li { margin-bottom: 0.5rem; padding-left: 0.25rem; }
+        .faq-answer p { margin-bottom: 0.5rem; }
+
         /* Footer (Zero Spacing Architecture) */
         .app-footer { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); text-align: center; padding: 1.5rem 0; color: var(--text-muted); font-size: 0.95rem; border-top: 1px solid var(--glass-border); position: relative; z-index: 10; flex-shrink: 0; margin-bottom: 0; }
 
@@ -251,7 +256,7 @@
         <div class="hero-content">
             <div class="status-badge animate-fade-in-up">
                 <span class="material-symbols-outlined" style="font-size: 1.25rem;" aria-hidden="true">shield_locked</span>
-                Secure IT & Incident Portal
+                Secure CDA-ICT Helpdesk Portal
             </div>
 
             <h1 id="hero-heading" class="hero-title animate-fade-in-up delay-100">
@@ -317,7 +322,7 @@
                 <summary>Who is authorized to use this portal?</summary>
                 <div class="faq-answer">
                     <ol>
-                        <li>This Helpdesk portal is exclusively for authorized CDA personnel across all regional offices and the central office.</li>
+                        <li>This ICT Helpdesk portal is exclusively for authorized CDA Personnel across all Regional Offices and the Head Office.</li>
                         <li>You must have a signed-in account using your official Authentik account or @cda.gov.ph email.</li>
                     </ol>
                 </div>
@@ -338,10 +343,10 @@
                 <summary>How to request a Zoom link?</summary>
                 <div class="faq-answer">
                     <ol>
-                        <li>To request a Zoom link for a meeting or training session, please submit a request through the official calendar site at 1calendar.cda.gov.ph.</li>
+                        <li>To request a Zoom link for a meeting or training session, please submit a request through the official calendar site at <strong>1calendar.cda.gov.ph.</strong></li>
                         <li>Kindly click the <strong>"HERE"</strong> button at the top of the page to submit your request.</li>
                         <li>Once you have submitted the request, create a schedule in your calendar and invite <strong>1calendar.cda.gov.ph</strong> and <strong>videocom@cda.gov.ph</strong> as Event Modifiers.</li>
-                        <li>The ICT Team will provide the Zoom link through the scheduled calendar event.</li>
+                        <li>Once the event is approved by PPDD, the ICT Team will provide the Zoom link through the scheduled calendar event.</li>
                     </ol>
                 </div>
             </details>
@@ -349,11 +354,11 @@
             <details class="faq-item">
                 <summary>How to troubleshoot printer connectivity issues?</summary>
                 <div class="faq-answer">
-                    If you are experiencing issues with your printer connectivity, please try the following steps:
+                    <p>If you are experiencing issues with your printer connectivity, please try the following steps:</p>
                     <ol>
-                        <li>Ensure the printer is powered on and connected to the network.</li>
+                        <li>Ensure the printer is powered on and connected to the same network as the computer.</li>
                         <li>Check if the printer is set as the default printer in your device's settings.</li>
-                        <li>Restart both your device and the printer.</li>
+                        <li>Restart both your computer.</li>
                         <li>If the issue persists, contact the <strong>ICT Administrator</strong> for further assistance.</li>
                     </ol>
                 </div>
@@ -362,7 +367,7 @@
             <details class="faq-item">
                 <summary>How to troubleshoot Network Connectivity Issues?</summary>
                 <div class="faq-answer">
-                    If you are experiencing issues with your network connectivity, please try the following steps:
+                    <p>If you are experiencing issues with your network connectivity, please try the following steps:</p>
                     <ol>
                         <li>Ensure your device is connected to the network whether via Ethernet or Wi-Fi.</li>
                         <li>Check if other devices on the same network are experiencing similar issues.</li>
@@ -377,7 +382,7 @@
                 <div class="faq-answer">
                     <ol>
                         <li>Ensure that you have already registered for an account on the CDA Workspace using the registration details sent by the ICT Administrator via email.</li>
-                        <li>Log in to the CDA Workspace using your registered credentials.</li>
+                        <li>Log in to the CDA Workspace at <strong>https://ws.cda.gov.ph/?itppl-login</strong> using your registered credentials.</li>
                         <li>For the meantime, please do not log in using OAuth. Use your email address and password instead.</li>
                         <li>If the issue persists, please contact the <strong>ICT Administrator</strong> for further assistance.</li>
                     </ol>

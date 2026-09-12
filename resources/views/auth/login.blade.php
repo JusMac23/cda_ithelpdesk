@@ -101,15 +101,15 @@
 
             {{-- Terms and Privacy Policy Agreement --}}
             <p class="terms-text">
-                By logging in, you agree to our 
+                By signing in, you agree to our 
                 <a href="https://cda.gov.ph/cda-privacy-policy/" class="text-link" target="_blank">Terms and Conditions</a> & 
                 <a href="https://cda.gov.ph/cda-privacy-policy/" class="text-link" target="_blank">Privacy Policy</a>.
             </p>
 
-            {{-- Login Button --}}
+            {{-- Sign in Button --}}
             <div>
                 <button type="submit" id="login-button" class="btn-primary">
-                    {{ __('Log in') }}
+                    {{ __('Sign in') }}
                 </button>
             </div>
         </form>
@@ -121,17 +121,17 @@
             <hr>
         </div>
 
-        {{-- CDAOauth Login --}}
+        {{-- CDAOauth Sign in --}}
         <div>
             <a href="{{ route('auth.authentik') }}" class="cda-button">
-                Continue with CDAOauth
+                Sign in with CDAOauth
             </a>
         </div>
 
-        {{-- Google Login --}}
+        {{-- Google Sign in --}}
         <div>
             <a href="{{ route('auth.google') }}" class="cda-button">
-                Continue with Google
+                Sign in with Google
             </a>
         </div>
 

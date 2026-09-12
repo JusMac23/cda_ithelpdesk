@@ -197,6 +197,7 @@ class TicketsController extends Controller
                 $q->where('ticket_id', 'like', "%{$search}%")
                   ->orWhere('ticket_number', 'like', "%{$search}%")
                   ->orWhere('firstname', 'like', "%{$search}%")
+                  ->orWhere('middle_initial', 'like', "%{$search}%")
                   ->orWhere('lastname', 'like', "%{$search}%")
                   ->orWhere('division', 'like', "%{$search}%")
                   ->orWhere('it_area', 'like', "%{$search}%")
@@ -328,6 +329,7 @@ class TicketsController extends Controller
                 fputcsv($file, [
                     $ticket->ticket_number,
                     $ticket->firstname,
+                    $ticket->middle_initial,
                     $ticket->lastname,
                     $ticket->division,
                     $ticket->it_area,

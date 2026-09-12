@@ -20,7 +20,8 @@ use App\Models\ITPersonnel;
 use App\Models\Notification;
 use App\Models\User;
 
-use App\Mail\NewTicketSubmitted;
+use App\Mail\ITPersonnelTicketNotification;
+use App\Mail\CLientTicketNotification;
 
 class CreateTicketPrivateController extends Controller
 {
@@ -215,7 +216,6 @@ class CreateTicketPrivateController extends Controller
         }
 
         // Force merged assignment data into request prior to validation
-        // ONLY merging it_personnel and it_email to avoid prepopulating re-assignment fields
         $request->merge([
             'it_personnel' => $assignedName,
             'it_email'     => $assignedEmail,
@@ -223,20 +223,21 @@ class CreateTicketPrivateController extends Controller
 
         // 2. Validate form inputs
         $validatedData = $request->validate([
-            'firstname'    => 'required|string|max:255',
-            'lastname'     => 'required|string|max:255',
-            'email'        => 'required|email|max:255',
-            'date_created' => 'nullable|date',
-            'division'     => 'required|string|max:255',
-            'device'       => 'required|string|max:255',
-            'service'      => 'required|string|max:255',
-            'request'      => 'required|string',
-            'it_area'      => 'required|string|max:255',
-            'it_personnel' => 'required|string',
-            'it_email'     => 'required|string|email',
-            'status'       => 'required|string|max:255',
-            'photo'        => 'nullable|image|max:10240',
-            'priority'     => 'required|string|max:255',
+            'firstname'         => 'required|string|max:255',
+            'lastname'          => 'required|string|max:255',
+            'middle_initial'    => 'nullable|string|max:10',
+            'email'             => 'required|email|max:255',
+            'date_created'      => 'nullable|date',
+            'division'          => 'required|string|max:255',
+            'device'            => 'required|string|max:255',
+            'service'           => 'required|string|max:255',
+            'request'           => 'required|string',
+            'it_area'           => 'required|string|max:255',
+            'it_personnel'      => 'required|string',
+            'it_email'          => 'required|string|email',
+            'status'            => 'required|string|max:255',
+            'photo'             => 'nullable|image|max:10240',
+            'priority'          => 'required|string|max:255',
         ]);
 
         $validatedData['date_created']  = Carbon::now('Asia/Manila')->format('Y-m-d H:i:s');
@@ -252,12 +253,8 @@ class CreateTicketPrivateController extends Controller
         $currentYear = now()->year;
 
         do {
-            // Generate a 4-digit random number (1000 to 9999)
-            $randomNumber = random_int(100000, 999999);
-            
-            // Format: CDA-ICT-2026-1234
+            $randomNumber = random_int(1000, 9999);
             $ticket_number = "{$orgName}-ICT-{$currentYear}-{$randomNumber}";
-            
         } while (Tickets::where('ticket_number', $ticket_number)->exists());
 
         $validatedData['ticket_number'] = $ticket_number;
@@ -265,52 +262,58 @@ class CreateTicketPrivateController extends Controller
         // 5. Create ticket in database
         $ticket = Tickets::create($validatedData);
 
-        // 6. Send email notification to assigned IT personnel
-        $emailRecipient = $ticket->it_email;
-        $emailSent = false;
+        // 6. Resolve IT recipient email
+        $targetEmail = trim($ticket->it_email ?? '');
 
-        if ($emailRecipient && filter_var($emailRecipient, FILTER_VALIDATE_EMAIL)) {
+        if (empty($targetEmail) || !filter_var($targetEmail, FILTER_VALIDATE_EMAIL)) {
+            if (!empty($ticket->it_personnel)) {
+                $userMatch = User::where('name', $ticket->it_personnel)
+                    ->orWhereRaw("CONCAT(firstname, ' ', lastname) = ?", [$ticket->it_personnel])
+                    ->first();
+                if ($userMatch && filter_var($userMatch->email, FILTER_VALIDATE_EMAIL)) {
+                    $targetEmail = $userMatch->email;
+                }
+            }
+        }
+
+        $itEmailSent = false;
+        $clientEmailSent = false;
+
+        // Send Email to IT Personnel
+        if (!empty($targetEmail) && filter_var($targetEmail, FILTER_VALIDATE_EMAIL)) {
             try {
-                Mail::to($emailRecipient)->send(new NewTicketSubmitted($ticket));
-                $emailSent = true;
-
-                $this->createNotification(
-                    $ticket,
-                    $emailRecipient,
-                    'new_ticket_created',
-                    "New ticket #{$ticket->ticket_number} assigned to you"
-                );
-            } catch (\Throwable $e) {
-                Log::error("Failed sending private ticket notification to {$emailRecipient}: " . $e->getMessage(), [
-                    'exception' => $e
-                ]);
+                Mail::to($targetEmail)->send(new ITPersonnelTicketNotification($ticket));
+                Log::info("Ticket notification email with PDF successfully sent to IT personnel: {$targetEmail}");
+                $itEmailSent = true;
+            } catch (Throwable $e) {
+                Log::error("IT Personnel email dispatch failed for {$targetEmail}: " . $e->getMessage());
             }
         } else {
-            Log::warning("No valid email address found to send ticket notification for Ticket #{$ticket->ticket_number}");
+            Log::warning("Ticket #{$ticket->ticket_number} created, but no valid IT email found for '{$ticket->it_personnel}'.");
         }
 
-        // 7. Handle JSON/AJAX or standard redirects based on actual mail status
-        if ($request->ajax() || $request->wantsJson()) {
-            if ($emailSent) {
-                return response()->json([
-                    'status'  => 'success',
-                    'message' => 'Ticket created successfully and email notification sent to assigned IT personnel.',
-                    'ticket'  => $ticket
-                ]);
+        // Send Email to Client
+        if (!empty($ticket->email) && filter_var($ticket->email, FILTER_VALIDATE_EMAIL)) {
+            try {
+                Mail::to($ticket->email)->send(new CLientTicketNotification($ticket));
+                Log::info("Confirmation email successfully sent to client: {$ticket->email}");
+                $clientEmailSent = true;
+            } catch (Throwable $e) {
+                Log::error("Client email dispatch failed for {$ticket->email}: " . $e->getMessage());
             }
-
-            return response()->json([
-                'status'  => 'warning',
-                'message' => 'Ticket created successfully, but failed to send email notification to IT personnel.',
-                'ticket'  => $ticket
-            ]);
         }
 
-        if ($emailSent) {
-            return redirect()->back()->with('success', 'Ticket submitted successfully. Email notification sent to assigned IT personnel.');
+        // Create In-App Notification for Client if user exists
+        $this->createNotification($ticket, $ticket->email, 'ticket_created', "Your ticket #{$ticket->ticket_number} has been created successfully.");
+
+        // Return user feedback
+        if ($itEmailSent && $clientEmailSent) {
+            return redirect()->back()->with('success', "Ticket #{$ticket->ticket_number} submitted successfully. Confirmation emails sent to you and assigned IT personnel.");
+        } elseif ($itEmailSent || $clientEmailSent) {
+            return redirect()->back()->with('success', "Ticket #{$ticket->ticket_number} submitted successfully, but one notification email failed to deliver. Check system logs for details.");
         }
 
-        return redirect()->back()->with('warning', 'Ticket submitted successfully, but email notification could not be sent.');
+        return redirect()->back()->with('warning', "Ticket #{$ticket->ticket_number} was created, but email notifications failed to send. Check logs for SMTP details.");
     }
 
     // Create in-app notification

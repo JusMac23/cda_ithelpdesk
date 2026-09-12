@@ -37,5 +37,5 @@ Feedback Form
 **Division:** {{ $ticket->division }}  
 **Request:** {{ $ticket->request }}
 
-This is an automated notification from the ICT Support Helpdesk System.
+This is an automated notification from the ICT Support Helpdesk System. Please do not reply to this email.
 @endcomponent

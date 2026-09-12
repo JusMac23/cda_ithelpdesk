@@ -31,5 +31,5 @@ A new ticket has been assigned to you. Below are the details:
 View Ticket
 @endcomponent
 
-This is an automated notification from the ICT Support Helpdesk System.
+This is an automated notification from the ICT Support Helpdesk System. Please do not reply to this email.
 @endcomponent

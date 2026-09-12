@@ -3,12 +3,12 @@
     /* Import Figtree font from Google Fonts */
     @import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&display=swap');
 
-    /* Apply Figtree font to all text elements */
+    /* Apply Figtree font globally */
     body, h1, h2, h3, h4, h5, h6, p, a, strong, em, span, div {
         font-family: 'Figtree', sans-serif !important;
     }
 
-    /* Ensure the button also uses Figtree font */
+    /* Style for the mail button */
     .button {
         font-family: 'Figtree', sans-serif !important;
         font-weight: 600;
@@ -16,20 +16,18 @@
     }
 </style>
 
-# New Ticket Re-Assigned
+# Your Ticket Has Been Submitted
 
-Hello {{ $ticket->assigned_to }},
+Hello {{ $ticket->firstname . ' ' . $ticket->lastname }},
 
-<p>A new ticket has been re-assigned to you by <strong>{{ Auth::user()->name }}</strong>.</p>
-
-**Notes:** {{ $ticket->notes }} 
-
-<p>Please check the details below and take the necessary action.</p>
+Your ticket has been successfully submitted. Below are the details of your request:
 
 **Ticket Number:** {{ $ticket->ticket_number }}  
 **Name:** {{ $ticket->firstname }} {{ $ticket->lastname }}  
 **Division:** {{ $ticket->division }}  
 **Request:** {{ $ticket->request }}
+
+To monitor the status of your ticket, please login to **https://icthelpdesk.cda.gov.ph/** using your Google account.
 
 @component('mail::button', ['url' => url('/login')])
 View Ticket

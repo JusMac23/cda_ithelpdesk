@@ -7,9 +7,8 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use App\PDF\TSARpdf;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Mail;
 
-class NewTicketSubmitted extends Mailable
+class ITPersonnelTicketNotification extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -61,7 +60,7 @@ class NewTicketSubmitted extends Mailable
         $pdf->Cell(79.6, 7, 'Date Request:', 'LTR', 1);
         $pdf->SetFont('Arial', '', 8);
         $pdf->Cell(79.6, 10, $t->division, 'LR', 0);
-        $pdf->Cell(79.6, 10, \Carbon\Carbon::parse($t->date_created)->format('M d, Y h:i A'), 'LR', 1);
+        $pdf->Cell(79.6, 10, Carbon::parse($t->date_created)->format('M d, Y h:i A'), 'LR', 1);
         $pdf->Cell(159.2, 0, '', 'T', 1);
 
         $pdf->SetFont('Arial', 'B', 8);
@@ -108,8 +107,6 @@ class NewTicketSubmitted extends Mailable
         $pdf->SetLineWidth(0.4); 
         $pdf->Line($pdf->GetX(), $pdf->GetY(), $pdf->GetX() + 160, $pdf->GetY()); 
 
-        $pdf->SetLineWidth(0.4);
-
         $pdf->Cell(129.6, 7, 'Softcopy ICT coded forms can be downloaded here:', 0, 0, 'R');
         $pdf->SetFont('Arial', 'B', 8);
         $pdf->Cell(29.6, 7, 'https:bit.ly/3NCfJCV', 0, 1);
@@ -117,7 +114,7 @@ class NewTicketSubmitted extends Mailable
         $pdfData = $pdf->Output('S');
 
         return $this->subject('New Ticket Assigned to You - Ticket Number: ' . $t->ticket_number)
-                    ->markdown('emails.ticket_submitted')
+                    ->markdown('emails.itpersonnel_ticket_notification')
                     ->attachData($pdfData, 'TSAR.pdf', [
                         'mime' => 'application/pdf',
                     ]);

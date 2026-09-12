@@ -15,6 +15,6 @@ View Incident
 _DBN ID not available._
 @endif
 
-This is an automated notification from the ICT Support Helpdesk System.
+This is an automated notification from the ICT Support Helpdesk System. Please do not reply to this email.
 @endcomponent
 

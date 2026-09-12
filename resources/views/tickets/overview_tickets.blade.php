@@ -1,9 +1,9 @@
 <x-app-layout>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-    
+
     @if(auth()->user()->hasAnyRole(['Super Admin', 'ICTS Admin']))
-   <style>
+    <style>
         /* --- Theme Variables --- */
         :root {
             --bg-main: #f1f5f9;
@@ -57,44 +57,42 @@
 
         /* Dashboard Container */
         .dashboard-panel { background-color: var(--card-bg); border-radius: 1rem; border: 1px solid var(--border-light); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); padding: 2rem; width: 100%; transition: background-color 0.3s ease, border-color 0.3s ease; }
-        .dashboard-title { font-size: 1.75rem; font-weight: 800; margin-top: 0; margin-bottom: 2rem; color: var(--text-dark); letter-spacing: -0.025em; transition: color 0.3s ease; }
-        
+        .dashboard-header-flex { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; }
+        .dashboard-title { font-size: 1.75rem; font-weight: 800; margin: 0; color: var(--text-dark); letter-spacing: -0.025em; transition: color 0.3s ease; }
+
         /* Stats Cards */
         .stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
         .stat-card { border-radius: 1rem; padding: 1.5rem; background-color: var(--card-bg); border: 1px solid var(--border-light); box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; border-left: 5px solid; transition: all 0.3s ease; }
         .stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
-        
+
         .stat-left { display: flex; align-items: center; gap: 1.25rem; }
         .stat-icon { width: 56px; height: 56px; border-radius: 1rem; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; transition: background-color 0.3s ease, color 0.3s ease; }
         .stat-label { font-size: 0.85rem; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); transition: color 0.3s ease; }
         .stat-value { font-size: 2.25rem; font-weight: 800; margin: 0.25rem 0 0 0; text-align: left; line-height: 1; color: var(--text-dark); transition: color 0.3s ease; }
-        
+
         /* Card Themes */
         .card-indigo { border-left-color: #6366f1; }
         .card-indigo .stat-icon { background-color: var(--icon-indigo-bg); color: var(--icon-indigo-text); }
-        
         .card-green { border-left-color: #10b981; }
         .card-green .stat-icon { background-color: var(--icon-green-bg); color: var(--icon-green-text); }
-        
         .card-blue { border-left-color: #3b82f6; }
         .card-blue .stat-icon { background-color: var(--icon-blue-bg); color: var(--icon-blue-text); }
-        
         .card-red { border-left-color: #ef4444; }
         .card-red .stat-icon { background-color: var(--icon-red-bg); color: var(--icon-red-text); }
-        
-        /* Grid Tables (Middle Section) */
+
+        /* Grid Tables */
         .tables-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
         .table-card { background-color: var(--card-bg); border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 1.5rem; border: 1px solid var(--border-light); border-top: 4px solid var(--border-light); overflow: hidden; display: flex; flex-direction: column; transition: all 0.3s ease; }
         .table-card-title { font-size: 1.15rem; font-weight: 700; margin-top: 0; margin-bottom: 1.25rem; color: var(--text-dark); display: flex; align-items: center; gap: 0.75rem; transition: color 0.3s ease; }
-        
+
         /* Accent Colors for Table Cards */
         .tc-indigo { border-top-color: #4f46e5; }
         .tc-green { border-top-color: #10b981; }
         .tc-yellow { border-top-color: #eab308; }
         .tc-red { border-top-color: #ef4444; }
-        
+
         .table-responsive { width: 100%; overflow-x: auto; flex-grow: 1; -webkit-overflow-scrolling: touch; }
-        
+
         /* Small Grid Tables */
         .data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; }
         .data-table th, .data-table td { padding: 0.85rem 1rem; white-space: nowrap; border-bottom: 1px solid var(--border-subtle); transition: border-color 0.3s ease; }
@@ -103,7 +101,7 @@
         .data-table tbody tr { transition: background-color 0.15s; }
         .data-table tbody tr:hover { background-color: var(--bg-alt); }
         .text-right { text-align: right; }
-        
+
         /* Bottom Full Table */
         .full-table-container { background-color: var(--card-bg); box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-radius: 1rem; border: 1px solid var(--border-light); overflow-x: auto; margin-top: 1.5rem; -webkit-overflow-scrolling: touch; transition: background-color 0.3s ease, border-color 0.3s ease; }
         .full-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; min-width: 1000px; }
@@ -111,7 +109,7 @@
         .full-table td { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-subtle); color: var(--text-main); font-weight: 500; vertical-align: middle; transition: color 0.3s ease, border-color 0.3s ease; } 
         .full-table tbody tr { transition: background-color 0.15s; }
         .full-table tbody tr:hover { background-color: var(--bg-alt); }
-        
+
         /* Badges */
         .badge { padding: 0.4rem 1rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; display: inline-block; text-align: center; white-space: nowrap; letter-spacing: 0.025em; transition: background-color 0.3s ease, color 0.3s ease; }
         .badge-green { background-color: var(--badge-green-bg); color: var(--badge-green-text); }
@@ -119,15 +117,28 @@
         .badge-blue { background-color: var(--badge-blue-bg); color: var(--badge-blue-text); }
         .badge-gray { background-color: var(--badge-gray-bg); color: var(--badge-gray-text); }
 
-        /* Export PDF Button - Variable Fix */
-        .export-container { display: flex; justify-content: flex-end; margin: 12px 0; }
-        .btn-export-pdf { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background-color: var(--card-bg); color: var(--text-dark); border: 1px solid var(--border-light); border-radius: 8px; font-size: 0.875rem; font-weight: 500; text-decoration: none; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: all 0.2s ease-in-out; }
+        /* Region Select & Export Box */
+        .export-container { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .region-filter-form { display: flex; align-items: center; margin: 0; }
+        .form-group { display: flex; flex-direction: row; align-items: center; gap: 8px; margin: 0; }
+        .form-label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.025em; margin: 0; white-space: nowrap; }
+
+        .form-select { appearance: none; background-color: var(--card-bg); border: 1px solid var(--border-light); color: var(--text-dark); padding: 9px 36px 9px 14px; border-radius: 8px; font-size: 0.875rem; font-family: inherit; min-width: 160px; cursor: pointer; outline: none; transition: all 0.2s ease-in-out; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; }
+        .form-select:hover, .form-select:focus { border-color: var(--text-muted); }
+
+        .btn-export-pdf { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 16px; background-color: var(--card-bg); color: var(--text-dark); border: 1px solid var(--border-light); border-radius: 8px; font-size: 0.875rem; font-weight: 500; text-decoration: none; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: all 0.2s ease-in-out; cursor: pointer; }
         .btn-export-pdf:hover { background-color: var(--bg-alt); border-color: var(--border-light); transform: translateY(-1px); }
         .btn-export-pdf .material-symbols-outlined { font-size: 1.15rem; color: #ef4444; }
 
         /* General Mobile Responsiveness */
         @media (max-width: 640px) {
             .dashboard-panel { padding: 1.25rem; }
+            .dashboard-header-flex { flex-direction: column; align-items: stretch; }
+            .export-container { justify-content: stretch; flex-direction: column; align-items: stretch; width: 100%; }
+            .region-filter-form { width: 100%; }
+            .form-group { flex-direction: column; align-items: flex-start; width: 100%; }
+            .form-select { width: 100%; }
+            .btn-export-pdf { width: 100%; }
             .stat-card { padding: 1.25rem; }
             .stat-icon { width: 48px; height: 48px; font-size: 1.25rem; }
             .stat-value { font-size: 1.75rem; }
@@ -140,14 +151,35 @@
     <div id="main-content" class="page-wrapper">
         <div id="dashboardContent" class="dashboard-wrapper">
             <div class="dashboard-panel">
-                
-                <h3 class="dashboard-title">Tickets Overview</h3>
 
-                <div class="export-container">
-                    <a href="{{ route('tickets.export_pdf') }}" class="btn-export-pdf" title="PDF File Download">
-                        <span class="material-symbols-outlined">download</span>
-                        Download Report
-                    </a>
+                <div class="dashboard-header-flex">
+                    <h3 class="dashboard-title">Tickets Overview</h3>
+
+                    <div class="export-container">
+
+                        @can('filter_ticket_by_region')
+                        <form method="GET" action="{{ url()->current() }}" class="region-filter-form">
+                            <div class="form-group">
+                                <label for="region" class="form-label">Select Region:</label>
+                                <select name="region" id="region" class="form-select" onchange="this.form.submit()">
+                                    <option value="">All Regions</option>
+                                    @if(!empty($regions))
+                                        @foreach($regions as $region)
+                                            <option value="{{ trim($region) }}" {{ request('region') == trim($region) ? 'selected' : '' }}>
+                                                {{ trim($region) }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                        </form>
+                        @endcan
+
+                        <a href="{{ route('tickets.export_pdf', ['region' => request('region')]) }}" class="btn-export-pdf" title="PDF File Download">
+                            <span class="material-symbols-outlined">download</span>
+                            Download Report
+                        </a>
+                    </div>
                 </div>
 
                 {{-- Dashboard Cards --}}
@@ -182,7 +214,7 @@
 
                 {{-- IT Area, Personnel, Service, Overdue --}}
                 <div class="tables-grid">
-                    
+
                     @can('view tickets by region')
                     {{-- Tickets by Region --}}
                     <div class="table-card tc-indigo">
@@ -337,7 +369,7 @@
                                         <td>{{ $ticket->it_personnel }}</td>
                                         <td style="color: var(--text-muted);">{{ \Carbon\Carbon::parse($ticket->date_created)->format('M d, Y h:i A') }}</td>
                                         <td style="color: var(--text-muted);">{{ \Carbon\Carbon::parse($ticket->date_resolved)->format('M d, Y h:i A') }}</td>
-                                        
+
                                         @php
                                             $status = trim($ticket->status);
                                             $badgeClass = match($status) {
@@ -347,7 +379,7 @@
                                                 default => 'badge-gray',
                                             };
                                         @endphp
-                                        
+
                                         <td style="text-align: center;">
                                             <span class="badge {{ $badgeClass }}">
                                                 {{ $ticket->status }}

@@ -144,10 +144,24 @@
         .alert-error { width: 100%; background-color: var(--error-bg); border-left: 4px solid var(--alert-red); color: var(--error-text); padding: 1.25rem; margin-bottom: 1.5rem; border-radius: 0.5rem; display: flex; gap: 0.75rem; }
         .alert-error h4 { margin-bottom: 0.5rem; font-size: 0.95rem; font-weight: 700; }
         .alert-error ul { padding-left: 1.25rem; list-style-type: disc; font-size: 0.875rem; }
+
+        /* Full-Screen Loading Overlay */
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: #ffffff; }
+        .loading-overlay.active { display: flex; }
+        .spinner { width: 44px; height: 44px; border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: #ffffff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 
 <body>
+
+<!-- Full-Screen Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <p style="font-size: 1rem; font-weight: 600; letter-spacing: 0.025em;">Submitting Ticket, please wait...</p>
+</div>
 
 <header class="app-header">
     <div class="header-gradient"></div>
@@ -193,6 +207,7 @@
         &times;
     </button>
 
+    <!-- Display Error -->
     @if ($errors->any())
         <div class="alert-error">
             <i class="fas fa-exclamation-circle text-lg mt-0.5"></i>
@@ -207,9 +222,7 @@
         </div>
     @endif
 
-    <h2 class="form-title">
-        <span>Tickets Form</span>
-    </h2>
+    <h2 class="form-title"><span>Tickets Form</span> </h2>
 
     <form action="{{ route('tickets.store.client') }}" method="POST" enctype="multipart/form-data">
         @csrf
@@ -226,19 +239,25 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="middle_initial" class="form-label">
+                        Middle Initial <span class="text-required">*</span>
+                    </label>
+                    <input type="text" id="middle_initial" name="middle_initial" placeholder="e.g.,A." class="form-input">
+                </div>
+
+                <div class="form-group">
                     <label for="lastname" class="form-label">
                         Last Name <span class="text-required">*</span>
                     </label>
                     <input type="text" id="lastname" name="lastname" placeholder="e.g., Dela Cruz" required class="form-input">
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <label for="email" class="form-label">
-                        Email <span class="text-required">*</span>
-                    </label>
-                    <!-- HTML5 pattern added to enforce @cda.gov.ph domain natively -->
-                    <input type="email" id="email" name="email" placeholder="e.g., j_delacruz@cda.gov.ph" pattern=".*@cda\.gov\.ph$" title="Please use a valid @cda.gov.ph email address." required class="form-input">
-                </div>
+            <div class="form-group">
+                <label for="email" class="form-label">
+                    Email <span class="text-required">*</span>
+                </label>
+                <input type="email" id="email" name="email" placeholder="e.g., j_delacruz@cda.gov.ph" pattern=".*@cda\.gov\.ph$" title="Please use a valid @cda.gov.ph email address." required class="form-input">
             </div>
 
             <div class="form-grid grid-cols-2">
@@ -294,23 +313,23 @@
                 <textarea id="request" name="request" rows="4" placeholder="Describe the issue or request in detail..." required class="form-input"></textarea>
             </div>
 
-            <div class="form-group">
-                <label for="photo" class="form-label">Attach Photo (Optional)</label>
-                <input type="file" id="photo" name="photo" accept="image/*" class="form-input">
-            </div>
+            <div class="form-grid grid-cols-2">
+                <div class="form-group">
+                    <label for="photo" class="form-label">Attach Photo (Optional)</label>
+                    <input type="file" id="photo" name="photo" accept="image/*" class="form-input">
+                </div>
 
-            <div class="form-group">
-                <label for="priority" class="form-label">
-                    Priority <span class="text-required">*</span>
-                </label>
-                <select id="priority" name="priority" required class="form-select">
-                    <option value="" disabled selected>Select Priority</option>
-                    <option value="High">High</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Low">Low</option>
-                    <option value="Critical">Critical</option>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label for="priority" class="form-label">Priority <span class="text-required">*</span></label>
+                    <select id="priority" name="priority" required class="form-select">
+                        <option value="" disabled selected>Select Priority</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                        <option value="Critical">Critical</option>
+                    </select>
+                </div>
+            </div> 
 
         </fieldset>
 
@@ -397,7 +416,6 @@
     const personnelInput = document.getElementById('it_personnel');
     const emailInput = document.getElementById('it_email');
 
-    // Triggered when Region or Service dropdown changes
     function updatePersonnelAndEmails() {
         const selectedRegion = regionSelect.value;
         const selectedService = serviceSelect.value;
@@ -407,7 +425,6 @@
 
         if (!selectedRegion) return;
 
-        // Try exact match with selected service first, otherwise fallback to default for that region
         const exactKey = `${selectedRegion}_${selectedService}`;
         const defaultKey = `${selectedRegion}_default`;
 
@@ -445,7 +462,7 @@
         }
     });
 
-    // Form validation check on Submit
+    // Form validation check on Submit & Overlay Trigger
     document.querySelector('form').addEventListener('submit', function(e) {
         let isValid = true;
         let errorMessage = 'Please fill in all required fields marked with *.';
@@ -476,6 +493,9 @@
                 text: errorMessage,
                 confirmButtonColor: '#3085d6'
             });
+        } else {
+            // Display loading overlay when validation passes
+            document.getElementById('loadingOverlay').classList.add('active');
         }
     });
 
@@ -493,7 +513,6 @@
             if (this.value.trim()) {
                 this.classList.remove('border-red-500', 'bg-red-50');
             }
-            // Real-time valid color reset for email specifically
             if (this.id === 'email') {
                 if (this.value.trim() && !this.value.trim().toLowerCase().endsWith('@cda.gov.ph')) {
                     this.classList.add('border-red-500', 'bg-red-50');

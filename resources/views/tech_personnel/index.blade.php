@@ -221,6 +221,14 @@
         .error-title { margin: 0 0 0.5rem 0; font-weight: 700; font-size: 0.95rem; color: var(--error-title); transition: color 0.3s ease; }
         .error-list { margin: 0; padding-left: 1.5rem; font-size: 0.9rem; font-weight: 500; }
 
+        /* Full-Screen Loading Overlay */
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: #ffffff; }
+        .loading-overlay.active { display: flex; }
+        .spinner { width: 44px; height: 44px; border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: #ffffff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* Responsive Overrides */
         @media (max-width: 639px) {
             .pagination-wrapper nav .hidden { display: none !important; }
@@ -243,6 +251,12 @@
             .pagination-wrapper nav > div.hidden.sm\:flex-1 { display: flex !important; width: 100%; justify-content: space-between; align-items: center; }
         }
     </style>
+
+    <!-- Full-Screen Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p style="font-size: 1rem; font-weight: 600; letter-spacing: 0.025em;">Processing Technical Personnel, please wait...</p>
+    </div>
 
     <div id="main-content">
         <div class="panel">
@@ -510,9 +524,21 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
 
+            // Loading Helper Utilities
+            function showLoading() {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) overlay.classList.add('active');
+            }
+
+            function hideLoading() {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) overlay.classList.remove('active');
+            }
+
             // Helper to get CSS variable colors for SweetAlert Dark Mode
             const getComputedColor = (cssVar) => getComputedStyle(document.body).getPropertyValue(cssVar).trim();
 
+            // SweetAlert Flash & Validation Notifications
             @if(session('success'))
                 Swal.fire({
                     icon: 'success',
@@ -549,17 +575,32 @@
                 });
             @endif
 
-            // Modal Logic
+            // Modal Helpers
+            const body = document.body;
+
+            function openModal(modal) {
+                if (!modal) return;
+                modal.classList.remove('hidden');
+                body.classList.add('overflow-hidden');
+            }
+
+            function closeModal(modal) {
+                if (!modal) return;
+                modal.classList.add('hidden');
+                body.classList.remove('overflow-hidden');
+            }
+
+            // Add Personnel Modal Logic
             const addModal = document.getElementById("personnelModal");
             const openAddBtn = document.getElementById("openModal");
             const closeAddBtn = document.getElementById("closeModal");
             const cancelAddBtn = document.getElementById("cancelAddModal");
 
             if (openAddBtn && addModal) {
-                openAddBtn.addEventListener("click", () => addModal.classList.remove("hidden"));
+                openAddBtn.addEventListener("click", () => openModal(addModal));
             }
 
-            const closeAddModalFunc = () => { if(addModal) addModal.classList.add("hidden"); };
+            const closeAddModalFunc = () => closeModal(addModal);
             if (closeAddBtn) closeAddBtn.addEventListener("click", closeAddModalFunc);
             if (cancelAddBtn) cancelAddBtn.addEventListener("click", closeAddModalFunc);
 
@@ -567,50 +608,57 @@
                 addModal.addEventListener("click", (e) => {
                     if (e.target === addModal) closeAddModalFunc();
                 });
+
+                // Trigger loading on Add form submission
+                const addForm = addModal.querySelector('form');
+                if (addForm) {
+                    addForm.addEventListener('submit', function () {
+                        showLoading();
+                    });
+                }
             }
 
-            // Edit Modal Toggles
+            // Edit Personnel Modal Toggles
             const editModal = document.getElementById("editModal");
             const closeEditBtn = document.getElementById("closeEditModal");
             const cancelEditBtn = document.getElementById("cancelEditModal");
             const editButtons = document.querySelectorAll(".editBtn");
             const editForm = document.getElementById("editForm");
-            
+
             const editFirstname = document.getElementById("edit_firstname");
             const editMiddleInitial = document.getElementById("edit_middle_initial");
             const editLastname = document.getElementById("edit_lastname");
             const editEmail = document.getElementById("edit_it_email");
             const editArea = document.getElementById("edit_it_area");
-            const editCheckboxes = document.querySelectorAll(".edit-tech-service-checkbox"); // Checkboxes
+            const editCheckboxes = document.querySelectorAll(".edit-tech-service-checkbox");
 
             editButtons.forEach(button => {
                 button.addEventListener("click", (e) => {
                     e.preventDefault();
 
                     const id = button.dataset.id;
-                    editFirstname.value = button.dataset.firstname;
-                    editMiddleInitial.value = button.dataset.middle_initial;
-                    editLastname.value = button.dataset.lastname;
-                    editEmail.value = button.dataset.it_email;
-                    editArea.value = button.dataset.it_area;
+                    if (editFirstname) editFirstname.value = button.dataset.firstname || '';
+                    if (editMiddleInitial) editMiddleInitial.value = button.dataset.middle_initial || '';
+                    if (editLastname) editLastname.value = button.dataset.lastname || '';
+                    if (editEmail) editEmail.value = button.dataset.it_email || '';
+                    if (editArea) editArea.value = button.dataset.it_area || '';
 
-                    // Automatically check the correct Checkboxes
+                    // Check selected service checkboxes
                     const techServicesStr = button.dataset.tech_services || '';
                     const selectedServices = techServicesStr.split(',').map(item => item.trim());
-                    
+
                     editCheckboxes.forEach(checkbox => {
                         checkbox.checked = selectedServices.includes(checkbox.value);
                     });
 
-                    // Update form action dynamically
-                    editForm.action = `/tech_personnel/${id}`;
+                    // Update action route dynamically
+                    if (editForm) editForm.action = `/tech_personnel/${id}`;
 
-                    // Show modal
-                    editModal.classList.remove("hidden");
+                    openModal(editModal);
                 });
             });
 
-            const closeEditModalFunc = () => { if(editModal) editModal.classList.add("hidden"); };
+            const closeEditModalFunc = () => closeModal(editModal);
             if (closeEditBtn) closeEditBtn.addEventListener("click", closeEditModalFunc);
             if (cancelEditBtn) cancelEditBtn.addEventListener("click", closeEditModalFunc);
 
@@ -620,7 +668,14 @@
                 });
             }
 
-            // Delete confirmation
+            // Trigger loading on Edit form submission
+            if (editForm) {
+                editForm.addEventListener('submit', function () {
+                    showLoading();
+                });
+            }
+
+            // Delete Confirmation Logic
             document.querySelectorAll('.delete-btn').forEach(function (button) {
                 button.addEventListener('click', function (event) {
                     event.preventDefault();
@@ -639,14 +694,15 @@
                         color: getComputedColor('--text-dark')
                     }).then((result) => {
                         if (result.isConfirmed) {
+                            showLoading();
                             form.submit();
                         }
                     });
                 });
             });
-            
-            // Allow closing modals with Escape key
-            document.addEventListener('keydown', function(event) {
+
+            // Close Modals with Escape Key
+            document.addEventListener('keydown', function (event) {
                 if (event.key === "Escape") {
                     closeAddModalFunc();
                     closeEditModalFunc();

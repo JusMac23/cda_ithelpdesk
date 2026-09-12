@@ -242,7 +242,7 @@
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 1; visibility: visible; transition: all 0.3s ease; }
         .modal-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         
-        .modal-box { position: relative; background-color: var(--card-bg); border-radius: 1rem; border: 1px solid var(--border-light); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 100%; max-width: 52rem; max-height: 90vh; overflow-y: auto; padding: 1.5rem; transform: scale(1); transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease; }
+        .modal-box { position: relative; background-color: var(--card-bg); border-radius: 1rem; border: 1px solid var(--border-light); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 100%; max-width: 60rem; max-height: 90vh; overflow-y: auto; padding: 1.5rem; transform: scale(1); transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease; }
         .modal-overlay.hidden .modal-box { transform: scale(0.95); }
         
         .close-btn { position: absolute; top: 1.25rem; right: 1.25rem; color: var(--text-muted); font-size: 2rem; background: none; border: none; cursor: pointer; transition: all 0.2s; line-height: 1; border-radius: 0.25rem; padding: 0 0.5rem; }
@@ -265,6 +265,14 @@
         input[type="file"].form-input { padding: 0.4rem 0.5rem; line-height: 1.75; }
         input[type="file"]::file-selector-button { margin-right: 1rem; border: none; background: var(--btn-gray-bg); color: var(--btn-gray-text); padding: 0.4rem 0.8rem; border-radius: 0.25rem; cursor: pointer; transition: all 0.2s ease; font-weight: 600; font-size: 0.85rem; font-family: inherit; }
         input[type="file"]::file-selector-button:hover { background: var(--btn-gray-hover-bg); color: var(--btn-gray-hover-text); }
+
+        /* Full-Screen Loading Overlay */
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: #ffffff; }
+        .loading-overlay.active { display: flex; }
+        .spinner { width: 44px; height: 44px; border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: #ffffff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
 
         /* --------------------------------------------------- */
         /* Responsive Overrides                                */
@@ -300,6 +308,12 @@
             .pagination-wrapper nav > div.hidden.sm\:flex-1 { display: flex !important; width: 100%; justify-content: space-between; align-items: center; }
         }
     </style>
+
+    <!-- Full-Screen Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p style="font-size: 1rem; font-weight: 600; letter-spacing: 0.025em;">Processing Ticket, please wait...</p>
+    </div>
 
     <div id="main-content" class="page-wrapper">
         <div id="ticketsContent">
@@ -437,7 +451,7 @@
                             @forelse ($tickets ?? [] as $ticket)
                                 <tr>
                                     <td class="text-center font-bold" style="font-size: 0.95rem;">{{ $ticket->ticket_number }}</td>
-                                    <td>{{ $ticket->firstname }} {{ $ticket->lastname }}</td>
+                                    <td>{{ $ticket->firstname }} {{ $ticket->middle_initial }} {{ $ticket->lastname }}</td>
                                     <td>{{ $ticket->division }}</td>
                                     <td>{{ $ticket->device }}</td>
                                     <td>{{ $ticket->service }}</td>
@@ -586,21 +600,41 @@
                     <!-- Client Information -->
                     <fieldset class="form-fieldset">
                         <legend>Client Information</legend>
-                        <div class="form-grid grid-cols-3">
+
+                        @php
+                            $parts = explode(' ', trim(auth()->user()->name));
+                            $lastName = count($parts) > 1 ? array_pop($parts) : '';
+                            $middleInitial = '';
+
+                            // Check if the new last element is a middle initial (e.g., "A." or "A")
+                            if (count($parts) > 0) {
+                                $lastPart = end($parts);
+                                if (preg_match('/^[A-Za-z]\.?$/', $lastPart)) {
+                                    $middleInitial = array_pop($parts);
+                                }
+                            }
+
+                            $firstName = implode(' ', $parts);
+                        @endphp
+
+                        <div class="form-grid" style="display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 1rem;">
                             <div class="form-group">
                                 <label for="firstname" class="form-label">First Name <span class="text-required">*</span></label>
-                                <input type="text" id="firstname" name="firstname" placeholder="e.g., Juan" required class="form-input">
+                                <input type="text" id="firstname" name="firstname" value="{{ $firstName }}" readonly class="form-input">
                             </div>
-
+                            <div class="form-group">
+                                <label for="middle_initial" class="form-label">Middle Initial<span class="text-required">*</span></label>
+                                <input type="text" id="middle_initial" name="middle_initial" value="{{ $middleInitial }}" readonly class="form-input">
+                            </div>
                             <div class="form-group">
                                 <label for="lastname" class="form-label">Last Name <span class="text-required">*</span></label>
-                                <input type="text" id="lastname" name="lastname" placeholder="e.g., Dela Cruz" required class="form-input">
+                                <input type="text" id="lastname" name="lastname" value="{{ $lastName }}" readonly class="form-input">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label for="email" class="form-label">Email <span class="text-required">*</span></label>
-                            <input type="email" id="email" name="email" placeholder="e.g., j_delacruz@cda.gov.ph" required class="form-input">
+                            <input type="email" id="email" name="email" value="{{ auth()->user()->email }}" readonly class="form-input">
                         </div>
 
                         <div class="form-grid grid-cols-2">
@@ -652,21 +686,23 @@
                             <textarea id="request" name="request" rows="4" placeholder="Describe the issue or request in detail..." required class="form-input"></textarea>
                         </div>
 
-                        <div class="form-group">
-                            <label for="photo" class="form-label">Attach Photo (Optional)</label>
-                            <input type="file" id="photo" name="photo" accept="image/*" class="form-input">
-                        </div>
+                        <div class="form-grid grid-cols-2">
+                            <div class="form-group">
+                                <label for="photo" class="form-label">Attach Photo (Optional)</label>
+                                <input type="file" id="photo" name="photo" accept="image/*" class="form-input">
+                            </div>
 
-                        <div class="form-group">
-                            <label for="priority" class="form-label">Priority <span class="text-required">*</span></label>
-                            <select id="priority" name="priority" required class="form-select">
-                                <option value="" disabled selected>Select Priority</option>
-                                <option value="High">High</option>
-                                <option value="Medium">Medium</option>
-                                <option value="Low">Low</option>
-                                <option value="Critical">Critical</option>
-                            </select>
-                        </div>
+                            <div class="form-group">
+                                <label for="priority" class="form-label">Priority <span class="text-required">*</span></label>
+                                <select id="priority" name="priority" required class="form-select">
+                                    <option value="" disabled selected>Select Priority</option>
+                                    <option value="High">High</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Low">Low</option>
+                                    <option value="Critical">Critical</option>
+                                </select>
+                            </div>
+                        </div>    
                     </fieldset>
 
                     <!-- Designated Personnel -->
@@ -872,13 +908,24 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             
+            // Loading Helper Utilities
+            function showLoading() {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) overlay.classList.add('active');
+            }
+
+            function hideLoading() {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) overlay.classList.remove('active');
+            }
+
             // SweetAlert Flash Messages
             @if(session('success'))
                 Swal.fire({
                     icon: 'success',
                     title: 'Success!',
                     text: '{!! addslashes(session("success")) !!}',
-                    timer: 2500,
+                    timer: 3000,
                     showConfirmButton: false,
                     background: getComputedStyle(document.body).getPropertyValue('--card-bg').trim() || '#ffffff',
                     color: getComputedStyle(document.body).getPropertyValue('--text-dark').trim() || '#000000'
@@ -888,9 +935,9 @@
             @if(session('warning'))
                 Swal.fire({
                     icon: 'warning',
-                    title: 'warning!',
+                    title: 'Warning!',
                     text: '{!! addslashes(session("warning")) !!}',
-                    timer: 2500,
+                    timer: 3000,
                     showConfirmButton: false,
                     background: getComputedStyle(document.body).getPropertyValue('--card-bg').trim() || '#ffffff',
                     color: getComputedStyle(document.body).getPropertyValue('--text-dark').trim() || '#000000'
@@ -937,7 +984,10 @@
                 intervalId = setInterval(() => {
                     countdown--;
                     updateCountdown();
-                    if (countdown <= 0) location.reload();
+                    if (countdown <= 0) {
+                        showLoading();
+                        location.reload();
+                    }
                 }, 1000);
             }
 
@@ -991,10 +1041,8 @@
                     openModal(addModal);
                 @endif
 
-                // Get NextAssignment Map safely
                 const nextAssignmentMap = @json($nextAssignment ?? new \stdClass());
                 
-                // Use querySelector scoped to addModal to avoid ID conflicts
                 const serviceSelect = addModal.querySelector('select[name="service"]');
                 const regionSelect = addModal.querySelector('select[name="it_area"]');
                 const personnelInput = addModal.querySelector('input[name="it_personnel"]');
@@ -1021,7 +1069,6 @@
                     } else {
                         personnelInput.value = 'No personnel found for this region';
                         
-                        // Optional: Alert the user natively if they select an empty region
                         if (typeof Swal !== 'undefined') {
                             Swal.fire({
                                 icon: 'warning',
@@ -1037,7 +1084,7 @@
                 if (serviceSelect) serviceSelect.addEventListener('change', updatePersonnelAndEmails);
                 if (regionSelect) regionSelect.addEventListener('change', updatePersonnelAndEmails);
 
-                // Form validation enhancement
+                // Form validation & submission enhancement
                 const ticketForm = addModal.querySelector('#createTicketForm');
                 if (ticketForm) {
                     ticketForm.addEventListener('submit', function(e) {
@@ -1065,11 +1112,12 @@
                             } else {
                                 alert('Please fill in all required fields marked with *.');
                             }
+                        } else {
+                            showLoading();
                         }
                     });
                 }
 
-                // Enable/Disable Submit button on Terms acceptance
                 const termsCheckbox = addModal.querySelector('#terms_agree');
                 const submitBtn = addModal.querySelector('#submitTicketBtn');
 
@@ -1084,13 +1132,10 @@
 
             // Re-Assign Ticket Modal Logic
             const assignModal = document.getElementById('assignTicketModal');
-
-            // Currently logged-in user details from Laravel
             const currentUserEmail = @json(auth()->user()->email ?? '');
             const currentUserName = @json(auth()->user()->name ?? '');
             const currentUserRole = @json(auth()->user()->role ?? '');
 
-            // Parse mapping payload from Controller safely
             const rawItMapping = @json($itMapping ?? $reassignable_it_mapping ?? $it_mapping ?? []);
             const itMapping = typeof rawItMapping === 'string' ? JSON.parse(rawItMapping) : rawItMapping;
 
@@ -1098,12 +1143,16 @@
                 const closeAssignBtn = document.getElementById('closeAssignModal');
                 const cancelAssignBtn = document.getElementById('cancelAssignModal');
                 const regionSelectAssign = assignModal.querySelector('#it_area_assign') || assignModal.querySelector('select[name="it_area"]');
-                
-                // Updated Selectors to match new IDs and field names
                 const assigneeSelect = assignModal.querySelector('#re_assigned_to') || assignModal.querySelector('select[name="re_assigned_to"]');
                 const assigneeEmail = assignModal.querySelector('#re_assigned_it_email') || assignModal.querySelector('input[name="re_assigned_it_email"]');
+                const assignForm = assignModal.querySelector('form');
 
-                // Open Modal Handler
+                if (assignForm) {
+                    assignForm.addEventListener('submit', function() {
+                        showLoading();
+                    });
+                }
+
                 document.querySelectorAll('.open-assign-modal').forEach(btn => {
                     btn.addEventListener('click', function () {
                         const ticketId = this.dataset.id;
@@ -1111,7 +1160,6 @@
                         const currentAssigneeName = (this.dataset.assignedPersonnel || this.dataset.assignedTo || '').trim();
                         const currentAssigneeEmail = (this.dataset.assignedEmail || this.dataset.itEmail || '').trim().toLowerCase();
 
-                        // 1. Prevent reassignment if ticket is resolved
                         if (currentStatus === 'Resolved') {
                             if (typeof Swal !== 'undefined') {
                                 Swal.fire({ title: 'Ticket Locked', text: 'Ticket was already resolved. Re-assignment is not allowed.', icon: 'warning', confirmButtonColor: '#4f46e5' });
@@ -1121,7 +1169,6 @@
                             return;
                         }
 
-                        // 2. Access Check: Only current assignee OR Super Admin / ICTS Admin can reassign
                         const isAdmin = ['Super Admin', 'ICTS Admin'].includes(currentUserRole);
 
                         if ((currentAssigneeEmail || currentAssigneeName) && (currentStatus === 'Pending/Re-Assigned')) {
@@ -1146,37 +1193,23 @@
                         const assignTicketIdInput = document.getElementById('assignTicketId');
                         if (assignTicketIdInput) assignTicketIdInput.value = ticketId;
 
-                        // Store current assignee on modal dataset to filter them out of dropdown selection
                         assignModal.dataset.currentAssigneeEmail = currentAssigneeEmail;
                         assignModal.dataset.currentAssigneeName = currentAssigneeName;
 
-                        // Reset form fields when opening modal
                         if (regionSelectAssign) regionSelectAssign.selectedIndex = 0;
                         if (assigneeSelect) assigneeSelect.innerHTML = '<option disabled selected value="">Select Personnel</option>';
                         if (assigneeEmail) assigneeEmail.value = '';
 
-                        if (typeof openModal === 'function') {
-                            openModal(assignModal);
-                        } else {
-                            assignModal.classList.remove('hidden');
-                        }
+                        openModal(assignModal);
                     });
                 });
 
-                // Close Modal Handler
-                const closeAssignFunc = () => {
-                    if (typeof closeModal === 'function') {
-                        closeModal(assignModal);
-                    } else {
-                        assignModal.classList.add('hidden');
-                    }
-                };
+                const closeAssignFunc = () => closeModal(assignModal);
 
                 if (closeAssignBtn) closeAssignBtn.addEventListener('click', closeAssignFunc);
                 if (cancelAssignBtn) cancelAssignBtn.addEventListener('click', closeAssignFunc);
                 assignModal.addEventListener('click', e => { if (e.target === assignModal) closeAssignFunc(); });
 
-                // Region / IT Area Selection Change Handler
                 if (regionSelectAssign) {
                     regionSelectAssign.addEventListener('change', function () {
                         if (assigneeSelect) assigneeSelect.innerHTML = '<option disabled selected value="">Select Personnel</option>';
@@ -1187,7 +1220,6 @@
 
                         let rawPersonnelData = [];
 
-                        // Match selected IT Area against mapping keys
                         for (const areaKey in itMapping) {
                             if (areaKey.trim().toLowerCase() === selectedRegionVal) {
                                 rawPersonnelData = itMapping[areaKey];
@@ -1200,7 +1232,6 @@
                         const currentAssigneeEmail = (assignModal.dataset.currentAssigneeEmail || '').toLowerCase();
                         const currentAssigneeName = (assignModal.dataset.currentAssigneeName || '').toLowerCase();
 
-                        // Filter out the currently assigned IT personnel
                         const availablePersonnel = personnelList.filter(p => {
                             const pEmail = (p.email || p.it_email || '').trim().toLowerCase();
 
@@ -1225,7 +1256,6 @@
                             return;
                         }
 
-                        // Populate personnel dropdown
                         availablePersonnel.forEach(p => {
                             const opt = document.createElement('option');
 
@@ -1246,7 +1276,6 @@
                     });
                 }
 
-                // Personnel Dropdown Selection Change Handler (Auto-fills Email)
                 if (assigneeSelect) {
                     assigneeSelect.addEventListener('change', function () {
                         const sel = this.options[this.selectedIndex];
@@ -1271,18 +1300,16 @@
                 if (cancelEditBtn) cancelEditBtn.addEventListener('click', closeEditFunc);
                 editModal.addEventListener('click', e => { if (e.target === editModal) closeEditFunc(); });
 
-                // Handle alerts when selecting status from dropdown
                 if (statusSelect) {
                     statusSelect.addEventListener('change', function () {
                         if (this.value === 'Pending/Re-Assigned') {
                             showAlert('warning', 'Notice', 'You must re-assign the ticket first.');
                         } else if (this.value !== 'Resolved') {
-                            showAlert('info', 'Notice', 'Please update the ticket into resolved');
+                            showAlert('info', 'Notice', 'Please update the ticket into resolved.');
                         }
                     });
                 }
 
-                // Handle form submission guardrails
                 if (editForm) {
                     editForm.addEventListener('submit', function (e) {
                         const currentStatus = statusSelect ? statusSelect.value : '';
@@ -1295,19 +1322,19 @@
 
                         if (currentStatus !== 'Resolved') {
                             e.preventDefault();
-                            showAlert('warning', 'Action Required', 'Please update the ticket into resolved');
+                            showAlert('warning', 'Action Required', 'Please update the ticket into resolved.');
                             return;
                         }
+
+                        showLoading();
                     });
                 }
 
-                // Populate modal when clicking edit button
                 document.querySelectorAll('.open-edit-modal').forEach(btn => {
                     btn.addEventListener('click', function () {
                         const ticketId = this.dataset.id;
                         const status = this.dataset.status || '';
                         
-                        // FIX 1: Format priority to match the exact capitalized values in the HTML options
                         let rawPriority = this.dataset.priority || '';
                         let priority = rawPriority ? (rawPriority.charAt(0).toUpperCase() + rawPriority.slice(1).toLowerCase()) : '';
                         
@@ -1319,7 +1346,6 @@
                             return;
                         }
 
-                        // Populate form actions and fields
                         if (editForm) editForm.action = `/tickets/${ticketId}`;
                         
                         const editIdInput = editModal.querySelector('#edit_ticket_id');
@@ -1327,14 +1353,10 @@
                         const photoPreview = editModal.querySelector('#photo_preview');
 
                         if (editIdInput) editIdInput.value = ticketId;
-                        
-                        // FIX 2: Assign priority to the prioritySelect (it was mistakenly set to 'status')
                         if (prioritySelect) prioritySelect.value = priority;
-                        
                         if (statusSelect) statusSelect.value = status;
                         if (actionTextarea) actionTextarea.value = actionTaken;
 
-                        // Handle photo thumbnail preview
                         if (photoPreview) {
                             if (photoUrl) {
                                 photoPreview.src = photoUrl;
@@ -1349,7 +1371,6 @@
                     });
                 });
 
-                // Helper function for alerts (SweetAlert fallback to native alert)
                 function showAlert(icon, title, message) {
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
@@ -1379,6 +1400,7 @@
                         cancelButtonText: 'Cancel'
                     }).then(res => {
                         if (res.isConfirmed) {
+                            showLoading();
                             const deleteForm = document.getElementById('delete-form-' + id);
                             if (deleteForm) deleteForm.submit();
                         }
@@ -1395,5 +1417,5 @@
                 }
             });
         });
-        </script>
+    </script>
 </x-app-layout>
