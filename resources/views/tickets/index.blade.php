@@ -1,8 +1,9 @@
 <x-app-layout>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
- <style>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+
+    <style>
         /* --- Theme Variables --- */
         :root {
             --card-bg: #ffffff;
@@ -93,7 +94,9 @@
 
         /* --- Buttons - Uniform 44px Heights --- */
         .btn { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 1.5rem; border-radius: 0.5rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s ease; width: 100%; text-decoration: none; font-family: inherit; white-space: nowrap; box-sizing: border-box; }
-        .btn i { margin-right: 0.5rem; font-size: 1rem; }
+        
+        /* Targeting Material Symbols Outlined inside buttons */
+        .btn .material-symbols-outlined { margin-right: 0.4rem; font-size: 1.25rem; display: inline-flex; align-items: center; justify-content: center; }
         
         /* Internal Count Badges inside Buttons */
         .btn .btn-count { margin-left: 0.5rem; background-color: rgba(255, 255, 255, 0.25); padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 700; }
@@ -196,30 +199,47 @@
 
         /* Action Links inside Table */
         .action-group { display: flex; flex-direction: column; gap: 0.5rem; min-width: 140px; }
-        .action-link { display: inline-flex; align-items: center; font-size: 0.85rem; font-weight: 600; font-family: inherit; cursor: pointer; padding: 0.4rem 0.75rem; border-radius: 0.375rem; transition: all 0.2s; text-decoration: none; background: transparent; white-space: nowrap; width: 100%; text-align: left; box-sizing: border-box; justify-content: flex-start; }
-        .action-link i { margin-right: 0.4rem; width: 16px; text-align: center; flex-shrink: 0; font-size: 0.9rem; }
-        
-        .link-blue { color: #3b82f6; border: 1px solid #bfdbfe; } 
+
+        .action-link { display: inline-flex; align-items: center; font-size: 0.85rem; font-weight: 600; font-family: inherit; cursor: pointer; padding: 0.4rem 0.75rem; border-radius: 0.375rem; transition: all 0.2s ease-in-out; text-decoration: none;  background: transparent; white-space: nowrap; width: 100%; text-align: left; box-sizing: border-box; justify-content: flex-start; }
+
+        /* Targeting Material Symbols Outlined inside action links */
+        .action-link .material-symbols-outlined { margin-right: 0.4rem; font-size: 1.1rem; width: 20px; text-align: center; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
+
+        /* Green */
+        .link-green { color: #16a34a; border: 1px solid #bbf7d0; } 
+        .link-green:hover { background-color: #f0fdf4; color: #15803d; border-color: #86efac; }
+
+        /* Blue */
+        .link-blue { color: #2563eb; border: 1px solid #bfdbfe; } 
         .link-blue:hover { background-color: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
-        
+
+        /* Yellow / Amber */
         .link-yellow { color: #d97706; border: 1px solid #fde68a; } 
         .link-yellow:hover { background-color: #fffbeb; color: #b45309; border-color: #fcd34d; }
-        
-        .link-indigo { color: #4f46e5; border: 1px solid #a5b4fc; } 
-        .link-indigo:hover { background-color: #e0e7ff; color: #3730a3; border-color: #818cf8; }
-        
-        .link-red { color: #ef4444; border: 1px solid #fecaca; } 
+
+        /* Indigo */
+        .link-indigo { color: #4f46e5; border: 1px solid #c7d2fe; } 
+        .link-indigo:hover { background-color: #eef2ff; color: #3730a3; border-color: #a5b4fc; }
+
+        /* Red */
+        .link-red { color: #dc2626; border: 1px solid #fecaca; } 
         .link-red:hover { background-color: #fef2f2; color: #b91c1c; border-color: #fca5a5; }
 
-        /* Dark Mode Action Link Overrides */
+        /* Dark Mode Overrides */
+        body.dark .link-green { color: #4ade80; border-color: #14532d; }
+        body.dark .link-green:hover { background-color: rgba(20, 83, 45, 0.4); color: #86efac; border-color: #22c55e; }
+
         body.dark .link-blue { color: #60a5fa; border-color: #1e3a8a; }
-        body.dark .link-blue:hover { background-color: rgba(30, 58, 138, 0.4); color: #93c5fd; }
+        body.dark .link-blue:hover { background-color: rgba(30, 58, 138, 0.4); color: #93c5fd; border-color: #3b82f6; }
+
         body.dark .link-yellow { color: #fbbf24; border-color: #78350f; }
-        body.dark .link-yellow:hover { background-color: rgba(120, 53, 15, 0.4); color: #fcd34d; }
-        body.dark .link-indigo { color: #818cf8; border-color: #3730a3; }
-        body.dark .link-indigo:hover { background-color: rgba(49, 46, 129, 0.4); color: #a5b4fc; }
+        body.dark .link-yellow:hover { background-color: rgba(120, 53, 15, 0.4); color: #fcd34d; border-color: #f59e0b; }
+
+        body.dark .link-indigo { color: #818cf8; border-color: #312e81; }
+        body.dark .link-indigo:hover { background-color: rgba(49, 46, 129, 0.4); color: #a5b4fc; border-color: #6366f1; }
+
         body.dark .link-red { color: #f87171; border-color: #7f1d1d; }
-        body.dark .link-red:hover { background-color: rgba(127, 29, 29, 0.4); color: #fca5a5; }
+        body.dark .link-red:hover { background-color: rgba(127, 29, 29, 0.4); color: #fca5a5; border-color: #ef4444; }
 
         /* --- Modern UI Pagination --- */
         .pagination-wrapper { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-light); width: 100%; transition: border-color 0.3s ease; }
@@ -328,21 +348,21 @@
                     <div class="action-left-group">
                         @can('create_ticket')
                         <button id="openAddTicketModalBtn" class="btn btn-green">
-                            <i class="fas fa-plus"></i> Add Ticket
+                            <span class="material-symbols-outlined">add</span> Add Ticket
                         </button>
                         @endcan
 
                         <form action="{{ route('tickets.index') }}" method="GET" class="action-form">
                             <input type="hidden" name="filter" value="allTickets">
                             <button id="allTickets" type="submit" class="btn btn-blue">
-                                <i class="fas fa-list"></i> All Tickets <span class="btn-count">{{ $ticketsCount ?? 0 }}</span>
+                                <span class="material-symbols-outlined">list</span> All Tickets <span class="btn-count">{{ $ticketsCount ?? 0 }}</span>
                             </button>
                         </form>
 
                         <form action="{{ route('tickets.index') }}" method="GET" class="action-form">
                             <input type="hidden" name="filter" value="overdue">
                             <button id="overdue" type="submit" class="btn btn-red">
-                                <i class="fas fa-clock"></i> Overdue <span class="btn-count">{{ $overdueCount ?? 0 }}</span>
+                                <span class="material-symbols-outlined">schedule</span> Overdue <span class="btn-count">{{ $overdueCount ?? 0 }}</span>
                             </button>
                         </form>
 
@@ -356,7 +376,7 @@
                     <form action="{{ route('tickets.index') }}" method="GET" class="search-form">
                         <input type="text" name="search_query" value="{{ request('search_query') }}" placeholder="Search tickets..." class="search-input" autocomplete="off">
                         <button type="submit" class="search-btn" aria-label="Search">
-                            <i class="fas fa-search" style="margin: 0;"></i>
+                            <span class="material-symbols-outlined">search</span>
                         </button>
                     </form>
                     @endcan
@@ -416,11 +436,11 @@
                     
                     <div class="filter-container">
                         <button type="submit" name="action" value="search" class="btn btn-indigo">
-                            <i class="fas fa-filter"></i> Apply Filter
+                            <span class="material-symbols-outlined">filter_alt</span> Apply Filter
                         </button>
                         @can('generate_report')
                         <button type="submit" name="action" value="generate" class="btn btn-green" title="Excel File Download">
-                            <i class="fas fa-download"></i> Generate Report
+                            <span class="material-symbols-outlined">download</span> Generate Report
                         </button>
                         @endcan
                     </div>
@@ -434,14 +454,10 @@
                                 <th class="text-center">Tracking ID</th>
                                 <th>Requested By</th>
                                 <th>Division</th>
-                                <th>Device</th>
                                 <th>Technical Service</th>
                                 <th>Request Details</th>
                                 <th>Assigned Personnel</th>
-                                <th>Action Taken</th>
-                                <th>Date & Time Created</th>
-                                <th>Date & Time Resolved</th>
-                                <th class="">Photo</th>
+                                <th>Date Created</th>
                                 <th class="text-center">Priority</th>
                                 <th class="text-center">Status</th>
                                 <th class="text-center">Actions</th>
@@ -453,7 +469,6 @@
                                     <td class="text-center font-bold" style="font-size: 0.95rem;">{{ $ticket->ticket_number }}</td>
                                     <td>{{ $ticket->firstname }} {{ $ticket->middle_initial }} {{ $ticket->lastname }}</td>
                                     <td>{{ $ticket->division }}</td>
-                                    <td>{{ $ticket->device }}</td>
                                     <td>{{ $ticket->service }}</td>
                                     <td>
                                         <span class="text-truncate" title="{{ $ticket->request }}">
@@ -461,29 +476,9 @@
                                         </span>
                                     </td>
                                     <td>{{ $ticket->it_personnel }}</td>
-                                    <td>
-                                        <span class="text-truncate" title="{{ $ticket->action_taken }}">
-                                            {{ $ticket->action_taken ?: 'N/A' }}
-                                        </span>
-                                    </td>
+                                    
                                     <td style="color: var(--text-muted);">
                                         {{ \Carbon\Carbon::parse($ticket->date_created)->format('M d, Y h:i A') }}
-                                    </td>
-                                    <td style="color: var(--text-muted);">
-                                        @if($ticket->date_resolved)
-                                            {{ \Carbon\Carbon::parse($ticket->date_resolved)->format('M d, Y h:i A') }}
-                                        @else
-                                            <span style="color: #ef4444; font-style: italic; font-weight: 600;">Not Resolved</span>
-                                        @endif
-                                    </td>
-                                    <td class="text-center">
-                                        @if($ticket->photo)
-                                            <a href="{{ asset('storage/' . $ticket->photo) }}" target="_blank">
-                                                <img src="{{ asset('storage/' . $ticket->photo) }}" alt="Evidence" class="thumb-img">
-                                            </a>
-                                        @else
-                                            <span style="color: var(--text-muted); font-size: 0.8rem; font-weight: 600;">N/A</span>
-                                        @endif
                                     </td>
                                     
                                     <td class="text-center">
@@ -519,13 +514,20 @@
 
                                     <td class="text-center">
                                         <div class="action-group">
+                                            
+                                            @can('view_ticket_details')
+                                                <a href="{{ route('tickets.view', $ticket->ticket_id) }}" class="action-link link-green">
+                                                    <span class="material-symbols-outlined">visibility</span> View Details
+                                                </a>
+                                            @endcan
+
                                             @can('reassign_ticket')
                                                 <button type="button" class="action-link link-yellow open-assign-modal"
                                                     data-id="{{ $ticket->ticket_id }}" 
                                                     data-status="{{ $ticket->status }}"
                                                     data-assigned-email="{{ $ticket->it_email }}"
                                                     data-assigned-personnel="{{ $ticket->it_personnel }}">
-                                                    <i class="fas fa-user-plus"></i> Re-Assign
+                                                    <span class="material-symbols-outlined">person_add</span> Re-Assign
                                                 </button>
                                             @endcan
 
@@ -536,14 +538,14 @@
                                                     data-priority="{{ $ticket->priority }}"
                                                     data-action_taken="{{ $ticket->action_taken }}"
                                                     data-photo="{{ $ticket->photo }}">
-                                                    <i class="fas fa-edit"></i> Update Status
+                                                    <span class="material-symbols-outlined">edit</span> Update Status
                                                 </button>
                                             @endcan
 
                                             @can('generate_tsar')
                                                 @if($ticket->status === 'Resolved')
                                                     <a href="{{ route('tickets.generateTSAR', $ticket->ticket_id) }}" class="action-link link-indigo">
-                                                        <i class="fas fa-file-alt"></i> Generate TSAR
+                                                        <span class="material-symbols-outlined">description</span> Generate TSAR
                                                     </a>
                                                 @endif
                                             @endcan
@@ -553,7 +555,7 @@
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="button" class="action-link link-red delete-btn" data-id="{{ $ticket->ticket_id }}">
-                                                        <i class="fas fa-trash-alt"></i> Delete
+                                                        <span class="material-symbols-outlined">delete</span> Delete
                                                     </button>
                                                 </form>
                                             @endcan
@@ -580,11 +582,12 @@
         {{-- Add Ticket Modal --}}
         <div id="addticketModal" class="modal-overlay hidden">
             <div class="modal-box">
+                
                 <button id="closeModal" class="close-btn" aria-label="Close">&times;</button>
                 
                 @if ($errors->any())
                     <div style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid #fca5a5; color: #b91c1c; padding: 1.25rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">
-                        <h4 style="margin:0 0 0.5rem 0; font-weight: 700; color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> Please fix the following errors:</h4>
+                        <h4 style="margin:0 0 0.5rem 0; font-weight: 700; color: #ef4444;"><span class="material-symbols-outlined">exclamation</span> Please fix the following errors:</h4>
                         <ul style="margin:0; padding-left: 1.5rem; font-size: 0.9rem; font-weight: 500;">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>

@@ -417,19 +417,21 @@
                                     {{ $label }} <span class="required-mark">*</span>
                                 </label>
 
-                                @if ($name === 'dpo')
-                                    {{-- Display DPO name and email as readonly --}}
-                                    <div id="{{ $name }}" class="readonly-box">
-                                        <p><strong>Name:</strong> {{ $dpoDetails->name }}</p>
-                                        <p><strong>Email:</strong> {{ $dpoDetails->email }}</p>
-                                        <p><strong>Contact:</strong> {{ $dpoDetails->contact_number }}</p>
+                                @if (strtolower($name) === 'dpo')
+                                    {{-- Automatically fetch and display DPO details independently as readonly --}}
+                                    <div id="{{ $name }}" class="readonly-box" style="display: flex; flex-direction: column; gap: 4px;">
+                                        <p><strong>Name:</strong> {{ $dpoDetails->name ?? 'No DPO Assigned' }}</p>
+                                        <p><strong>Email:</strong> {{ $dpoDetails->email ?? 'N/A' }}</p>
+                                        <p><strong>Contact:</strong> {{ $dpoDetails->contact_number ?? 'N/A' }}</p>
                                     </div>
+                                    {{-- Hidden fallback to supply the payload on form submit --}}
+                                    <input type="hidden" name="{{ $name }}" value="{{ $dpoDetails->name ?? '' }} | {{ $dpoDetails->email ?? '' }}">
                                 @else
                                     <textarea id="{{ $name }}" name="{{ $name }}" class="form-textarea" placeholder="Provide details...">{{ old($name, $notification->$name ?? '') }}</textarea>
                                 @endif
                             </div>
 
-                            {{-- Insert the extra "Provide Details" field right after 1.C --}}
+                            {{-- Insert the extra "Provide Details" field right after num_records --}}
                             @if ($name === 'num_records')
                                 <div class="form-group">
                                     <label for="num_records_provide_details" class="form-label">
@@ -438,7 +440,7 @@
                                     <textarea name="num_records_provide_details" id="num_records_provide_details" rows="3"
                                         placeholder="e.g., 1000 employees consisting of names, contact details, and social security numbers."
                                         class="form-textarea" required>{{ old('num_records_provide_details', $notification->num_records_provide_details ?? '') }}</textarea>
-                                    
+                                
                                     @error('num_records_provide_details')
                                         <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem; font-weight: 500;">{{ $message }}</span>
                                     @enderror

@@ -352,6 +352,34 @@ class TicketsController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
+    // Handle View
+    public function view(Request $request, $ticket_id)
+    {
+        // 1. Fetch ticket using base query to enforce user role/regional scope security
+        $ticket = $this->getTicketQuery()
+            ->where('ticket_id', $ticket_id)
+            ->first();
+
+        // 2. Abort if not found or unauthorized for this user's scope
+        if (!$ticket) {
+            abort(404, 'Ticket record not found or access denied.');
+        }
+
+        $viewName = 'tickets.view_details_tickets';
+
+        // 3. Handle AJAX/JSON requests for modals
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'status' => 'success',
+                'ticket' => $ticket,
+                'html'   => view($viewName, compact('ticket'))->render(),
+            ]);
+        }
+
+        // 4. Standard View Response
+        return view($viewName, compact('ticket'));
+    }
+
     /**
      * Reassign ticket to another IT personnel with validation, priority update, and notifications.
      */

@@ -542,34 +542,34 @@ class DataBreachReportsController extends Controller
     // Handle Assessment
     public function assess($dbn_id)
     {
-        $dpoRoleId = Role::where('name', 'DPO')->value('id');
-        $dpoDetails = User::where('role', $dpoRoleId)->first();
+        // 1. Find the DPO purely from the database (Strictly independent of logged-in user)
+        // First checks via Spatie Permission trait, then falls back to column check
+        $dpoDetails = User::role('DPO')->first();
+        if (!$dpoDetails) {
+            $dpoRoleId = Role::where('name', 'DPO')->value('id');
+            $dpoDetails = User::where('role', $dpoRoleId)->orWhere('role', 'DPO')->first();
+        }
 
+        // 2. Resolve Representative logic
         $email = auth()->user()->email;
-
-        // Try DatabreachTeam first
         $loggedInUser = DatabreachTeam::where('email', $email)->first();
-
-        // If not found, fall back to User
         if (!$loggedInUser) {
             $loggedInUser = User::where('email', $email)->first();
         }
 
-        // Build a unified full name
         $representativeName = $loggedInUser instanceof DatabreachTeam
             ? $loggedInUser->firstname . ' ' . $loggedInUser->lastname
-            : $loggedInUser->name;
+            : ($loggedInUser->name ?? 'Unknown User');
 
+        // 3. Prepare Notification Model
         $notification = DataBreachNotification::findOrFail($dbn_id);
 
-        // Decode JSON into array for Blade display
         if (is_string($notification->notification_type_description)) {
             $notification->notification_type_description = json_decode($notification->notification_type_description, true);
         }
 
         $region = $notification->pic;
         $team = DatabreachTeam::where('region', 'like', '%' . $region . '%')->first();
-
         $notification->team_email = $team ? $team->email : null;
 
         return view('databreach.assess_databreach', compact('notification', 'dpoDetails', 'loggedInUser', 'representativeName'));
@@ -612,7 +612,7 @@ class DataBreachReportsController extends Controller
             'with_request'                      => 'required|in:Yes,No',
             'how_breach_occured'                => 'required|string',
             'chronology'                        => 'required|string',
-            'num_records'                       => 'required|integer',
+            'num_records'                       => 'required|string',
             'hundred_plus'                      => 'nullable|boolean',
             'num_records_provide_details'       => 'required|string',
             'description_nature'                => 'required|string',
@@ -633,40 +633,47 @@ class DataBreachReportsController extends Controller
         }
 
         // --- NEW CALCULATION LOGIC ---
-        // Lock in the remaining time in seconds when the assessment happens
         if ($notification->status === 'For Assessment') {
             $deadline = Carbon::parse($notification->created_at)->addHours(24);
             $now = now();
             
             if ($now->lessThan($deadline)) {
-                // Calculate remaining seconds and save it to the DB
                 $data['time_countdown'] = $now->diffInSeconds($deadline);
             } else {
-                // The assessment was late
                 $data['time_countdown'] = 0;
             }
         }
 
-        // Get DPO user
-        $dpoRoleId = Role::where('name', 'DPO')->value('id');
-        $dpo = User::where('role', $dpoRoleId)->first(); 
+        // 1. Fetch DPO independently to store assignment record inside DB
+        $dpo = User::role('DPO')->first(); 
+        if (!$dpo) {
+            $dpoRoleId = Role::where('name', 'DPO')->value('id');
+            $dpo = User::where('role', $dpoRoleId)->orWhere('role', 'DPO')->first();
+        }
 
-        // Prepare DPO display
-        $data['dpo'] = implode(' | ', array_filter([
+        $dpoFormattedString = implode(' | ', array_filter([
             $dpo->name ?? null,
             $dpo->email ?? null,
             $dpo->contact_number ?? null,
         ]));
+        
+        $data['dpo'] = $dpoFormattedString;
+        $data['DPO'] = $dpoFormattedString; // Covers both exact/lowercase column matches
 
         $data['status'] = 'For Evaluation';
 
         $notification->update($data);
 
-        User::where('role', $dpoRoleId)
-            ->pluck('email')
-            ->each(fn ($email) =>
-                Mail::to($email)->send(new IncidentForEvaluation($notification))
-            );
+        // 2. Collect all DPO emails and dispatch evaluation securely
+        $dpoEmails = User::role('DPO')->pluck('email')->filter()->toArray();
+        if (empty($dpoEmails)) {
+            $dpoRoleId = Role::where('name', 'DPO')->value('id');
+            $dpoEmails = User::where('role', $dpoRoleId)->orWhere('role', 'DPO')->pluck('email')->filter()->toArray();
+        }
+
+        foreach ($dpoEmails as $dpoEmail) {
+            Mail::to($dpoEmail)->send(new IncidentForEvaluation($notification));
+        }
 
         return redirect()
             ->route('databreach.index')
@@ -676,8 +683,12 @@ class DataBreachReportsController extends Controller
     // Handle Evaluation
     public function evaluate($dbn_id)
     {
-        $dpoRoleId = Role::where('name', 'DPO')->value('id');
-        $dpoDetails = User::where('role', $dpoRoleId)->first();
+        // 1. Find the DPO purely from the database (Strictly independent of logged-in user)
+        $dpoDetails = User::role('DPO')->first();
+        if (!$dpoDetails) {
+            $dpoRoleId = Role::where('name', 'DPO')->value('id');
+            $dpoDetails = User::where('role', $dpoRoleId)->orWhere('role', 'DPO')->first();
+        }
 
         $notification = DataBreachNotification::findOrFail($dbn_id);
 
@@ -691,6 +702,9 @@ class DataBreachReportsController extends Controller
 
         $notification->team_email = $team ? $team->email : null;
 
+        // Ensure we pass dpoRoleId if the blade still references it, along with the fixed dpoDetails
+        $dpoRoleId = Role::where('name', 'DPO')->value('id'); 
+        
         return view('databreach.evaluate_databreach', compact('notification', 'dpoRoleId', 'dpoDetails'));
     }
 
@@ -734,7 +748,7 @@ class DataBreachReportsController extends Controller
             'with_request'                      => 'required|in:Yes,No',
             'how_breach_occured'                => 'required|string',
             'chronology'                        => 'required|string',
-            'num_records'                       => 'required|integer',
+            'num_records'                       => 'required|string',
             'hundred_plus'                      => 'nullable|boolean',
             'num_records_provide_details'       => 'required|string',
             'description_nature'                => 'required|string',
@@ -769,21 +783,28 @@ class DataBreachReportsController extends Controller
                 }
             }
 
-            $dpoRoleId = Role::where('name', 'DPO')->value('id');
-            $dpo = User::where('role', $dpoRoleId)->first(); 
+            // 1. Fetch DPO independently to store assignment record inside DB securely
+            $dpo = User::role('DPO')->first(); 
+            if (!$dpo) {
+                $dpoRoleId = Role::where('name', 'DPO')->value('id');
+                $dpo = User::where('role', $dpoRoleId)->orWhere('role', 'DPO')->first();
+            }
 
-            $data['dpo'] = implode(' | ', array_filter([
+            $dpoFormattedString = implode(' | ', array_filter([
                 $dpo->name ?? null,
                 $dpo->email ?? null,
                 $dpo->contact_number ?? null,
             ]));
+            
+            $data['dpo'] = $dpoFormattedString;
+            $data['DPO'] = $dpoFormattedString; // Covers both exact/lowercase column matches
         
             $data['status'] = 'For Reporting to NPC';
             
             // Execute the update
             $notification->update($data);
 
-            // Send emails
+            // Send emails to the team
             $teamEmails = DatabreachTeam::whereNotNull('email')->pluck('email');
             foreach ($teamEmails as $email) {
                 Mail::to($email)->send(new IncidentEvaluated($data));
@@ -794,9 +815,9 @@ class DataBreachReportsController extends Controller
             return redirect()->route('databreach.index')
                 ->with('success', 'Incident report evaluated successfully. Status: For reporting to the NPC by the DPO.');
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) { // Make sure Exception is fully qualified with \
             DB::rollBack();
-            Log::error('Evaluation Error: ' . $e->getMessage());
+            \Log::error('Evaluation Error: ' . $e->getMessage()); // Ensure Log uses \ 
             
             // This will redirect back and show you the actual database or email error!
             return redirect()->back()->withInput()->with('error', 'An error occurred while saving: ' . $e->getMessage());

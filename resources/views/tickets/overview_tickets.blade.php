@@ -1,6 +1,8 @@
 <x-app-layout>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <!-- Include Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     @if(auth()->user()->hasAnyRole(['Super Admin', 'ICTS Admin']))
     <style>
@@ -80,27 +82,35 @@
         .card-red { border-left-color: #ef4444; }
         .card-red .stat-icon { background-color: var(--icon-red-bg); color: var(--icon-red-text); }
 
-        /* Grid Tables */
-        .tables-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+        /* Grid Charts */
+        .tables-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 450px), 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
         .table-card { background-color: var(--card-bg); border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 1.5rem; border: 1px solid var(--border-light); border-top: 4px solid var(--border-light); overflow: hidden; display: flex; flex-direction: column; transition: all 0.3s ease; }
-        .table-card-title { font-size: 1.15rem; font-weight: 700; margin-top: 0; margin-bottom: 1.25rem; color: var(--text-dark); display: flex; align-items: center; gap: 0.75rem; transition: color 0.3s ease; }
+        .table-card-title { font-size: 1.15rem; font-weight: 700; margin-top: 0; margin-bottom: 1.25rem; color: var(--text-dark); display: flex; align-items: center; gap: 0.5rem; transition: color 0.3s ease; }
 
-        /* Accent Colors for Table Cards */
+        /* Full Width Card Modification for Grid */
+        .table-card-full { grid-column: 1 / -1; }
+
+        /* Accent Colors for Table/Chart Cards */
         .tc-indigo { border-top-color: #4f46e5; }
         .tc-green { border-top-color: #10b981; }
         .tc-yellow { border-top-color: #eab308; }
         .tc-red { border-top-color: #ef4444; }
 
-        .table-responsive { width: 100%; overflow-x: auto; flex-grow: 1; -webkit-overflow-scrolling: touch; }
+        /* Chart Scrolling Viewport */
+        .chart-viewport { 
+            position: relative; 
+            width: 100%; 
+            height: 320px; 
+            overflow: auto; /* Enables Both Vertical and Horizontal Scrolling */
+            -webkit-overflow-scrolling: touch; 
+            border-radius: 0.5rem;
+        }
 
-        /* Small Grid Tables */
-        .data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; }
-        .data-table th, .data-table td { padding: 0.85rem 1rem; white-space: nowrap; border-bottom: 1px solid var(--border-subtle); transition: border-color 0.3s ease; }
-        .data-table th { background-color: var(--bg-alt); color: var(--text-muted); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; transition: background-color 0.3s ease, color 0.3s ease; }
-        .data-table td { color: var(--text-main); font-weight: 500; transition: color 0.3s ease; }
-        .data-table tbody tr { transition: background-color 0.15s; }
-        .data-table tbody tr:hover { background-color: var(--bg-alt); }
-        .text-right { text-align: right; }
+        /* Chart Wrapper dynamically resized */
+        .chart-wrapper { 
+            position: relative; 
+            /* Width/Height determined dynamically inline */
+        }
 
         /* Bottom Full Table */
         .full-table-container { background-color: var(--card-bg); box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-radius: 1rem; border: 1px solid var(--border-light); overflow-x: auto; margin-top: 1.5rem; -webkit-overflow-scrolling: touch; transition: background-color 0.3s ease, border-color 0.3s ease; }
@@ -144,6 +154,8 @@
             .stat-value { font-size: 1.75rem; }
             .dashboard-wrapper { padding: 0.5rem; }
             .table-card { padding: 1.25rem; }
+            .tables-grid { grid-template-columns: 1fr; }
+            .table-card-full { grid-column: auto; }
         }
     </style>
 
@@ -182,21 +194,38 @@
                     </div>
                 </div>
 
+                {{-- Preprocessing Data for Javascript Charts & Scroll Dimensions --}}
+                @php
+                    $cards = [
+                        ['label' => 'Total Tickets', 'icon' => 'confirmation_number', 'theme' => 'indigo', 'value' => $total ?? 0],
+                        ['label' => 'Pending Tickets', 'icon' => 'hourglass_top', 'theme' => 'green', 'value' => $pending ?? 0],
+                        ['label' => 'Resolved Tickets', 'icon' => 'check_circle', 'theme' => 'blue', 'value' => $resolved ?? 0],
+                        ['label' => 'Overdue Tickets', 'icon' => 'error', 'theme' => 'red', 'value' => $overdue ?? 0],
+                    ];
+
+                    $regionLabels = collect($byItArea ?? [])->pluck('it_area')->toArray();
+                    $regionTotals = collect($byItArea ?? [])->pluck('total')->toArray();
+                    $regionCount = count($regionLabels);
+
+                    $personnelLabels = collect($byItPersonnel ?? [])->pluck('it_personnel')->toArray();
+                    $personnelTotals = collect($byItPersonnel ?? [])->pluck('total')->toArray();
+                    $personnelCount = count($personnelLabels);
+
+                    $serviceLabels = collect($byService ?? [])->pluck('service')->toArray();
+                    $serviceTotals = collect($byService ?? [])->pluck('total')->toArray();
+                    $serviceCount = count($serviceLabels);
+
+                    $overduePersonnelLabels = [];
+                    $overdueCounts = [];
+                    foreach(($overdueTickets ?? []) as $pName => $tList) {
+                        $overduePersonnelLabels[] = $pName;
+                        $overdueCounts[] = is_array($tList) || $tList instanceof \Countable ? count($tList) : 0;
+                    }
+                    $overdueCount = count($overduePersonnelLabels);
+                @endphp
+
                 {{-- Dashboard Cards --}}
                 <div class="stat-cards">
-                    <span class="material-symbols-outlined" style="display: none;">confirmation_number</span> <!-- IGNORE: For preloading icons -->
-                    <span class="material-symbols-outlined" style="display: none;">hourglass_top</span> <!-- IGNORE: For preloading icons -->
-                    <span class="material-symbols-outlined" style="display: none;">check_circle</span> <!-- IGNORE: For preloading icons -->
-                    <span class="material-symbols-outlined" style="display: none;">error</span> <!-- IGNORE: For preloading icons -->
-                    @php
-                        $cards = [
-                            ['label' => 'Total Tickets', 'icon' => 'confirmation_number', 'theme' => 'indigo', 'value' => $total ?? 0],
-                            ['label' => 'Pending Tickets', 'icon' => 'hourglass_top', 'theme' => 'green', 'value' => $pending ?? 0],
-                            ['label' => 'Resolved Tickets', 'icon' => 'check_circle', 'theme' => 'blue', 'value' => $resolved ?? 0],
-                            ['label' => 'Overdue Tickets', 'icon' => 'error', 'theme' => 'red', 'value' => $overdue ?? 0],
-                        ];
-                    @endphp
-
                     @foreach ($cards as $card)
                         <div class="stat-card card-{{ $card['theme'] }}">
                             <div class="stat-left">
@@ -212,131 +241,64 @@
                     @endforeach
                 </div>
 
-                {{-- IT Area, Personnel, Service, Overdue --}}
+                {{-- Visual Charts Grid --}}
                 <div class="tables-grid">
 
                     @can('view tickets by region')
-                    {{-- Tickets by Region --}}
-                    <div class="table-card tc-indigo">
+                    {{-- Tickets by Region (Full-Width Card) --}}
+                    <div class="table-card tc-indigo table-card-full">
                         <h4 class="table-card-title" style="color: var(--icon-indigo-text);">
-                            Tickets by Region
+                            <span class="material-symbols-outlined">map</span> Tickets by Region
                         </h4>
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>IT Area</th>
-                                        <th class="text-right">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse ($byItArea ?? [] as $area)
-                                        <tr>
-                                            <td>{{ $area->it_area }}</td>
-                                            <td class="text-right" style="font-weight: 700; color: var(--text-dark);">{{ $area->total }}</td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="2" style="text-align: center; color: var(--text-muted); padding: 2rem;">No data available.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                        <div class="chart-viewport">
+                            <div class="chart-wrapper" style="min-width: max(100%, {{ $regionCount * 50 }}px); height: 100%;">
+                                <canvas id="regionChart"></canvas>
+                            </div>
                         </div>
                     </div>
                     @endcan
 
-                    {{-- Tickets by Technical Personnel --}}
+                    {{-- Tickets by Technical Personnel (Horizontal Bar Chart - Vertical Scrolling) --}}
                     <div class="table-card tc-green">
                         <h4 class="table-card-title" style="color: var(--icon-green-text);">
+                            <span class="material-symbols-outlined">engineering</span>
                             Tickets by Technical Personnel 
-                            <span style="font-size: 0.85em; font-weight: normal; font-style: italic; opacity: 0.85;">
-                                (Including Re-Assigned)
+                            <span style="font-size: 0.8em; font-weight: normal; font-style: italic; opacity: 0.85;">
+                                (Inc. Re-Assigned)
                             </span>
                         </h4>
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Technical Personnel</th>
-                                        <th class="text-right">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse ($byItPersonnel ?? [] as $person)
-                                        <tr>
-                                            <td>{{ $person->it_personnel }}</td>
-                                            <td class="text-right" style="font-weight: 700; color: var(--text-dark);">{{ $person->total }}</td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="2" style="text-align: center; color: var(--text-muted); padding: 2rem;">No data available.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                        <div class="chart-viewport">
+                            <!-- Dynamically sets height based on number of personnel to force vertical scroll if heavy data -->
+                            <div class="chart-wrapper" style="min-width: max(100%, 400px); height: max(100%, {{ $personnelCount * 45 }}px);">
+                                <canvas id="personnelChart"></canvas>
+                            </div>
                         </div>
                     </div>
 
-                    {{-- Tickets by Service --}}
+                    {{-- Tickets by Technical Service (Doughnut Chart - Both direction Scrolling if legend scales) --}}
                     <div class="table-card tc-yellow">
                         <h4 class="table-card-title" style="color: #eab308;">
-                            Tickets by Technical Service
+                            <span class="material-symbols-outlined">build</span> Tickets by Technical Service
                         </h4>
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Service Category</th>
-                                        <th class="text-right">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse ($byService ?? [] as $service)
-                                        <tr>
-                                            <td>{{ $service->service }}</td>
-                                            <td class="text-right" style="font-weight: 700; color: var(--text-dark);">{{ $service->total }}</td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="2" style="text-align: center; color: var(--text-muted); padding: 2rem;">No data available.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                        <div class="chart-viewport">
+                            <div class="chart-wrapper" style="min-width: max(100%, 450px); min-height: max(100%, 300px); height: 100%;">
+                                <canvas id="serviceChart"></canvas>
+                            </div>
                         </div>
                     </div>
 
-                    {{-- Overdue Tickets --}}
+                    {{-- Overdue Tickets by Personnel (Vertical Bar Chart - Horizontal Scrolling) --}}
                     <div class="table-card tc-red">
                         <h4 class="table-card-title" style="color: var(--icon-red-text);">
-                            Overdue Tickets
+                            <span class="material-symbols-outlined">warning</span> Overdue Tickets by Personnel
                         </h4>
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Request Details</th>
-                                        <th class="text-right">Assigned To</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse ($overdueTickets ?? [] as $personnel => $tickets)
-                                        @foreach ($tickets as $ticket)
-                                            <tr>
-                                                <td style="white-space: normal; min-width: 150px;">{{ $ticket->request }}</td>
-                                                <td class="text-right" style="font-weight: 700; color: var(--text-dark);">{{ $personnel }}</td>
-                                            </tr>
-                                        @endforeach
-                                    @empty
-                                        <tr>
-                                            <td colspan="2" style="text-align: center; color: var(--text-muted); padding: 2rem;">No data available.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                        <div class="chart-viewport">
+                            <div class="chart-wrapper" style="min-width: max(100%, {{ $overdueCount * 60 }}px); height: 100%;">
+                                <canvas id="overdueChart"></canvas>
+                            </div>
                         </div>
                     </div>
+
                 </div>
 
                 {{-- Recently Resolved Tickets --}}
@@ -351,7 +313,6 @@
                                 <tr>
                                     <th>Ticket Number</th>
                                     <th>Requested By</th>
-                                    <th>Division</th>
                                     <th>Service</th>
                                     <th>Assigned Personnel</th>
                                     <th>Date Created</th>
@@ -364,7 +325,6 @@
                                     <tr>
                                         <td style="font-weight: 700; color: var(--text-dark);">{{ $ticket->ticket_number }}</td>
                                         <td>{{ $ticket->firstname }} {{ $ticket->lastname }}</td>
-                                        <td>{{ $ticket->division }}</td>
                                         <td>{{ $ticket->service }}</td>
                                         <td>{{ $ticket->it_personnel }}</td>
                                         <td style="color: var(--text-muted);">{{ \Carbon\Carbon::parse($ticket->date_created)->format('M d, Y h:i A') }}</td>
@@ -401,4 +361,131 @@
     </div>
     @endcan
     @endif
+
+    {{-- Script to Initialize Charts --}}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Theme Colors Logic
+            const isDark = document.body.classList.contains('dark');
+            const textColor = isDark ? '#e2e8f0' : '#334155';
+            const gridColor = isDark ? '#334155' : '#e2e8f0';
+
+            // Chart JS Common Defaults
+            Chart.defaults.color = textColor;
+            Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+
+            // 1. Tickets by Region (Vertical Bar)
+            const regionCtx = document.getElementById('regionChart');
+            if (regionCtx) {
+                new Chart(regionCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: @json($regionLabels),
+                        datasets: [{
+                            label: 'Tickets',
+                            data: @json($regionTotals),
+                            backgroundColor: '#6366f1',
+                            borderRadius: 6,
+                            maxBarThickness: 40
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: gridColor }, ticks: { color: textColor } },
+                            y: { grid: { color: gridColor }, ticks: { color: textColor, stepSize: 1 }, beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            // 2. Tickets by Personnel (Horizontal Bar)
+            const personnelCtx = document.getElementById('personnelChart');
+            if (personnelCtx) {
+                new Chart(personnelCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: @json($personnelLabels),
+                        datasets: [{
+                            label: 'Assigned Tickets',
+                            data: @json($personnelTotals),
+                            backgroundColor: '#10b981',
+                            borderRadius: 6,
+                            maxBarThickness: 25
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: gridColor }, ticks: { color: textColor, stepSize: 1 }, beginAtZero: true },
+                            y: { grid: { color: gridColor }, ticks: { color: textColor } }
+                        }
+                    }
+                });
+            }
+
+            // 3. Tickets by Technical Service (Doughnut Chart)
+            const serviceCtx = document.getElementById('serviceChart');
+            if (serviceCtx) {
+                new Chart(serviceCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: @json($serviceLabels),
+                        datasets: [{
+                            data: @json($serviceTotals),
+                            backgroundColor: [
+                                '#f59e0b', '#3b82f6', '#10b981', '#6366f1', 
+                                '#ec4899', '#8b5cf6', '#06b6d4', '#ef4444'
+                            ],
+                            borderWidth: 2,
+                            borderColor: isDark ? '#0f172a' : '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: { color: textColor, boxWidth: 12, font: { size: 11 } }
+                            }
+                        },
+                        cutout: '65%'
+                    }
+                });
+            }
+
+            // 4. Overdue Tickets by Personnel (Bar Chart)
+            const overdueCtx = document.getElementById('overdueChart');
+            if (overdueCtx) {
+                new Chart(overdueCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: @json($overduePersonnelLabels),
+                        datasets: [{
+                            label: 'Overdue Count',
+                            data: @json($overdueCounts),
+                            backgroundColor: '#ef4444',
+                            borderRadius: 6,
+                            maxBarThickness: 40
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: gridColor }, ticks: { color: textColor } },
+                            y: { grid: { color: gridColor }, ticks: { color: textColor, stepSize: 1 }, beginAtZero: true }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 </x-app-layout>

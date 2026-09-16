@@ -64,27 +64,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy')->middleware('permission:delete_profile');
     Route::post('/profile/image', [ProfileController::class, 'updatePhoto'])->name('profile.upload_image');
 
-    // Tickets Overview
-    Route::get('/tickets/overview_tickets', [TicketsOverviewController::class, 'index'])->name('overview_tickets.index')->middleware('permission:view_overview_tickets');
-    
-    // Ticket Management
+    // ----------------------------------------------------
+    // STATIC TICKET ROUTES
+    // ----------------------------------------------------
     Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets.index')->middleware('permission:view_all_tickets');
+    Route::get('/tickets/overview_tickets', [TicketsOverviewController::class, 'index'])->name('overview_tickets.index')->middleware('permission:view_overview_tickets');
+    Route::get('/tickets/assignedtome_tickets', [AssignedToMeController::class, 'index'])->name('assignedtome_tickets.index')->middleware('permission:view_assignedtome_tickets');
+    Route::get('/tickets/reassigned_tickets', [ReassignedTicketsController::class, 'index'])->name('reassigned_tickets.index')->middleware('permission:view_reassigned_tickets');
+    Route::get('/tickets/myrequested_tickets', [MyRequestedTicketsController::class, 'index'])->name('myrequested_tickets.index')->middleware('permission:view_myrequested_tickets');
+    
+    // Actions with static paths
     Route::post('/tickets/store', [CreateTicketPrivateController::class, 'store'])->name('tickets.store')->middleware('permission:create_ticket');
     Route::post('/tickets/re_assign', [TicketsController::class, 're_assign'])->name('tickets.re_assign')->middleware('permission:reassign_ticket');
+    Route::post('/tickets/myrequested/store', [MyRequestedTicketsController::class, 'store'])->name('tickets.myrequested.store')->middleware('permission:create_myrequested_tickets');
+
+    // Export Tickets Overview
+    Route::get('/dashboard/export-pdf', [TicketsOverviewController::class, 'exportPdf'])->name('tickets.export_pdf')->middleware('permission:generate_report');
+
+    // Tickets with ticket_id
+    Route::get('/tickets/{ticket_id}', [TicketsController::class, 'view'])->name('tickets.view')->middleware('permission:view_ticket_details');
+    Route::get('/tickets/myrequested/{ticket_id}', [MyRequestedTicketsController::class, 'view'])->name('tickets.myrequested.view')->middleware('permission:view_ticket_details_myrequested_tickets');
+
     Route::put('/tickets/{ticket_id}', [TicketsController::class, 'update'])->name('tickets.update')->middleware('permission:update_status_ticket');
     Route::delete('/tickets/{ticket_id}', [TicketsController::class, 'destroy'])->name('tickets.destroy')->middleware('permission:delete_ticket');
     Route::get('/tickets/{ticket_id}/generate-tsar', [GenerateTSARController::class, 'generateTSAR'])->name('tickets.generateTSAR')->middleware('permission:generate_tsar');
-
-    // Export Tickets Overview to CSV
-    Route::get('/dashboard/export-pdf', [TicketsOverviewController::class, 'exportPdf'])->name('tickets.export_pdf')->middleware('permission:generate_report');
-
-    // Tickets Assigned per Technical Personnel
-    Route::get('/tickets/assignedtome_tickets', [AssignedToMeController::class, 'index'])->name('assignedtome_tickets.index')->middleware('permission:view_assignedtome_tickets');
-    Route::get('/tickets/reassigned_tickets', [ReassignedTicketsController::class, 'index'])->name('reassigned_tickets.index')->middleware('permission:view_reassigned_tickets');
-
-    // Tickets Request per Client
-    Route::get('/tickets/myrequested_tickets', [MyRequestedTicketsController::class, 'index'])->name('myrequested_tickets.index')->middleware('permission:view_myrequested_tickets');
-    Route::post('/tickets/myrequested/store', [MyRequestedTicketsController::class, 'store'])->name('tickets.myrequested.store')->middleware('permission:create_myrequested_tickets');
 
     // Data Breach Notification
     Route::get('/databreach', [DataBreachReportsController::class, 'index'])->name('databreach.index')->middleware('permission:view_all_databreach');

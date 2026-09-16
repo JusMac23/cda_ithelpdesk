@@ -1,7 +1,8 @@
 <x-app-layout>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+
     <style>
         /* --- Theme Variables --- */
         :root {
@@ -24,7 +25,7 @@
             --primary-indigo: #4f46e5; 
             --indigo-hover: #4338ca; 
             
-           /* Enhanced Status Badges - Light */
+            /* Enhanced Status Badges - Light */
             --badge-new-bg: #f3e8ff; --badge-new-text: #6b21a8;     /* New/Open */
             --badge-res-bg: #dcfce7; --badge-res-text: #166534;     /* Resolved */
             --badge-pen-bg: #fef9c3; --badge-pen-text: #854d0e;     /* Pending */
@@ -72,11 +73,17 @@
             --prio-def-bg: rgba(71, 85, 105, 0.15); --prio-def-border: #475569; --prio-def-text: #94a3b8;
         }
 
-        /* Global Box Sizing & Font Fix */
+        /* --- Global Box Sizing & Font Fix --- */
         *, *::before, *::after { box-sizing: border-box; }
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
+        body { 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+            transition: background-color 0.3s ease, color 0.3s ease; 
+        }
 
-        /* Main Container */
+        /* --- Material Symbols Global Engine --- */
+        .material-symbols-outlined { font-family: 'Material Symbols Outlined'; font-weight: normal; font-style: normal; font-size: 24px; line-height: 1; display: inline-block; white-space: nowrap; word-wrap: normal; direction: ltr; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; -moz-osx-font-smoothing: grayscale; font-feature-settings: 'liga'; user-select: none; vertical-align: middle; }
+
+        /* --- Main Container --- */
         .content-panel { background-color: var(--card-bg); border-radius: 1rem; border: 1px solid var(--border-light); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); padding: 1.25rem; width: 100%; transition: background-color 0.3s ease, border-color 0.3s ease; }
         
         .header-flex { display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 1.5rem; gap: 1rem; width: 100%; }
@@ -93,7 +100,10 @@
 
         /* --- Buttons - Uniform 44px Heights --- */
         .btn { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 1.5rem; border-radius: 0.5rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s ease; width: 100%; text-decoration: none; font-family: inherit; white-space: nowrap; box-sizing: border-box; }
-        .btn i { margin-right: 0.5rem; font-size: 1rem; }
+        
+        /* Button Icon Adjustments for Material Symbols */
+        .btn i,
+        .btn .material-symbols-outlined { margin-right: 0.5rem; font-size: 20px; line-height: 1; flex-shrink: 0; }
         
         .btn .btn-count { margin-left: 0.5rem; background-color: rgba(255, 255, 255, 0.25); padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 700; }
 
@@ -125,6 +135,7 @@
         .search-input:focus { border-color: #6366f1; box-shadow: inset 0 0 0 1px #6366f1, 0 0 0 3px rgba(99, 102, 241, 0.15); z-index: 10; }
         .search-btn { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 1.25rem; border: none; border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; background-color: #4f46e5; color: white; cursor: pointer; transition: background-color 0.2s; z-index: 2; width: auto; }
         .search-btn:hover { background-color: #4338ca; }
+        .search-btn i, .search-btn .material-symbols-outlined { font-size: 20px; }
 
         /* --- Data Table --- */
         .table-container { width: 100%; overflow-x: auto; background-color: var(--card-bg); border-radius: 0.75rem; border: 1px solid var(--border-light); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-top: 1.5rem; -webkit-overflow-scrolling: touch; display: block; transition: background-color 0.3s ease, border-color 0.3s ease; }
@@ -150,7 +161,6 @@
 
         .btn-submit { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 2rem; background-color: var(--primary-indigo); color: #f8fafc; font-size: 0.95rem; font-weight: 600; border: none; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2); }
         .btn-submit:hover:not(:disabled) { background-color: var(--indigo-hover); color: #f8fafc; transform: translateY(-1px); }
-        .btn-submit:hover { background-color: var(--indigo-hover); color: #f8fafc; transform: translateY(-1px); }
         .btn-submit:disabled { background-color: #cbd5e1; color: #f8fafc; cursor: not-allowed; box-shadow: none; transform: none; }
 
         /* --- Enhanced Status Badges --- */
@@ -182,11 +192,17 @@
 
         @keyframes pulse-critical { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
-
-        /* Action Links inside Table */
+        /* --- Action Links inside Table --- */
         .action-group { display: flex; flex-direction: column; gap: 0.5rem; min-width: 140px; }
         .action-link { display: inline-flex; align-items: center; justify-content: flex-start; height: 34px; padding: 0 0.85rem; border-radius: 0.375rem; font-size: 0.85rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; text-decoration: none; background: transparent; white-space: nowrap; box-sizing: border-box; }
-        .action-link i { margin-right: 0.4rem; width: 16px; text-align: center; flex-shrink: 0; font-size: 0.9rem; }
+        
+        /* Material Symbol inside Action Link */
+        .action-link i,
+        .action-link .material-symbols-outlined { margin-right: 0.4rem; width: 18px; height: 18px; font-size: 18px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+        /* Green */
+        .link-green { color: #16a34a; border: 1px solid #bbf7d0; } 
+        .link-green:hover { background-color: #f0fdf4; color: #15803d; border-color: #86efac; }
         
         .link-blue { color: #3b82f6; border: 1px solid #bfdbfe; } 
         .link-blue:hover { background-color: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
@@ -269,10 +285,7 @@
             to { transform: rotate(360deg); }
         }
 
-        /* --------------------------------------------------- */
-        /* Responsive Overrides                                */
-        /* --------------------------------------------------- */
-        
+        /* --- Responsive Overrides --- */
         @media (max-width: 639px) {
             .pagination-wrapper nav .hidden { display: none !important; }
             .pagination-wrapper nav .sm\:hidden { display: flex; width: 100%; justify-content: space-between; }
@@ -293,7 +306,7 @@
             .form-grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
             .col-span-2 { grid-column: span 2; }
             .modal-footer { flex-direction: row; justify-content: flex-end; }
-            .form-group { width: 100%; } /* Ensure form groups don't shrink */
+            .form-group { width: 100%; }
 
             .pagination-wrapper nav { flex-direction: row; justify-content: space-between; }
             .pagination-wrapper nav > div.sm\:hidden { display: none !important; }
@@ -319,7 +332,7 @@
 
                     @can('create_myrequested_tickets')
                     <button id="openAddTicketModalBtn" class="btn btn-green">
-                        <i class="fas fa-plus"></i> Add Ticket
+                        <span class="material-symbols-outlined">add</span> Add Ticket
                     </button>
                     @endcan
 
@@ -334,7 +347,7 @@
                     <form action="{{ route('myrequested_tickets.index') }}" method="GET" class="search-form">
                         <input type="text" name="search_query" value="{{ request('search_query') }}" placeholder="Search tickets..." class="search-input" autocomplete="off">
                         <button type="submit" class="search-btn" aria-label="Search">
-                            <i class="fas fa-search" style="margin: 0;"></i>
+                            <span class="material-symbols-outlined">search</span>
                         </button>
                     </form>
                     @endcan
@@ -347,16 +360,13 @@
                                 <th class="text-center">Tracking ID</th>
                                 <th>Requested By</th>
                                 <th>Division</th>
-                                <th>Device</th>
-                                <th>Service</th>
+                                <th>Technical Service</th>
                                 <th>Request Details</th>
                                 <th>Assigned Personnel</th>
-                                <th>Action Taken</th>
                                 <th>Date Created</th>
-                                <th>Date Resolved</th>
-                                <th class="text-center">Photo</th>
                                 <th class="text-center">Priority</th>
                                 <th class="text-center">Status</th>
+                                <th class="text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -365,7 +375,6 @@
                                     <td class="text-center font-bold" style="font-size: 0.95rem;">{{ $ticket->ticket_number }}</td>
                                     <td>{{ $ticket->firstname }} {{ $ticket->middle_initial }} {{ $ticket->lastname }}</td>
                                     <td>{{ $ticket->division }}</td>
-                                    <td>{{ $ticket->device }}</td>
                                     <td>{{ $ticket->service }}</td>
                                     <td>
                                         <span class="text-truncate" title="{{ $ticket->request }}">
@@ -373,31 +382,9 @@
                                         </span>
                                     </td>
                                     <td>{{ $ticket->it_personnel }}</td>
-                                    <td>
-                                        <span class="text-truncate" title="{{ $ticket->action_taken }}">
-                                            {{ $ticket->action_taken ?: 'N/A' }}
-                                        </span>
-                                    </td>
                                     <td style="color: var(--text-muted);">
                                         {{ \Carbon\Carbon::parse($ticket->date_created)->format('M d, Y h:i A') }}
                                     </td>
-                                    <td style="color: var(--text-muted);">
-                                        @if($ticket->date_resolved)
-                                            {{ \Carbon\Carbon::parse($ticket->date_resolved)->format('M d, Y h:i A') }}
-                                        @else
-                                            <span style="color: #ef4444; font-style: italic; font-weight: 600;">Not Resolved</span>
-                                        @endif
-                                    </td>
-                                    <td class="text-center">
-                                        @if($ticket->photo)
-                                            <a href="{{ asset('storage/' . $ticket->photo) }}" target="_blank">
-                                                <img src="{{ asset('storage/' . $ticket->photo) }}" alt="Evidence" class="thumb-img">
-                                            </a>
-                                        @else
-                                            <span style="color: var(--text-muted); font-size: 0.8rem; font-weight: 600;">N/A</span>
-                                        @endif
-                                    </td>
-                                    
                                    <td class="text-center">
                                         @php
                                             $priority = trim($ticket->priority);
@@ -428,6 +415,18 @@
                                             {{ $ticket->status }}
                                         </span>
                                     </td>
+
+                                    <td class="text-center">
+                                        <div class="action-group">
+                                            
+                                           @can('view_ticket_details_myrequested_tickets')
+                                                <a href="{{ route('tickets.myrequested.view', $ticket->ticket_id) }}" class="action-link link-green">
+                                                    <span class="material-symbols-outlined">visibility</span> View Details
+                                                </a>
+                                            @endcan
+
+                                        </div>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
@@ -449,11 +448,12 @@
         {{-- Add Ticket Modal --}}
         <div id="addticketModal" class="modal-overlay hidden">
             <div class="modal-box">
+                
                 <button id="closeModal" class="close-btn" aria-label="Close">&times;</button>
                 
                 @if ($errors->any())
                     <div style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid #fca5a5; color: #b91c1c; padding: 1.25rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">
-                        <h4 style="margin:0 0 0.5rem 0; font-weight: 700; color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> Please fix the following errors:</h4>
+                        <h4 style="margin:0 0 0.5rem 0; font-weight: 700; color: #ef4444;"><span class="material-symbols-outlined">exclamation</span> Please fix the following errors:</h4>
                         <ul style="margin:0; padding-left: 1.5rem; font-size: 0.9rem; font-weight: 500;">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>

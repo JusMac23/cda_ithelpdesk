@@ -28,6 +28,7 @@ class PermissionSeeder extends Seeder
             'filter_ticket_by_region',
             'filter_ticket_by_status',
             'filter_ticket_by_priority',
+            'view_ticket_details',
             'reassign_ticket',
             'update_status_ticket',
             'delete_ticket',
@@ -37,6 +38,7 @@ class PermissionSeeder extends Seeder
 
             'view_overview_tickets',
             'view_myrequested_tickets',
+            'view_ticket_details_myrequested_tickets',
             'create_myrequested_tickets',
             'reassign_myrequested_tickets',
             'update_status_myrequested_tickets',
