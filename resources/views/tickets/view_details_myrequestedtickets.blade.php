@@ -5,8 +5,8 @@
     @can('view_ticket_details_myrequested_tickets')
     <style>
         .view-wrapper { background-color: #ffffff; border-radius: 8px; padding: 2rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); max-width: 1000px; margin: 2rem auto; position: relative; font-family: 'Inter', sans-serif; }
-        .close-btn { position: absolute; top: 1.25rem; right: 1.25rem; color: var(--text-muted); font-size: 2rem; background: none; border: none; cursor: pointer; transition: all 0.2s; line-height: 1; border-radius: 0.25rem; padding: 0 0.5rem; }
-        .close-btn:hover { color: var(--text-dark); }
+        .close-btn { position: absolute; top: 1.25rem; right: 1.25rem; color: #6b7280; font-size: 2rem; background: none; border: none; cursor: pointer; transition: all 0.2s; line-height: 1; border-radius: 0.25rem; padding: 0 0.5rem; }
+        .close-btn:hover { color: #111827; }
         .report-title { font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 1.5rem; border-bottom: 2px solid #f3f4f6; padding-bottom: 0.75rem; }
         .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
         .detail-group { display: flex; flex-direction: column; gap: 0.25rem; }
@@ -28,8 +28,23 @@
         .priority-critical { background-color: #fecaca; color: #991b1b; }
         .priority-default { background-color: #f3f4f6; color: #374151; }
         
-        .evidence-img { max-width: 100%; height: auto; border-radius: 6px; border: 1px solid #e5e7eb; margin-top: 0.5rem; max-height: 400px; object-fit: contain; }
+        /* Evidence Photo Section */
         .section-header { grid-column: 1 / -1; font-size: 1.125rem; font-weight: 600; color: #374151; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .evidence-img-wrapper { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+        .evidence-img-container { position: relative; cursor: pointer; border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb; background-color: #f9fafb; display: inline-block; }
+        .evidence-img { max-width: 100%; height: auto; max-height: 380px; object-fit: contain; display: block; transition: transform 0.2s ease, opacity 0.2s ease; }
+        .evidence-img-container:hover .evidence-img { transform: scale(1.02); opacity: 0.9; }
+        .click-hint { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.875rem; color: #2563eb; font-weight: 600; cursor: pointer; background: #eff6ff; padding: 0.4rem 0.8rem; border-radius: 6px; border: 1px solid #bfdbfe; transition: background 0.2s; }
+        .click-hint:hover { background: #dbeafe; }
+        
+        /* Lightbox Fullscreen Modal */
+        .img-modal { display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.88); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .img-modal.active { display: flex; }
+        .modal-content { max-width: 90vw; max-height: 88vh; object-fit: contain; border-radius: 6px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .close-modal { position: absolute; top: 20px; right: 25px; color: #ffffff; font-size: 36px; font-weight: bold; cursor: pointer; z-index: 100000; line-height: 1; transition: color 0.2s; }
+        .close-modal:hover { color: #ef4444; }
+        .fullscreen-btn { position: absolute; top: 22px; right: 75px; color: #ffffff; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); padding: 0.4rem; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; z-index: 100000; }
+        .fullscreen-btn:hover { background: rgba(255,255,255,0.4); }
     </style>
 
     <div id="main-content" class="page-wrapper">
@@ -127,13 +142,19 @@
                     </span>
                 </div>
 
-                <!-- Evidence Photo -->
+                <!-- Evidence Photo (LONGBLOB Data URI Rendering) -->
                 <h3 class="section-header">Attached Evidence / Photo</h3>
                 <div class="detail-group" style="grid-column: 1 / -1;">
-                    @if($ticket->photo)
-                        <a href="{{ asset('storage/' . $ticket->photo) }}" target="_blank" title="Click to view full image">
-                            <img src="{{ asset('storage/' . $ticket->photo) }}" alt="Ticket Evidence" class="evidence-img">
-                        </a>
+                    @if(!empty($photoDataUri))
+                        <div class="evidence-img-wrapper">
+                            <div class="evidence-img-container" onclick="openImageModal()">
+                                <img src="{{ $photoDataUri }}" alt="Ticket Evidence" class="evidence-img">
+                            </div>
+                            <button type="button" class="click-hint" onclick="openImageModal()">
+                                <span class="material-symbols-outlined">zoom_in</span>
+                                View Full Size
+                            </button>
+                        </div>
                     @else
                         <span class="detail-value" style="color: #6b7280; font-style: italic;">No photo evidence provided.</span>
                     @endif
@@ -142,5 +163,57 @@
             </div>
         </div>
     </div>
+
+    <!-- Fullscreen Lightbox Modal -->
+    @if(!empty($photoDataUri))
+    <div id="imageModal" class="img-modal">
+        <span class="close-modal" onclick="closeImageModal()" title="Close">&times;</span>
+        <button type="button" class="fullscreen-btn" onclick="toggleNativeFullscreen()" title="Toggle Native Fullscreen">
+            <span class="material-symbols-outlined">fullscreen</span>
+        </button>
+        <img class="modal-content" id="modalImg" src="{{ $photoDataUri }}" alt="Full Screen Evidence">
+    </div>
+
+    <!-- Modal Scripts -->
+    <script>
+        function openImageModal() {
+            document.getElementById('imageModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+        }
+
+        function toggleNativeFullscreen() {
+            const img = document.getElementById('modalImg');
+            if (!document.fullscreenElement) {
+                if (img.requestFullscreen) { img.requestFullscreen(); }
+                else if (img.webkitRequestFullscreen) { img.webkitRequestFullscreen(); }
+                else if (img.msRequestFullscreen) { img.msRequestFullscreen(); }
+            } else {
+                if (document.exitFullscreen) { document.exitFullscreen(); }
+            }
+        }
+
+        // Close modal when clicking dark backdrop
+        document.getElementById('imageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeImageModal();
+            }
+        });
+
+        // Close modal on Escape key press
+        document.addEventListener('keydown', function(e) {
+            if (e.key === "Escape") {
+                closeImageModal();
+            }
+        });
+    </script>
+    @endif
     @endcan    
 </x-app-layout>

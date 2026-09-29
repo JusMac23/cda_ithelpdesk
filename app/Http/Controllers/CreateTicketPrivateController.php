@@ -236,16 +236,23 @@ class CreateTicketPrivateController extends Controller
             'it_personnel'      => 'required|string',
             'it_email'          => 'required|string|email',
             'status'            => 'required|string|max:255',
-            'photo'             => 'nullable|image|max:10240',
+            'photo'             => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:20480',
             'priority'          => 'required|string|max:255',
         ]);
 
         $validatedData['date_created']  = Carbon::now('Asia/Manila')->format('Y-m-d H:i:s');
         $validatedData['date_resolved'] = null;
 
-        // 3. Handle photo upload
-        if ($request->hasFile('photo')) {
-            $validatedData['photo'] = $request->file('photo')->store('ticket_photos', 'public');
+        // 3. Handle photo upload (Stores raw binary data for LONGBLOB)
+        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
+            $file = $request->file('photo');
+            // Extract the raw binary to save directly into the database
+            $validatedData['photo'] = file_get_contents($file->getRealPath());
+
+            // Optional: Save file locally
+            $file->store('ticket_photos', 'public');
+        } else {
+            $validatedData['photo'] = null;
         }
 
         // 4. Generate unique ticket number

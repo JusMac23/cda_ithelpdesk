@@ -236,17 +236,28 @@ class MyRequestedTicketsController extends Controller
             abort(404, 'Ticket record not found or access denied.');
         }
 
+        // Process raw LONGBLOB photo into base64 data URI string
+        $photoDataUri = null;
+        if (!empty($ticket->photo)) {
+            $base64Image = base64_encode($ticket->photo);
+            $photoDataUri = 'data:image/jpeg;base64,' . $base64Image;
+
+            // Clear raw binary data from model to prevent UTF-8 encoding errors
+            unset($ticket->photo);
+        }
+
         $viewName = 'tickets.view_details_myrequestedtickets';
 
         // Handle AJAX/JSON requests for modals
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
-                'status' => 'success',
-                'ticket' => $ticket,
-                'html'   => view($viewName, compact('ticket'))->render(),
+                'status'       => 'success',
+                'ticket'       => $ticket,
+                'photoDataUri' => $photoDataUri,
+                'html'         => view($viewName, compact('ticket', 'photoDataUri'))->render(),
             ]);
         }
 
-        return view($viewName, compact('ticket'));
+        return view($viewName, compact('ticket', 'photoDataUri'));
     }
 }

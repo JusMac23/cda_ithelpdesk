@@ -315,7 +315,10 @@
 
             <div class="form-grid grid-cols-2">
                 <div class="form-group">
-                    <label for="photo" class="form-label">Attach Photo (Optional)</label>
+                    <label for="photo" class="form-label">Attach Photo <i style="font-size: 0.85em;">(Upload a photo if it helps explain your issue.)</i></label>
+                    <p class="form-text" style="font-size: 0.75em; color: #6c757d; margin-bottom: 8px;">
+                        <strong>Note for CDA Articles Posting:</strong> Please do not upload files here. Instead, paste a Google Drive link in the Request Details description.
+                    </p>
                     <input type="file" id="photo" name="photo" accept="image/*" class="form-input">
                 </div>
 
