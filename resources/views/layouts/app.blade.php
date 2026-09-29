@@ -8,8 +8,8 @@
     <title>CDA-ICT Helpdesk</title>
     <link rel="icon" href="{{ asset('images/CDA-logo-RA11364-PNG.png') }}" type="image/png">
 
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
     
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -53,7 +53,7 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Figtree', sans-serif; background-color: var(--body-bg); color: var(--text-main); overflow: hidden; transition: background-color 0.3s ease, color 0.3s ease; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: var(--body-bg); color: var(--text-main); overflow: hidden; transition: background-color 0.3s ease, color 0.3s ease; }
         a { text-decoration: none; }
         button { background: none; border: none; cursor: pointer; font-family: inherit; outline: none; }
         [x-cloak] { display: none !important; }

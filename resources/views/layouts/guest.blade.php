@@ -12,24 +12,34 @@
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
         <style>
-            /* base resets & typography */
-            body{ margin:0;font-family:'Figtree',ui-sans-serif,system-ui,-apple-system,sans-serif;color:#111827;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;background-color:#f3f4f6; }
-            *{ box-sizing:border-box;}
+            /* CSS Variables & Base Resets */
+            :root { 
+                --primary-color: #2563eb; 
+                --bg-gradient: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%); 
+                --card-bg: rgba(255, 255, 255, 0.95); 
+                --text-main: #0f172a; 
+                --text-muted: #64748b; 
+                --border-light: rgba(0, 0, 0, 0.05); 
+            }
+            body { margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; color: var(--text-main); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background: var(--bg-gradient); min-height: 100vh; }
+            * { box-sizing: border-box; }
 
-            /* layout containers */
-            .page-wrapper{ min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem; }
-            .auth-card{ width:100%;max-width:28rem;padding:2rem;background-color:#ffffff;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6 -2 rgba(0,0,0,0.05);border-radius:.75rem; }
+            /* Layout & Animations */
+            @keyframes cardFadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+            .page-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+            .auth-card { width: 100%; max-width: 28rem; padding: 3rem 2.5rem; background-color: var(--card-bg); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01), 0 0 0 1px var(--border-light); border-radius: 1.25rem; backdrop-filter: blur(10px); animation: cardFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-            /* logo styles */
-            .logo-container{ display:flex;justify-content:center; margin-bottom:.5rem; }
-            .logo-link{ display:block;}
-            .logo-img{ width:5.5rem;height:5.5rem;object-fit:contain; }
+            /* Logo Styles */
+            .logo-container { display: flex; justify-content: center; margin-bottom: 2rem; transition: transform 0.3s ease; }
+            .logo-container:hover { transform: translateY(-3px) scale(1.02); }
+            .logo-link { display: block; outline: none; }
+            .logo-img { width: 6.5rem; height: 6.5rem; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.06)); }
 
-            /* typography */
-            .auth-heading{ text-align:center;margin-bottom:2rem; }
-            /* title */
-            .login-title{ font-size:1.5rem;font-weight:700;color:#1f2937;margin:0; }
-            .login-subtitle{ font-size:.875rem;color:#6b7280;margin-top:.5rem;margin-bottom:0; }
+            /* Typography & Headings */
+            .auth-heading { text-align: center; margin-bottom: 2.25rem; }
+            .login-header { display: flex; flex-direction: column; gap: 0.35rem; }
+            .login-title { font-size: 1.25rem; font-weight: 700; color: var(--primary-color); margin: 0; line-height: 1.2; }
+            .login-subtitle { font-size: 0.95rem; color: var(--text-muted); margin: 0; font-weight: 400; line-height: 1.5; }
         </style>
     </head>
     <body>
@@ -49,7 +59,7 @@
 
                     @if ($route === 'login')
                         <div class="login-header">
-                            <h2 class="login-title">Welcome Back</h2>
+                            <h2 class="login-title">Welcome to CDA-ICT Helpdesk !</h2>
                             <p class="login-subtitle">A few more clicks to sign in to your account.</p>
                         </div>
                     @elseif ($route === 'register')
