@@ -147,7 +147,7 @@
         .filter-section { display: flex; flex-direction: column; align-items: stretch; width: 100%; gap: 1rem; margin-bottom: 2rem; background: var(--bg-alt); padding: 1.25rem; border-radius: 0.75rem; border: 1px solid var(--border-light); transition: background-color 0.3s ease, border-color 0.3s ease; }
         .form-group { display: flex; flex-direction: column; width: 100%; }
         .form-label { font-weight: 600; margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--text-muted); transition: color 0.3s ease; }
-        .form-input, .form-select { height: 44px; padding: 0 1rem; border: 1px solid var(--input-border); border-radius: 0.5rem; font-size: 0.95rem; color: var(--input-text); width: 100%; box-sizing: border-box; outline: none; transition: all 0.2s; background-color: var(--input-bg); font-family: inherit; }
+        .form-input, .form-select { height: 44px; padding: 0 1rem; margin-bottom: 1rem; border: 1px solid var(--input-border); border-radius: 0.5rem; font-size: 0.95rem; color: var(--input-text); width: 100%; box-sizing: border-box; outline: none; transition: all 0.2s; background-color: var(--input-bg); font-family: inherit; }
         .form-input:focus, .form-select:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
         textarea.form-input { height: auto; resize: vertical; padding: 0.75rem 1rem; min-height: 120px; }
         
@@ -414,9 +414,9 @@
 
                     @can('filter_ticket_by_priority')
                     <div class="form-group">
-                        <label for="priority" class="form-label">Filter by Priority</label>
+                        <label for="priority" class="form-label">Filter by Priority Level</label>
                         <select name="priority" id="priority" class="form-select">
-                            <option value="">All Priorities</option>
+                            <option value="">All Priority Level</option>
                             <option value="Critical" {{ request('priority') == 'Critical' ? 'selected' : '' }}>Critical</option>
                             <option value="High" {{ request('priority') == 'High' ? 'selected' : '' }}>High</option>
                             <option value="Medium" {{ request('priority') == 'Medium' ? 'selected' : '' }}>Medium</option>
@@ -458,7 +458,7 @@
                                 <th>Request Details</th>
                                 <th>Assigned Personnel</th>
                                 <th>Date Created</th>
-                                <th class="text-center">Priority</th>
+                                <th class="text-center">Priority Level</th>
                                 <th class="text-center">Status</th>
                                 <th class="text-center">Actions</th>
                             </tr>
@@ -699,9 +699,9 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="priority" class="form-label">Priority <span class="text-required">*</span></label>
+                                <label for="priority" class="form-label">Priority Level <span class="text-required">*</span></label>
                                 <select id="priority" name="priority" required class="form-select">
-                                    <option value="" disabled selected>Select Priority</option>
+                                    <option value="" disabled selected>Select Priority Level</option>
                                     <option value="High">High</option>
                                     <option value="Medium">Medium</option>
                                     <option value="Low">Low</option>
@@ -800,11 +800,11 @@
                             <input type="text" name="re_assigned_it_email" id="re_assigned_it_email" readonly class="form-input">
                         </div>
 
-                        {{-- Added Priority selection so priority can also be adjusted --}}
+                        {{-- Added Priority Level selection so priority can also be adjusted --}}
                         <div class="form-group col-span-2">
                             <label for="re_assign_priority" class="form-label">Priority Level</label>
                             <select name="priority" id="re_assign_priority" class="form-select">
-                                <option value="">Keep Current Priority</option>
+                                <option value="">Keep Current Priority Level</option>
                                 <option value="Low">Low</option>
                                 <option value="Medium">Medium</option>
                                 <option value="High">High</option>
@@ -869,9 +869,9 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="edit_priority" class="form-label">Priority <span style="color:#ef4444;">*</span></label>
+                            <label for="edit_priority" class="form-label">Priority Level <span style="color:#ef4444;">*</span></label>
                             <select name="priority" id="edit_priority" required class="form-select">
-                                <option value="" disabled>Select priority</option>
+                                <option value="" disabled>Select priority Level</option>
                                 <option value="Low">Low</option>
                                 <option value="Medium">Medium</option>
                                 <option value="High">High</option>

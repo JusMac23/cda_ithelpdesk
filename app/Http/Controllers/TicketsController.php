@@ -317,7 +317,7 @@ class TicketsController extends Controller
         ];
 
         $columns = [
-            'Ticket Number', 'First Name', 'Last Name', 'Division', 'IT Area', 'Email',
+            'Ticket Number', 'First Name', 'Middle Initial', 'Last Name', 'Division', 'Region', 'Email',
             'Device', 'Service', 'Request', 'Status', 'Date Created', 'Date Resolved', 'IT Personnel', 'Priority', 'Action Taken'
         ];
 

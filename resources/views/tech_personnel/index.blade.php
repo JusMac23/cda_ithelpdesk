@@ -201,6 +201,9 @@
         /* Form Grid - Mobile First 100% Width */
         .form-grid { display: flex; flex-direction: column; gap: 1.25rem; width: 100%; }
 
+        /* NEW: Added Name Grid for Mobile Stacked */
+        .name-grid { display: flex; flex-direction: column; gap: 1.25rem; width: 100%; }
+
         /* Checkbox Grid - Fixed Variable Fallbacks */
         .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.5rem; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-light); border-radius: 0.375rem; background-color: var(--bg-alt); transition: all 0.3s ease; }
         .checkbox-grid label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 500; cursor: pointer; color: var(--text-dark); }
@@ -243,6 +246,10 @@
             .btn { width: auto; }
             .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
             .col-span-2 { grid-column: span 2; }
+            
+            /* NEW: Name grid forces a 3 column layout on Desktop */
+            .name-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+            
             .modal-box { padding: 2.5rem; }
             .close-btn { top: 1.5rem; right: 2rem; }
             .modal-footer { flex-direction: row; justify-content: flex-end; }
@@ -384,24 +391,27 @@
             <form action="{{ route('tech_personnel.store') }}" method="POST">
                 @csrf
                 <div class="form-grid">
-                    <div class="form-group col-span-2">
-                        <label for="firstname" class="form-label">First Name</label>
-                        <input type="text" name="firstname" id="firstname" required class="form-input" autocomplete="off">
-                    </div>
+                    <!-- Adjusted: Added name-grid class to align inputs side-by-side horizontally -->
+                    <div class="name-grid col-span-2">
+                        <div class="form-group">
+                            <label for="firstname" class="form-label">First Name</label>
+                            <input type="text" name="firstname" id="firstname" placeholder="e.g., Juan" required class="form-input" autocomplete="off">
+                        </div>
 
-                    <div class="form-group col-span-2">
-                        <label for="middle_initial" class="form-label">Middle Initial</label>
-                        <input type="text" name="middle_initial" id="middle_initial" class="form-input" autocomplete="off">
-                    </div>
+                        <div class="form-group">
+                            <label for="middle_initial" class="form-label">Middle Initial</label>
+                            <input type="text" name="middle_initial" id="middle_initial" placeholder="e.g., A." class="form-input" autocomplete="off">
+                        </div>
 
-                    <div class="form-group col-span-2">
-                        <label for="lastname" class="form-label">Last Name</label>
-                        <input type="text" name="lastname" id="lastname" required class="form-input" autocomplete="off">
-                    </div>
+                        <div class="form-group">
+                            <label for="lastname" class="form-label">Last Name</label>
+                            <input type="text" name="lastname" id="lastname" placeholder="e.g., DelaCruz" required class="form-input" autocomplete="off">
+                        </div>
+                    </div> 
 
                     <div class="form-group col-span-2">
                         <label for="it_email" class="form-label">Email Address</label>
-                        <input type="email" name="it_email" id="it_email" required class="form-input" autocomplete="email">
+                        <input type="email" name="it_email" id="it_email" placeholder="e.g., j_delacruz@cda.gov.ph" required class="form-input" autocomplete="email">
                     </div>
 
                     <div class="form-group col-span-2">
@@ -414,7 +424,7 @@
                         </select>
                     </div>
 
-                    <!-- Added Checkboxes for Add Modal -->
+                    <!-- Checkboxes for Technical Services Category -->
                     <div class="form-group col-span-2">
                         <label class="form-label">Technical Services Category <span style="color:#ef4444;">*</span></label>
                         <div class="checkbox-grid">
@@ -463,19 +473,22 @@
                 @csrf
                 @method('PUT')
                 <div class="form-grid">
-                    <div class="form-group col-span-2">
-                        <label for="edit_firstname" class="form-label">First Name</label>
-                        <input type="text" name="firstname" id="edit_firstname" class="form-input" required autocomplete="off">
-                    </div>
+                    <!-- Adjusted: Added name-grid class to align inputs side-by-side horizontally -->
+                    <div class="name-grid col-span-2">
+                        <div class="form-group">
+                            <label for="edit_firstname" class="form-label">First Name</label>
+                            <input type="text" name="firstname" id="edit_firstname" class="form-input" required autocomplete="off">
+                        </div>
 
-                    <div class="form-group col-span-2">
-                        <label for="edit_middle_initial" class="form-label">Middle Initial</label>
-                        <input type="text" name="middle_initial" id="edit_middle_initial" class="form-input" autocomplete="off">
-                    </div>
+                        <div class="form-group">
+                            <label for="edit_middle_initial" class="form-label">Middle Initial</label>
+                            <input type="text" name="middle_initial" id="edit_middle_initial" class="form-input" autocomplete="off">
+                        </div>
 
-                    <div class="form-group col-span-2">
-                        <label for="edit_lastname" class="form-label">Last Name</label>
-                        <input type="text" name="lastname" id="edit_lastname" class="form-input" required autocomplete="off">
+                        <div class="form-group">
+                            <label for="edit_lastname" class="form-label">Last Name</label>
+                            <input type="text" name="lastname" id="edit_lastname" class="form-input" required autocomplete="off">
+                        </div>
                     </div>
 
                     <div class="form-group col-span-2">

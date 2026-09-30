@@ -259,7 +259,7 @@
         .form-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; width: 100%; }
         .form-group { display: flex; flex-direction: column; width: 100%; }
         .form-label { font-weight: 600; margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--text-muted); transition: color 0.3s ease; }
-        .form-input, .form-select { height: 44px; padding: 0 1rem; border: 1px solid var(--input-border); border-radius: 0.5rem; font-size: 0.95rem; color: var(--input-text); width: 100%; box-sizing: border-box; outline: none; transition: all 0.2s; background-color: var(--input-bg); font-family: inherit; }
+        .form-input, .form-select { height: 44px; padding: 0 1rem; margin-bottom: 1rem; border: 1px solid var(--input-border); border-radius: 0.5rem; font-size: 0.95rem; color: var(--input-text); width: 100%; box-sizing: border-box; outline: none; transition: all 0.2s; background-color: var(--input-bg); font-family: inherit; }
         .form-input:focus, .form-select:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
         textarea.form-input { height: auto; resize: vertical; padding: 0.75rem 1rem; min-height: 100px; }
 
@@ -364,7 +364,7 @@
                                 <th>Request Details</th>
                                 <th>Assigned Personnel</th>
                                 <th>Date Created</th>
-                                <th class="text-center">Priority</th>
+                                <th class="text-center">Priority Level</th>
                                 <th class="text-center">Status</th>
                                 <th class="text-center">Actions</th>
                             </tr>
@@ -565,9 +565,9 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="priority" class="form-label">Priority <span class="text-required">*</span></label>
+                                <label for="priority" class="form-label">Priority Level <span class="text-required">*</span></label>
                                 <select id="priority" name="priority" required class="form-select">
-                                    <option value="" disabled selected>Select Priority</option>
+                                    <option value="" disabled selected>Select Priority Level</option>
                                     <option value="High">High</option>
                                     <option value="Medium">Medium</option>
                                     <option value="Low">Low</option>

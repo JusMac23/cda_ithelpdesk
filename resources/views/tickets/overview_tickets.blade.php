@@ -67,7 +67,7 @@
         .stat-card { border-radius: 1rem; padding: 1.5rem; background-color: var(--card-bg); border: 1px solid var(--border-light); box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; border-left: 5px solid; transition: all 0.3s ease; }
         .stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
 
-        .stat-left { display: flex; align-items: center; gap: 1.25rem; }
+        .stat-info { display: flex; flex-direction: column; }
         .stat-icon { width: 56px; height: 56px; border-radius: 1rem; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; transition: background-color 0.3s ease, color 0.3s ease; }
         .stat-label { font-size: 0.85rem; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); transition: color 0.3s ease; }
         .stat-value { font-size: 2.25rem; font-weight: 800; margin: 0.25rem 0 0 0; text-align: left; line-height: 1; color: var(--text-dark); transition: color 0.3s ease; }
@@ -82,9 +82,9 @@
         .card-red { border-left-color: #ef4444; }
         .card-red .stat-icon { background-color: var(--icon-red-bg); color: var(--icon-red-text); }
 
-        /* Grid Charts */
-        .tables-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 450px), 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
-        .table-card { background-color: var(--card-bg); border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 1.5rem; border: 1px solid var(--border-light); border-top: 4px solid var(--border-light); overflow: hidden; display: flex; flex-direction: column; transition: all 0.3s ease; }
+        /* Grid Charts - STRICT 3-COLUMN LAYOUT WITH STRETCH SUPPORT */
+        .tables-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; margin-bottom: 3rem; width: 100%; }
+        .table-card { background-color: var(--card-bg); border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 1.5rem; border: 1px solid var(--border-light); border-top: 4px solid var(--border-light); overflow: hidden; display: flex; flex-direction: column; transition: all 0.3s ease; width: 100%; }
         .table-card-title { font-size: 1.15rem; font-weight: 700; margin-top: 0; margin-bottom: 1.25rem; color: var(--text-dark); display: flex; align-items: center; gap: 0.5rem; transition: color 0.3s ease; }
 
         /* Full Width Card Modification for Grid */
@@ -97,20 +97,10 @@
         .tc-red { border-top-color: #ef4444; }
 
         /* Chart Scrolling Viewport */
-        .chart-viewport { 
-            position: relative; 
-            width: 100%; 
-            height: 320px; 
-            overflow: auto; /* Enables Both Vertical and Horizontal Scrolling */
-            -webkit-overflow-scrolling: touch; 
-            border-radius: 0.5rem;
-        }
+        .chart-viewport { position: relative; width: 100%; height: 320px; overflow: auto; -webkit-overflow-scrolling: touch; border-radius: 0.5rem; }
 
         /* Chart Wrapper dynamically resized */
-        .chart-wrapper { 
-            position: relative; 
-            /* Width/Height determined dynamically inline */
-        }
+        .chart-wrapper { position: relative; }
 
         /* Bottom Full Table */
         .full-table-container { background-color: var(--card-bg); box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-radius: 1rem; border: 1px solid var(--border-light); overflow-x: auto; margin-top: 1.5rem; -webkit-overflow-scrolling: touch; transition: background-color 0.3s ease, border-color 0.3s ease; }
@@ -140,7 +130,22 @@
         .btn-export-pdf:hover { background-color: var(--bg-alt); border-color: var(--border-light); transform: translateY(-1px); }
         .btn-export-pdf .material-symbols-outlined { font-size: 1.15rem; color: #ef4444; }
 
-        /* General Mobile Responsiveness */
+        /* Responsive Breakpoints when zooming in or on smaller screens */
+        @media (max-width: 1200px) {
+            .tables-grid { 
+                grid-template-columns: repeat(2, minmax(0, 1fr)); 
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tables-grid { 
+                grid-template-columns: 1fr; 
+            }
+            .table-card-full { 
+                grid-column: auto; 
+            }
+        }
+
         @media (max-width: 640px) {
             .dashboard-panel { padding: 1.25rem; }
             .dashboard-header-flex { flex-direction: column; align-items: stretch; }
@@ -154,8 +159,6 @@
             .stat-value { font-size: 1.75rem; }
             .dashboard-wrapper { padding: 0.5rem; }
             .table-card { padding: 1.25rem; }
-            .tables-grid { grid-template-columns: 1fr; }
-            .table-card-full { grid-column: auto; }
         }
     </style>
 
@@ -228,14 +231,12 @@
                 <div class="stat-cards">
                     @foreach ($cards as $card)
                         <div class="stat-card card-{{ $card['theme'] }}">
-                            <div class="stat-left">
-                                <div class="stat-icon">
-                                    <span class="material-symbols-outlined">{{ $card['icon'] }}</span>
-                                </div>
-                                <div>
-                                    <h4 class="stat-label">{{ $card['label'] }}</h4>
-                                    <p class="stat-value">{{ $card['value'] }}</p>
-                                </div>
+                            <div class="stat-info">
+                                <h4 class="stat-label">{{ $card['label'] }}</h4>
+                                <p class="stat-value">{{ $card['value'] }}</p>
+                            </div>
+                            <div class="stat-icon">
+                                <span class="material-symbols-outlined">{{ $card['icon'] }}</span>
                             </div>
                         </div>
                     @endforeach
@@ -268,20 +269,19 @@
                             </span>
                         </h4>
                         <div class="chart-viewport">
-                            <!-- Dynamically sets height based on number of personnel to force vertical scroll if heavy data -->
-                            <div class="chart-wrapper" style="min-width: max(100%, 400px); height: max(100%, {{ $personnelCount * 45 }}px);">
+                            <div class="chart-wrapper" style="min-width: 100%; height: max(100%, {{ $personnelCount * 45 }}px);">
                                 <canvas id="personnelChart"></canvas>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Tickets by Technical Service (Doughnut Chart - Both direction Scrolling if legend scales) --}}
+                    {{-- Tickets by Technical Service (Doughnut Chart) --}}
                     <div class="table-card tc-yellow">
                         <h4 class="table-card-title" style="color: #eab308;">
                             <span class="material-symbols-outlined">build</span> Tickets by Technical Service
                         </h4>
                         <div class="chart-viewport">
-                            <div class="chart-wrapper" style="min-width: max(100%, 450px); min-height: max(100%, 300px); height: 100%;">
+                            <div class="chart-wrapper" style="min-width: 100%; min-height: max(100%, 300px); height: 100%;">
                                 <canvas id="serviceChart"></canvas>
                             </div>
                         </div>

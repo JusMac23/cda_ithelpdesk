@@ -321,9 +321,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="priority" class="form-label">Priority <span class="text-required">*</span></label>
+                    <label for="priority" class="form-label">Priority Level <span class="text-required">*</span></label>
                     <select id="priority" name="priority" required class="form-select">
-                        <option value="" disabled selected>Select Priority</option>
+                        <option value="" disabled selected>Select Priority Level</option>
                         <option value="High">High</option>
                         <option value="Medium">Medium</option>
                         <option value="Low">Low</option>
