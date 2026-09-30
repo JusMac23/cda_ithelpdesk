@@ -36,6 +36,8 @@ class Tickets extends Model
         're_assigned_it_email',
         'notes',
         're_assigned_at',
+        'photo_evidence',
+        'link_evidence',
         'priority'
     ];
 

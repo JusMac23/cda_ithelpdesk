@@ -685,17 +685,17 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="request" class="form-label">Request Details <span class="text-required">*</span></label>
-                            <textarea id="request" name="request" rows="4" placeholder="Describe the issue or request in detail..." required class="form-input"></textarea>
+                            <label for="request" class="form-label">
+                                Request Details <i style="font-size: 0.85em;">(Note for CDA website postings, please include the Google Drive link in the description.)</i> <span class="text-required">*</span>
+                            </label>
+                            <textarea id="request" name="request" rows="4" placeholder="Please describe your issue or request in detail..." required class="form-input"></textarea>
                         </div>
 
                         <div class="form-grid grid-cols-2">
                             <div class="form-group">
                                 <label for="photo" class="form-label">Attach Photo <i style="font-size: 0.85em;">(Upload a photo if it helps explain your issue.)</i></label>
-                                <p class="form-text" style="font-size: 0.75em; color: #6c757d; margin-bottom: 8px;">
-                                    <strong>Note for CDA Articles Posting:</strong> Please do not upload files here. Instead, paste a Google Drive link in the Request Details description.
-                                </p>
                                 <input type="file" id="photo" name="photo" accept="image/*" class="form-input">
+                                <small style="color: #6b7280; font-size: 0.8rem; margin-top: 0.25rem; display: block;">Max file size: 20MB (JPEG, PNG, JPG, GIF, WEBP)</small>
                             </div>
 
                             <div class="form-group">
@@ -867,6 +867,7 @@
                                 <option value="Resolved">Resolved</option>
                             </select>
                         </div>
+                        
                         <div class="form-group">
                             <label for="edit_priority" class="form-label">Priority <span style="color:#ef4444;">*</span></label>
                             <select name="priority" id="edit_priority" required class="form-select">
@@ -882,19 +883,24 @@
                             <label for="action_taken" class="form-label">Action Taken <span style="color:#ef4444;">*</span></label>
                             <textarea name="action_taken" id="action_taken" required class="form-input"></textarea>
                         </div>
-                        
+
+                        <!-- Photo Evidence Field -->
                         <div class="form-group col-span-2">
-                            <label for="edit_photo" class="form-label">Update Photo Evidence</label>
-                            <input type="file" name="photo" id="edit_photo" accept="image/*" class="form-input">
-                            <div class="mt-3">
-                                <img id="photo_preview" src="" alt="Uploaded Photo" class="thumb-img" style="display: none; height: 6rem; width: 6rem;">
-                            </div>
+                            <label for="photo_evidence" class="form-label">Photo Evidence <span style="color:#9ca3af; font-weight: normal;">(Optional)</span></label>
+                            <input type="file" name="photo_evidence" id="photo_evidence" class="form-input" accept=".jpeg, .png, .jpg, .gif, .webp">
+                            <small style="color: #6b7280; font-size: 0.8rem; margin-top: 0.25rem; display: block;">Max file size: 20MB (JPEG, PNG, JPG, GIF, WEBP)</small>
+                        </div>
+
+                        <!-- Link Evidence Field -->
+                        <div class="form-group col-span-2">
+                            <label for="link_evidence" class="form-label">Link Evidence <span style="color:#9ca3af; font-weight: normal;">(Optional)</span></label>
+                            <input type="text" name="link_evidence" id="link_evidence" class="form-input" placeholder="e.g., https://drive.google.com/...">
                         </div>
 
                         <div class="form-group col-span-2">
                             <label class="form-label">Date Resolved</label>
-                            <input type="text" value="{{ \Carbon\Carbon::now()->setTimezone('Asia/Manila')->format('F j, Y h:i A') }}" readonly class="form-input">
-                            <input type="hidden" name="date_resolved" value="{{ \Carbon\Carbon::now()->setTimezone('Asia/Manila')->format('Y-m-d') }}">
+                            <input type="text" value="{{ \Carbon\Carbon::now('Asia/Manila')->format('F j, Y h:i A') }}" readonly class="form-input">
+                            <input type="hidden" name="date_resolved" value="{{ \Carbon\Carbon::now('Asia/Manila')->format('Y-m-d') }}">
                         </div>
                     </div>
 

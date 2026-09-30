@@ -56,18 +56,18 @@ class TicketsController extends Controller
             $isIcts       = $hasRole('ICTS');
 
             if ($isSuperAdmin) {
-                // 1. Super Admin: View ALL tickets (no filters applied)
+                // Super Admin: View ALL tickets (no filters applied)
             } elseif ($isIctsAdmin) {
-                // 2. ICTS Admin: View all tickets assigned to their region
+                // ICTS Admin: View all tickets assigned to their region
                 if (!empty($user->region)) {
                     $query->where('it_area', $user->region);
                 }
             } elseif ($isIctd || $isIcts) {
-                // 3. ICTD and ICTS: View ONLY tickets assigned to them
+                // ICTD and ICTS: View ONLY tickets assigned to them
                 $query->where('it_email', $user->email);
                 
             } else {
-                // 4. Default Fallback for any other roles (scopes to region if they have one)
+                // Default Fallback for any other roles (scopes to region if they have one)
                 if (!empty($user->region)) {
                     $query->where('it_area', $user->region);
                 }
@@ -79,12 +79,12 @@ class TicketsController extends Controller
 
     public function index(Request $request)
     {
-        // 1. Initialize base query scoped by user role/region
+        // Initialize base query scoped by user role/region
         $query = $this->getTicketQuery();
 
         $currentTime = Carbon::now('Asia/Manila');
 
-        // 2. Load all Technical Services into memory indexed by lowercased service name
+        // Load all Technical Services into memory indexed by lowercased service name
         $allTechServices = TechnicalServices::all()->keyBy(function ($item) {
             return strtolower(trim($item->technical_services));
         });
@@ -99,7 +99,7 @@ class TicketsController extends Controller
             'pending/re-assigned'
         ];
 
-        // 3. SLA Overdue Calculation Closure
+        // SLA Overdue Calculation Closure
         $isTicketOverdue = function ($ticket) use ($allTechServices, $currentTime, $pendingStatuses) {
             $status = trim($ticket->status ?? '');
 
@@ -157,17 +157,17 @@ class TicketsController extends Controller
             return $currentTime->greaterThan($deadline);
         };
 
-        // 4. Calculate total count strictly based on role/regional scope
+        // Calculate total count strictly based on role/regional scope
         $ticketsCount = (clone $query)->count();
 
-        // 5. Fetch pending tickets to compute overdue count
+        // Fetch pending tickets to compute overdue count
         $pendingScopedTickets = (clone $query)
             ->whereIn('status', $pendingStatuses)
             ->get();
 
         $overdueCount = $pendingScopedTickets->filter($isTicketOverdue)->count();
 
-        // 6. Apply Request Filters
+        // Apply Request Filters
         $isOverdueFilterActive = ($request->input('filter') === 'overdue');
 
         if ($request->filled('it_area')) {
@@ -190,7 +190,7 @@ class TicketsController extends Controller
             $query->whereDate('date_created', '<=', $request->input('end_date'));
         }
 
-        // 7. Search Query Filter across schema columns
+        // Search Query Filter across schema columns
         if ($request->filled('search_query')) {
             $search = trim($request->input('search_query'));
             $query->where(function ($q) use ($search) {
@@ -212,7 +212,7 @@ class TicketsController extends Controller
             });
         }
 
-        // 8. CSV Export Handler
+        // CSV Export Handler
         if ($request->input('action') === 'generate') {
             $exportRecords = $query->get();
             if ($isOverdueFilterActive) {
@@ -221,7 +221,7 @@ class TicketsController extends Controller
             return $this->generateCSVReport($exportRecords);
         }
 
-        // 9. Pagination Handling with Primary Key (ticket_id)
+        // Pagination Handling with Primary Key (ticket_id)
         if ($isOverdueFilterActive) {
             $filteredOverdue = $query->get()->filter($isTicketOverdue);
             
@@ -242,7 +242,7 @@ class TicketsController extends Controller
 
         $ticket = null;
 
-        // 10. Fetch Dropdowns & Round-Robin Data required by the embedded Add Ticket Modal
+        // Fetch Dropdowns & Round-Robin Data required by the embedded Add Ticket Modal
         $sections_divisions = Divisions::pluck('sections_divisions')->filter()->toArray();
         $technical_services = TechnicalServices::pluck('technical_services')->filter()->toArray();
 
@@ -285,7 +285,7 @@ class TicketsController extends Controller
                 ])
             )->toArray();
 
-        // 11. Render View
+        // Render View
         return view('tickets.index', compact(
             'request',
             'ticketsCount',
@@ -352,44 +352,54 @@ class TicketsController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
-    // Handle View
+    // Handle View Details
     public function view(Request $request, $ticket_id)
     {
-        // 1. Fetch ticket using base query to enforce user role/regional scope security
+        // Fetch ticket using base query to enforce user role/regional scope security
         $ticket = $this->getTicketQuery()
             ->where('ticket_id', $ticket_id)
             ->first();
 
-        // 2. Abort if not found or unauthorized for this user's scope
+        // Abort if not found or unauthorized for this user's scope
         if (!$ticket) {
             abort(404, 'Ticket record not found or access denied.');
         }
 
-        // 3. Process raw LONGBLOB photo into base64 data stream string
-        $photoDataUri = null;
+        // Process Client's Attached Issue Photo Evidence (LONGBLOB)
+        $ticketIssuePhotoEvidenceDataUri = null;
         if (!empty($ticket->photo)) {
-            // Encode binary blob into base64 string
             $base64Image = base64_encode($ticket->photo);
-            $photoDataUri = 'data:image/jpeg;base64,' . $base64Image;
+            $ticketIssuePhotoEvidenceDataUri = 'data:image/jpeg;base64,' . $base64Image;
 
-            // Clear raw binary data from model to prevent UTF-8 malformed errors during JSON encoding
+            // Unset raw binary data to prevent UTF-8 malformed JSON errors
             unset($ticket->photo);
+        }
+
+        // Process IT Personnel's Resolved Ticket Photo Evidence (LONGBLOB)
+        $resolvedTicketPhotoEvidenceDataUri = null;
+        if (!empty($ticket->photo_evidence)) {
+            $base64Image = base64_encode($ticket->photo_evidence);
+            $resolvedTicketPhotoEvidenceDataUri = 'data:image/jpeg;base64,' . $base64Image;
+
+            // Unset raw binary data to prevent UTF-8 malformed JSON errors
+            unset($ticket->photo_evidence);
         }
 
         $viewName = 'tickets.view_details_tickets';
 
-        // 4. Handle AJAX/JSON requests for modals
+        // Handle AJAX/JSON requests for modals
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
-                'status'       => 'success',
-                'ticket'       => $ticket,
-                'photoDataUri' => $photoDataUri,
-                'html'         => view($viewName, compact('ticket', 'photoDataUri'))->render(),
+                'status'                             => 'success',
+                'ticket'                             => $ticket,
+                'ticketIssuePhotoEvidenceDataUri'    => $ticketIssuePhotoEvidenceDataUri,
+                'resolvedTicketPhotoEvidenceDataUri' => $resolvedTicketPhotoEvidenceDataUri,
+                'html'                               => view($viewName, compact('ticket', 'ticketIssuePhotoEvidenceDataUri', 'resolvedTicketPhotoEvidenceDataUri'))->render(),
             ]);
         }
 
-        // 5. Standard View Response
-        return view($viewName, compact('ticket', 'photoDataUri'));
+        // Standard View Response
+        return view($viewName, compact('ticket', 'ticketIssuePhotoEvidenceDataUri', 'resolvedTicketPhotoEvidenceDataUri'));
     }
 
     /**
@@ -397,7 +407,7 @@ class TicketsController extends Controller
      */
     public function re_assign(Request $request)
     {
-        // 1. Validate the request with flexible nullable rules
+        // Validate the request with flexible nullable rules
         $request->validate([
             'ticket_id'             => 'required|integer|exists:tickets,ticket_id',
             're_assigned_to'        => 'nullable|string', 
@@ -408,7 +418,7 @@ class TicketsController extends Controller
 
         $ticket = Tickets::findOrFail($request->ticket_id);
 
-        // 2. Prevent assigning if ticket is resolved
+        // Prevent assigning if ticket is resolved
         if ($ticket->status === 'Resolved') {
             return redirect()->back()->with('error', 'Cannot assign a resolved ticket.');
         }
@@ -433,7 +443,7 @@ class TicketsController extends Controller
             $reAssignedEmail = 'no-email@cda.gov.ph';
         }
 
-        // 3. Prevent assigning same personnel without any changes
+        // Prevent assigning same personnel without any changes
         if (
             $ticket->it_personnel &&
             $ticket->it_personnel === $reAssignedTo &&
@@ -447,7 +457,7 @@ class TicketsController extends Controller
         $previous_assigned = $ticket->it_personnel ?? 'N/A';
         $assignedBy = Auth::user() ? Auth::user()->name : 'System';
 
-        // 4. Prepare ticket update data
+        // Prepare ticket update data
         $updateData = [
             'status'                => 'Pending/Re-Assigned',
             'it_personnel'          => $reAssignedTo,
@@ -464,7 +474,7 @@ class TicketsController extends Controller
 
         $ticket->update($updateData);
 
-        // 5. Log reassignment history with priority and NOT-NULL safe fallbacks
+        // Log reassignment history with priority and NOT-NULL safe fallbacks
         ReassignedTicket::create([
             'ticket_number'     => $ticket->ticket_number,
             'requested_by'      => $ticket->firstname . ' ' . $ticket->lastname,
@@ -478,7 +488,7 @@ class TicketsController extends Controller
             'status'            => 'Pending/Re-Assigned',
         ]);
 
-        // 6. Safe Mail dispatch to IT personnel
+        // Safe Mail dispatch to IT personnel
         if ($ticket->it_email && filter_var($ticket->it_email, FILTER_VALIDATE_EMAIL)) {
             try {
                 Mail::to($ticket->it_email)->send(new TicketReassigned($ticket));
@@ -496,7 +506,7 @@ class TicketsController extends Controller
             }
         }
 
-        // 7. Notify the reassigned personnel
+        // Notify the reassigned personnel
         $user = User::where('email', $reAssignedEmail)->first();
         if ($user) {
             Notification::create([
@@ -507,7 +517,7 @@ class TicketsController extends Controller
             ]);
         }
 
-        // 8. Notify the requestee (ticket owner)
+        // Notify the requestee (ticket owner)
         $requesterUser = User::where('email', $ticket->email)->first();
         if ($requesterUser) {
             Notification::create([
@@ -546,15 +556,21 @@ class TicketsController extends Controller
             'status'        => 'required|string|max:255',
             'date_resolved' => 'required|date',
             'action_taken'  => 'required|string',
-            'photo'         => 'nullable|image|max:10240',
+            'photo_evidence'=> 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:20480',
+            'link_evidence' => 'nullable|string'
         ]);
 
         $ticket = Tickets::findOrFail($ticket_id);
 
         $validatedData['date_resolved'] = Carbon::now('Asia/Manila')->format('Y-m-d H:i:s');
 
-        if ($request->hasFile('photo')) {
-            $validatedData['photo'] = $request->file('photo')->store('ticket_photos', 'public');
+        if ($request->hasFile('photo_evidence') && $request->file('photo_evidence')->isValid()) {
+            $file = $request->file('photo_evidence');
+            $validatedData['photo_evidence'] = file_get_contents($file->getRealPath());
+
+            $file->store('ticket_photos', 'public');
+        } else {
+            $validatedData['photo_evidence'] = null;
         }
 
         $ticket->update($validatedData);

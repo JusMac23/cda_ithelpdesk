@@ -236,14 +236,24 @@ class MyRequestedTicketsController extends Controller
             abort(404, 'Ticket record not found or access denied.');
         }
 
-        // Process raw LONGBLOB photo into base64 data URI string
-        $photoDataUri = null;
+        // Process Client's Attached Issue Photo / Screenshot (LONGBLOB)
+        $ticketIssuePhotoEvidenceDataUri = null;
         if (!empty($ticket->photo)) {
             $base64Image = base64_encode($ticket->photo);
-            $photoDataUri = 'data:image/jpeg;base64,' . $base64Image;
+            $ticketIssuePhotoEvidenceDataUri = 'data:image/jpeg;base64,' . $base64Image;
 
-            // Clear raw binary data from model to prevent UTF-8 encoding errors
+            // Clear raw binary data from model to prevent UTF-8 encoding errors during JSON rendering
             unset($ticket->photo);
+        }
+
+        // Process IT Personnel's Resolved Ticket Photo Evidence (LONGBLOB)
+        $resolvedTicketPhotoEvidenceDataUri = null;
+        if (!empty($ticket->photo_evidence)) {
+            $base64Image = base64_encode($ticket->photo_evidence);
+            $resolvedTicketPhotoEvidenceDataUri = 'data:image/jpeg;base64,' . $base64Image;
+
+            // Clear raw binary data from model to prevent UTF-8 encoding errors during JSON rendering
+            unset($ticket->photo_evidence);
         }
 
         $viewName = 'tickets.view_details_myrequestedtickets';
@@ -251,13 +261,15 @@ class MyRequestedTicketsController extends Controller
         // Handle AJAX/JSON requests for modals
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
-                'status'       => 'success',
-                'ticket'       => $ticket,
-                'photoDataUri' => $photoDataUri,
-                'html'         => view($viewName, compact('ticket', 'photoDataUri'))->render(),
+                'status'                             => 'success',
+                'ticket'                             => $ticket,
+                'ticketIssuePhotoEvidenceDataUri'    => $ticketIssuePhotoEvidenceDataUri,
+                'resolvedTicketPhotoEvidenceDataUri' => $resolvedTicketPhotoEvidenceDataUri,
+                'html'                               => view($viewName, compact('ticket', 'ticketIssuePhotoEvidenceDataUri', 'resolvedTicketPhotoEvidenceDataUri'))->render(),
             ]);
         }
 
-        return view($viewName, compact('ticket', 'photoDataUri'));
+        // Standard View Response
+        return view($viewName, compact('ticket', 'ticketIssuePhotoEvidenceDataUri', 'resolvedTicketPhotoEvidenceDataUri'));
     }
 }

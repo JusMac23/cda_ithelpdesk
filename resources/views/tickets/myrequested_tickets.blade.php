@@ -551,17 +551,17 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="request" class="form-label">Request Details <span class="text-required">*</span></label>
-                            <textarea id="request" name="request" rows="4" placeholder="Describe the issue or request in detail..." required class="form-input"></textarea>
+                            <label for="request" class="form-label">
+                                Request Details <i style="font-size: 0.85em;">(Note for CDA website postings, please include the Google Drive link in the description.)</i> <span class="text-required">*</span>
+                            </label>
+                            <textarea id="request" name="request" rows="4" placeholder="Please describe your issue or request in detail..." required class="form-input"></textarea>
                         </div>
 
                         <div class="form-grid grid-cols-2">
                             <div class="form-group">
                                 <label for="photo" class="form-label">Attach Photo <i style="font-size: 0.85em;">(Upload a photo if it helps explain your issue.)</i></label>
-                                <p class="form-text" style="font-size: 0.75em; color: #6c757d; margin-bottom: 8px;">
-                                    <strong>Note for CDA Articles Posting:</strong> Please do not upload files here. Instead, paste a Google Drive link in the Request Details description.
-                                </p>
                                 <input type="file" id="photo" name="photo" accept="image/*" class="form-input">
+                                <small style="color: #6b7280; font-size: 0.8rem; margin-top: 0.25rem; display: block;">Max file size: 20MB (JPEG, PNG, JPG, GIF, WEBP)</small>
                             </div>
 
                             <div class="form-group">
