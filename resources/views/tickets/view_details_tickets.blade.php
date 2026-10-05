@@ -78,7 +78,7 @@
         *, *::before, *::after { box-sizing: border-box; }
         body { font-family: 'Inter', system-ui, -apple-system, sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
 
-        .view-wrapper { background-color: var(--bg-page); border-radius: 12px; padding: 2.5rem; max-width: 1100px; margin: 2rem auto; position: relative; font-family: 'Inter', sans-serif; color: var(--text-main); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); transition: background-color 0.3s ease; }
+        .view-wrapper { background-color: var(--bg-page); border-radius: 12px; padding: 2.5rem; max-width: 76rem; margin: 2rem auto; position: relative; font-family: 'Inter', sans-serif; color: var(--text-main); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); transition: background-color 0.3s ease; }
         .view-card { background: var(--bg-card); border-radius: 12px; padding: 1.75rem; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 1.5rem; transition: box-shadow 0.2s ease, background-color 0.3s ease, border-color 0.3s ease; }
         .view-card:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08); }
         
