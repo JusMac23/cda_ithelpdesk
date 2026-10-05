@@ -216,7 +216,7 @@
     <div class="header-gradient"></div>
     <div class="container">
         <a href="/" aria-label="Home" class="brand">
-            <img src="{{ asset('images/CDA-logo-RA11364-PNG.png') }}" alt="CDA Seal" loading="lazy">
+            <!-- <img src="{{ asset('images/CDA-logo-RA11364-PNG.png') }}" alt="CDA Seal" loading="lazy"> -->
             <span>CDA-ICT Helpdesk</span>
         </a>
 
