@@ -2,73 +2,115 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
-
-use App\Mail\TicketReassigned;
-use App\Mail\TicketResolved;
-use App\Mail\TicketUpdated;
+use App\Mail\CLientTicketNotification;
 use App\Mail\NewTicketSubmitted;
-use App\Mail\CLientTicketNotification; 
-
 use App\Models\Divisions;
 use App\Models\ITPersonnel;
-use App\Models\ReassignedTicket;
+use App\Models\Notification;
 use App\Models\TechnicalServices;
 use App\Models\Tickets;
-use App\Models\Notification;
 use App\Models\User;
-
 use App\Traits\RoundRobinAssignable;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
+use Throwable;
 
 class MyRequestedTicketsController extends Controller
 {
-    use RoundRobinAssignable; 
+    use RoundRobinAssignable;
 
-    public function index(Request $request)
+    // -------------------------------------------------------------------------
+    // Private Helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Creates an in-app notification for the user matching the given email.
+     * Silently catches and logs any errors so ticket processing never fails.
+     *
+     * @param  Tickets  $ticket
+     * @param  string|null  $email
+     * @param  string   $type
+     * @param  string   $message
+     * @return void
+     */
+    private function createNotification(Tickets $ticket, ?string $email, string $type, string $message): void
     {
-        $loggedInEmail = Auth::user()->email;
+        if (empty($email) || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
 
-        $tickets = Tickets::where('email', $loggedInEmail)
-                    ->orderBy('ticket_id', 'desc')
-                    ->paginate(10);
+        try {
+            $user = User::where('email', $email)->first();
 
-        // Load all Technical Services into memory indexed by lowercased service name
-        $allTechServices = TechnicalServices::all()->keyBy(function ($item) {
-            return strtolower(trim($item->technical_services));
-        });            
+            if ($user) {
+                Notification::create([
+                    'user_id'   => $user->id,
+                    'ticket_id' => $ticket->getKey(),
+                    'type'      => $type,
+                    'message'   => $message,
+                ]);
+            }
+        } catch (Throwable $e) {
+            Log::warning("Failed to create in-app notification ({$type}) for {$email}: " . $e->getMessage());
+        }
+    }
 
-        $ticket = null;
+    /**
+     * Safely attempts to send a mailable, logging failures without interrupting
+     * the application flow.
+     *
+     * @param  string|null                $toEmail
+     * @param  \Illuminate\Mail\Mailable  $mailable
+     * @param  string                     $context  Human-readable label for log messages.
+     * @return void
+     */
+    private function sendMailSafely(?string $toEmail, $mailable, string $context = ''): void
+    {
+        if (empty($toEmail) || ! filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
 
-        // Fetch Dropdowns & Clean strings (trim) to prevent frontend key mismatches
-        $sections_divisions = Divisions::pluck('sections_divisions')
-            ->map(fn($item) => trim($item))
-            ->filter()
-            ->values()
-            ->toArray();
+        try {
+            Mail::to($toEmail)->send($mailable);
+        } catch (Throwable $e) {
+            Log::error("Mail send failed [{$context}] for {$toEmail}: " . $e->getMessage());
+        }
+    }
 
-        $technical_services = TechnicalServices::pluck('technical_services')
-            ->map(fn($item) => trim($item))
-            ->filter()
-            ->values()
-            ->toArray();
+    /**
+     * Generates a unique ticket number in the format CDA-ICT-{YEAR}-{RAND}.
+     * Loops until a collision-free number is found.
+     *
+     * @return string
+     */
+    private function generateTicketNumber(): string
+    {
+        $year = now()->year;
 
-        $it_personnel = ITPersonnel::all();
+        do {
+            $number = "CDA-ICT-{$year}-" . random_int(1000, 9999);
+        } while (Tickets::where('ticket_number', $number)->exists());
 
-        $it_area = ITPersonnel::whereNotNull('it_area')
-            ->where('it_area', '!=', '')
-            ->pluck('it_area')
-            ->map(fn($item) => trim($item))
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
+        return $number;
+    }
 
+    /**
+     * Builds the round-robin next-assignment map indexed by "{area}_{service}" and "{area}_default".
+     *
+     * @param  array  $it_area
+     * @param  array  $technical_services
+     * @return array
+     */
+    private function buildNextAssignment(array $it_area, array $technical_services): array
+    {
         $nextAssignment = [];
 
         foreach ($it_area as $area) {
@@ -77,21 +119,130 @@ class MyRequestedTicketsController extends Controller
                 if ($assigned) {
                     $nextAssignment["{$area}_{$service}"] = [
                         'name'  => $this->formatFullName($assigned),
-                        'email' => $assigned->it_email,
+                        'email' => $assigned->it_email ?? '',
                     ];
                 }
             }
 
-            $assignedDefault = $this->getNextAssignedPersonnel($area, null);
-            if ($assignedDefault) {
+            $default = $this->getNextAssignedPersonnel($area, null);
+            if ($default) {
                 $nextAssignment["{$area}_default"] = [
-                    'name'  => $this->formatFullName($assignedDefault),
-                    'email' => $assignedDefault->it_email,
+                    'name'  => $this->formatFullName($default),
+                    'email' => $default->it_email ?? '',
                 ];
             }
         }
 
-        $it_mapping = $nextAssignment;
+        return $nextAssignment;
+    }
+
+    /**
+     * Decodes a LONGBLOB binary image column or stored file path to a base64 data URI
+     * and unsets the raw binary from the model instance to prevent JSON / UTF-8 encoding errors.
+     *
+     * @param  Tickets  $ticket
+     * @param  string   $column
+     * @return string|null
+     */
+    private function blobToDataUri(Tickets $ticket, string $column): ?string
+    {
+        $data = $ticket->{$column} ?? null;
+        if (empty($data)) {
+            return null;
+        }
+
+        // Unset from model to prevent JSON serialization errors
+        unset($ticket->{$column});
+
+        // 1. If stored as a relative file path on the public storage disk
+        if (is_string($data) && ! str_contains($data, "\0") && strlen($data) < 260 && Storage::disk('public')->exists($data)) {
+            $mime     = Storage::disk('public')->mimeType($data) ?: 'image/jpeg';
+            $contents = Storage::disk('public')->get($data);
+
+            return "data:{$mime};base64," . base64_encode($contents);
+        }
+
+        // 2. Raw binary data (LONGBLOB) with dynamic MIME type sniffing
+        $mime = 'image/jpeg';
+        if (function_exists('finfo_open')) {
+            $finfo    = finfo_open(FILEINFO_MIME_TYPE);
+            $detected = finfo_buffer($finfo, $data);
+            finfo_close($finfo);
+
+            if ($detected && str_starts_with($detected, 'image/')) {
+                $mime = $detected;
+            }
+        }
+
+        return "data:{$mime};base64," . base64_encode($data);
+    }
+
+    // -------------------------------------------------------------------------
+    // Public Actions
+    // -------------------------------------------------------------------------
+
+    /**
+     * Display the authenticated user's requested tickets with search, pagination,
+     * dropdown options, and round-robin assignment data for the Add Ticket modal.
+     *
+     * @param  Request  $request
+     * @return View
+     */
+    public function index(Request $request): View
+    {
+        $user = Auth::user();
+        abort_if(! $user, 401, 'Unauthorized');
+
+        $query = Tickets::query()
+            ->where('email', $user->email)
+            ->orderBy('ticket_id', 'desc');
+
+        // Search across relevant ticket columns
+        if ($request->filled('search_query')) {
+            $search = trim($request->input('search_query'));
+            $query->where(function ($q) use ($search) {
+                $columns = [
+                    'ticket_id', 'ticket_number', 'firstname', 'middle_initial',
+                    'lastname', 'division', 'it_area', 'device',
+                    'service', 'request', 'status', 'it_personnel',
+                    'action_taken', 'priority',
+                ];
+                foreach ($columns as $i => $column) {
+                    $method = $i === 0 ? 'where' : 'orWhere';
+                    $q->{$method}($column, 'like', "%{$search}%");
+                }
+                $q->orWhereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ["%{$search}%"]);
+            });
+        }
+
+        $tickets = $query->paginate(10)->withQueryString();
+
+        $sections_divisions = Divisions::pluck('sections_divisions')
+            ->map(fn($v) => trim($v))
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        $technical_services = TechnicalServices::pluck('technical_services')
+            ->map(fn($v) => trim($v))
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        $it_personnel = ITPersonnel::all();
+
+        $it_area = ITPersonnel::whereNotNull('it_area')
+            ->where('it_area', '!=', '')
+            ->pluck('it_area')
+            ->map(fn($v) => trim($v))
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        $nextAssignment = $this->buildNextAssignment($it_area, $technical_services);
 
         return view('tickets.myrequested_tickets', compact(
             'tickets',
@@ -99,177 +250,170 @@ class MyRequestedTicketsController extends Controller
             'it_personnel',
             'sections_divisions',
             'technical_services',
-            'it_mapping',
             'nextAssignment',
-            'ticket'
         ));
     }
 
     /**
-     * Store and process private ticket creation submitted from the modal.
+     * Store a new ticket submitted by the authenticated user from the modal form.
+     * Applies round-robin auto-assignment, stores raw image BLOB & backup file,
+     * generates a unique ticket number, and dispatches email + in-app notifications.
+     *
+     * @param  Request  $request
+     * @return RedirectResponse|JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
+        $user = Auth::user();
+        abort_if(! $user, 401, 'Unauthorized');
+
+        // 1. Server-side Round-Robin Auto-Assignment
+        $assignedName  = null;
+        $assignedEmail = null;
+
         if ($request->filled('it_area')) {
-            $area = trim($request->input('it_area'));
+            $area    = trim($request->input('it_area'));
             $service = $request->filled('service') ? trim($request->input('service')) : null;
+
             $assigned = $this->getNextAssignedPersonnel($area, $service);
 
             if ($assigned) {
-                $request->merge([
-                    'it_personnel' => $this->formatFullName($assigned),
-                    'it_email'     => $assigned->it_email,
-                ]);
+                $assignedName  = $this->formatFullName($assigned);
+                $assignedEmail = $assigned->it_email ?? null;
             }
         }
 
-        $validatedData = $request->validate([
-            'firstname'        => 'required|string|max:255',
-            'lastname'         => 'required|string|max:255',
-            'middle_initial'   => 'nullable|string|max:10',
-            'email'            => 'required|email|max:255',
-            'date_created'     => 'required|date',
-            'division'         => 'required|string|max:255',
-            'device'           => 'required|string|max:255',
-            'service'          => 'required|string|max:255',
-            'request'          => 'required|string',
-            'it_area'          => 'required|string|max:255',
-            'it_personnel'     => 'required|string',
-            'it_email'         => 'required|string|email',
-            'status'           => 'required|string|max:255',
-            'photo'            => 'nullable|image|max:10240',
-            'priority'         => 'required|string|max:255',
+        // Fallback to request input if round-robin calculation returned empty
+        if (empty($assignedName)) {
+            $assignedName = trim($request->input('it_personnel', ''));
+        }
+        if (empty($assignedEmail)) {
+            $assignedEmail = trim($request->input('it_email', ''));
+        }
+
+        // Fallback to first available personnel in the area
+        if ((empty($assignedName) || empty($assignedEmail)) && $request->filled('it_area')) {
+            $defaultPersonnel = ITPersonnel::where('it_area', trim($request->input('it_area')))->first();
+            if ($defaultPersonnel) {
+                $assignedName  = $assignedName ?: $this->formatFullName($defaultPersonnel);
+                $assignedEmail = $assignedEmail ?: ($defaultPersonnel->it_email ?? null);
+            }
+        }
+
+        // Pre-merge auto-assigned values so validation succeeds
+        $request->merge([
+            'it_personnel' => $assignedName,
+            'it_email'     => $assignedEmail,
         ]);
 
-        $validatedData['date_created']  = Carbon::now('Asia/Manila')->format('Y-m-d H:i:s');
-        $validatedData['date_resolved'] = null;
+        // 2. Validate form inputs
+        $validated = $request->validate([
+            'firstname'      => 'required|string|max:255',
+            'lastname'       => 'required|string|max:255',
+            'middle_initial' => 'nullable|string|max:10',
+            'email'          => 'required|email|max:255',
+            'division'       => 'required|string|max:255',
+            'device'         => 'required|string|max:255',
+            'service'        => 'required|string|max:255',
+            'request'        => 'required|string',
+            'it_area'        => 'required|string|max:255',
+            'it_personnel'   => 'required|string|max:255',
+            'it_email'       => 'required|email|max:255',
+            'photo'          => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:20480',
+            'priority'       => 'required|string|in:Low,Medium,High,Critical',
+            'terms_agree'    => 'accepted',
+        ]);
 
-        if ($request->hasFile('photo')) {
-            $validatedData['photo'] = $request->file('photo')->store('ticket_photos', 'public');
+        // Enforce server-side security defaults
+        $validated['email']         = $user->email;
+        $validated['status']        = 'Pending';
+        $validated['date_created']  = Carbon::now('Asia/Manila')->format('Y-m-d H:i:s');
+        $validated['date_resolved'] = null;
+        $validated['ticket_number'] = $this->generateTicketNumber();
+
+        // Remove non-column input
+        unset($validated['terms_agree']);
+
+        // 3. Handle attached photo (Stores raw binary into LONGBLOB and saves a file backup)
+        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
+            $file               = $request->file('photo');
+            $validated['photo'] = file_get_contents($file->getRealPath());
+            $file->store('ticket_photos', 'public');
+        } else {
+            $validated['photo'] = null;
         }
 
-        $ticket = Tickets::create($validatedData);
+        // 4. Create ticket atomically in database
+        $ticket = DB::transaction(fn() => Tickets::create($validated));
 
-        $orgName = 'CDA'; 
-        $currentYear = now()->year;
+        // 5. Send notifications outside transaction to prevent blocking
+        $this->sendMailSafely($ticket->it_email, new NewTicketSubmitted($ticket), 'new-ticket IT personnel');
+        $this->createNotification($ticket, $ticket->it_email, 'ticket_assigned', "New ticket #{$ticket->ticket_number} assigned to you.");
 
-        do {
-            $randomNumber = random_int(1000, 9999);
-            $ticket_number = "{$orgName}-ICT-{$currentYear}-{$randomNumber}";
-        } while (Tickets::where('ticket_number', $ticket_number)->exists());
-
-        $ticket->ticket_number = $ticket_number;
-        $ticket->save();
-
-        if ($ticket->it_email && filter_var($ticket->it_email, FILTER_VALIDATE_EMAIL)) {
-            try {
-                Mail::to($ticket->it_email)->send(new NewTicketSubmitted($ticket));
-            } catch (\Exception $e) {
-                Log::error('Failed sending private ticket notification to IT: ' . $e->getMessage());
-            }
-
-            $this->createNotification(
-                $ticket,
-                $ticket->it_email,
-                'ticket_assigned',
-                "New ticket #{$ticket->ticket_number} assigned to you"
-            );
-        }
-
-        if ($ticket->email && filter_var($ticket->email, FILTER_VALIDATE_EMAIL)) {
-            try {
-                Mail::to($ticket->email)->send(new CLientTicketNotification($ticket));
-            } catch (\Exception $e) {
-                Log::error('Failed sending private ticket notification to client: ' . $e->getMessage());
-            }
-
-            $this->createNotification(
-                $ticket,
-                $ticket->email,
-                'ticket_created',
-                "Your ticket #{$ticket->ticket_number} has been created successfully."
-            );
-        }
+        $this->sendMailSafely($ticket->email, new CLientTicketNotification($ticket), 'new-ticket requester');
+        $this->createNotification($ticket, $ticket->email, 'ticket_created', "Your ticket #{$ticket->ticket_number} has been created successfully.");
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'status'  => 'success',
-                'message' => "Ticket #{$ticket->ticket_number} created successfully. Confirmation emails sent."
+                'message' => "Ticket #{$ticket->ticket_number} created successfully. Confirmation emails sent.",
+                'ticket'  => $ticket,
             ]);
         }
 
-        return redirect()->back()->with('success', "Ticket #{$ticket->ticket_number} submitted successfully. Confirmation emails sent to you and assigned IT personnel.");
-    }
-
-    private function createNotification($ticket, $email, $type, $message)
-    {
-        $user = User::where('email', $email)->first();
-
-        if ($user) {
-            Notification::create([
-                'user_id'   => $user->id,
-                'ticket_id' => $ticket->getKey(),
-                'type'      => $type,
-                'message'   => $message,
-            ]);
-        }
+        return redirect()->route('myrequested_tickets.index')
+            ->with('success', "Ticket #{$ticket->ticket_number} submitted successfully. Confirmation emails sent to you and the assigned IT personnel.");
     }
 
     /**
-     * Safely view ticket details.
+     * Show the details of a ticket owned by the authenticated user.
+     * Supports both full-page and AJAX/modal requests.
+     * Prevents IDOR by scoping to the user's email unless they are a Super Admin.
+     *
+     * @param  Request     $request
+     * @param  int|string  $ticket_id
+     * @return View|JsonResponse
      */
-    public function view(Request $request, $ticket_id)
+    public function view(Request $request, $ticket_id): View|JsonResponse
     {
-        $loggedInEmail = Auth::user()->email;
+        $user = Auth::user();
+        abort_if(! $user, 401, 'Unauthorized');
 
-        // Fetch ticket belonging to the logged-in user
-        $ticket = Tickets::where('ticket_id', $ticket_id)
-            ->where('email', $loggedInEmail)
-            ->first();
+        $query = Tickets::where('ticket_id', $ticket_id);
 
-        // Fallback lookup if custom primary key resolution is required
-        if (!$ticket) {
-            $ticket = Tickets::where('email', $loggedInEmail)->find($ticket_id);
+        // IDOR protection: Non-super-admins can only view their own tickets
+        if (! $user->hasRole('Super Admin')) {
+            $query->where('email', $user->email);
         }
 
-        if (!$ticket) {
-            abort(404, 'Ticket record not found or access denied.');
-        }
+        $ticket = $query->first();
 
-        // Process Client's Attached Issue Photo / Screenshot (LONGBLOB)
-        $ticketIssuePhotoEvidenceDataUri = null;
-        if (!empty($ticket->photo)) {
-            $base64Image = base64_encode($ticket->photo);
-            $ticketIssuePhotoEvidenceDataUri = 'data:image/jpeg;base64,' . $base64Image;
+        abort_if(! $ticket, 404, 'Ticket record not found or access denied.');
 
-            // Clear raw binary data from model to prevent UTF-8 encoding errors during JSON rendering
-            unset($ticket->photo);
-        }
-
-        // Process IT Personnel's Resolved Ticket Photo Evidence (LONGBLOB)
-        $resolvedTicketPhotoEvidenceDataUri = null;
-        if (!empty($ticket->photo_evidence)) {
-            $base64Image = base64_encode($ticket->photo_evidence);
-            $resolvedTicketPhotoEvidenceDataUri = 'data:image/jpeg;base64,' . $base64Image;
-
-            // Clear raw binary data from model to prevent UTF-8 encoding errors during JSON rendering
-            unset($ticket->photo_evidence);
-        }
+        // Decode LONGBLOB binary / stored image columns to base64 data URIs
+        $ticketIssuePhotoEvidenceDataUri    = $this->blobToDataUri($ticket, 'photo');
+        $resolvedTicketPhotoEvidenceDataUri = $this->blobToDataUri($ticket, 'photo_evidence');
 
         $viewName = 'tickets.view_details_myrequestedtickets';
 
-        // Handle AJAX/JSON requests for modals
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'status'                             => 'success',
                 'ticket'                             => $ticket,
                 'ticketIssuePhotoEvidenceDataUri'    => $ticketIssuePhotoEvidenceDataUri,
                 'resolvedTicketPhotoEvidenceDataUri' => $resolvedTicketPhotoEvidenceDataUri,
-                'html'                               => view($viewName, compact('ticket', 'ticketIssuePhotoEvidenceDataUri', 'resolvedTicketPhotoEvidenceDataUri'))->render(),
+                'html'                               => view($viewName, compact(
+                    'ticket',
+                    'ticketIssuePhotoEvidenceDataUri',
+                    'resolvedTicketPhotoEvidenceDataUri'
+                ))->render(),
             ]);
         }
 
-        // Standard View Response
-        return view($viewName, compact('ticket', 'ticketIssuePhotoEvidenceDataUri', 'resolvedTicketPhotoEvidenceDataUri'));
-    }
+        return view($viewName, compact(
+            'ticket',
+            'ticketIssuePhotoEvidenceDataUri',
+            'resolvedTicketPhotoEvidenceDataUri'
+        ));
+    }   
 }

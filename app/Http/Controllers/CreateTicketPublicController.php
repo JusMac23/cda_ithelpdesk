@@ -311,7 +311,11 @@ class CreateTicketPublicController extends Controller
         }
 
         // Create In-App Notification for Client if user exists
-        $this->createNotification($ticket, $ticket->email, 'ticket_created', "Your ticket #{$ticket->ticket_number} has been created successfully.");
+        try {
+            $this->createNotification($ticket, $ticket->email, 'ticket_created', "Your ticket #{$ticket->ticket_number} has been created successfully.");
+        } catch (Throwable $e) {
+            Log::warning("In-app notification creation failed for ticket #{$ticket->ticket_number}: " . $e->getMessage());
+        }
 
         // Return user feedback
         if ($itEmailSent && $clientEmailSent) {

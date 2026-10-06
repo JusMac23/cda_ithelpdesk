@@ -9,6 +9,14 @@ class Notification extends Model
 {
     use HasFactory;
 
+    protected $table = 'notifications';
+
+    protected $primaryKey = 'id';
+
+    public $incrementing = true;
+
+    protected $keyType = 'int';
+
     protected $fillable = [
         'user_id',
         'ticket_id',

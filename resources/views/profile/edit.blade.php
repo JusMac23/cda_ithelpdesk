@@ -1,106 +1,177 @@
 <x-app-layout>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- SweetAlert2 CDN -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <style>
-        /* --- Theme Variables --- */
-        :root {
-            --card-bg: #ffffff;
-            --text-dark: #0f172a;
-            --border-light: #e2e8f0;
-            --border-danger: #fecaca;
+
+    @php
+        $user = Auth::user();
+        $base64 = null;
+        if (!empty($user->profile_image)) {
+            $base64 = is_resource($user->profile_image) 
+                ? base64_encode(stream_get_contents($user->profile_image)) 
+                : $user->profile_image;
         }
 
-        body.dark {
-            --card-bg: #0f172a; 
-            --text-dark: #f8fafc;
-            --border-light: #334155; 
-            --border-danger: #7f1d1d;
+        $initials = '';
+        if (!empty($user->firstname) && !empty($user->lastname)) {
+            $initials = strtoupper(substr($user->firstname, 0, 1) . substr($user->lastname, 0, 1));
+        } else {
+            $nameParts = explode(' ', trim($user->name ?? 'User'));
+            $initials = strtoupper(substr($nameParts[0], 0, 1));
+            if (count($nameParts) > 1) {
+                $initials .= strtoupper(substr(end($nameParts), 0, 1));
+            }
         }
+    @endphp
 
-        /* Global Box Sizing & Font Fix */
-        *, *::before, *::after { box-sizing: border-box; }
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
+    <div id="main-content" class="w-full max-w-6xl mx-auto space-y-6">
 
-        /* Profile Layout Constraints */
-        .profile-wrapper { max-width: 76rem; margin: 0 auto; width: 100%; }
-        
-        /* Header */
-        .header-flex { display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 1.5rem; gap: 1rem; width: 100%; }
-        .page-title { font-size: 1.75rem; font-weight: 800; color: var(--text-dark); margin: 0; letter-spacing: -0.025em; transition: color 0.3s ease; }
+        {{-- Page Header --}}
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2">
+            <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
+                    <span class="material-symbols-outlined text-2xl">manage_accounts</span>
+                </div>
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--text-dark)] m-0 leading-tight">
+                        Profile Settings
+                    </h1>
+                    <p class="text-xs sm:text-sm text-[var(--text-muted)] m-0 mt-0.5 font-medium">
+                        Manage your account information, update security credentials, and view system permissions
+                    </p>
+                </div>
+            </div>
 
-        /* Profile Container */
-        .profile-container { display: flex; flex-direction: column; gap: 2rem; }
-        
-        /* Modern Profile Card - Added outline matching dark mode specs */
-        .profile-card { background-color: var(--card-bg); border-radius: 1rem; border: 1px solid var(--border-light); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); padding: 1.5rem; transition: background-color 0.3s ease, border-color 0.3s ease; }
+            <div class="flex items-center gap-2 self-start sm:self-auto">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60">
+                    <span class="material-symbols-outlined text-sm">verified_user</span>
+                    {{ $user->roles->isNotEmpty() ? $user->roles->pluck('name')->first() : 'Standard User' }}
+                </span>
+            </div>
+        </div>
 
-        /* Specifically for the Delete Account card */
-        .profile-card-danger {
-            border-color: var(--border-danger);
-        }
-        
-        /* Profile Card Content Area */
-        .profile-card-content { max-width: 48rem; }
+        {{-- Profile Hero Overview Card --}}
+        <div class="bg-[var(--card-bg)] border border-[var(--border-light)] rounded-2xl shadow-xs transition-colors duration-300 p-5 sm:p-6 lg:p-8">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                
+                {{-- Avatar Container with Instant Photo Upload --}}
+                <div class="relative group shrink-0">
+                    <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-indigo-500/30 shadow-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                        @if(!empty($base64))
+                            <img src="data:image/jpeg;base64,{{ $base64 }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                        @else
+                            <div class="w-full h-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white font-extrabold text-2xl sm:text-3xl tracking-wider">
+                                {{ $initials }}
+                            </div>
+                        @endif
+                    </div>
 
-        /* Desktop & Tablet Overrides */
-        @media (min-width: 640px) { 
-            .profile-card { padding: 2.5rem; } 
-        }
-    </style>
+                    {{-- Floating Photo Upload Button --}}
+                    <form method="POST" action="{{ route('profile.upload_image') }}" enctype="multipart/form-data" class="m-0">
+                        @csrf
+                        <label 
+                            class="absolute -bottom-2 -right-2 w-9 h-9 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white flex items-center justify-center shadow-md shadow-indigo-600/30 cursor-pointer transition-all"
+                            title="Update profile picture"
+                        >
+                            <span class="material-symbols-outlined text-lg">photo_camera</span>
+                            <input type="file" name="profile_image" class="hidden" accept="image/*" onchange="this.form.submit()">
+                        </label>
+                    </form>
+                </div>
 
-    <div id="main-content" class="page-wrapper">
-        <div class="profile-wrapper">
+                {{-- User Highlights --}}
+                <div class="flex-1 text-center sm:text-left min-w-0">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 justify-center sm:justify-start">
+                        <h2 class="text-xl sm:text-2xl font-extrabold text-[var(--text-dark)] m-0 truncate">
+                            {{ $user->name }}
+                        </h2>
+                        
+                        @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 self-center sm:self-auto">
+                                <span class="material-symbols-outlined text-xs">error</span> Unverified
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 self-center sm:self-auto">
+                                <span class="material-symbols-outlined text-xs">check_circle</span> Verified Email
+                            </span>
+                        @endif
+                    </div>
+
+                    <p class="text-sm text-[var(--text-muted)] font-medium m-0 mt-1 flex items-center gap-1.5 justify-center sm:justify-start">
+                        <span class="material-symbols-outlined text-base text-slate-400">mail</span>
+                        <span>{{ $user->email }}</span>
+                    </p>
+
+                    <div class="flex flex-wrap items-center gap-2 mt-4 justify-center sm:justify-start">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-[var(--text-dark)] border border-slate-200/80 dark:border-slate-700/80">
+                            <span class="material-symbols-outlined text-sm text-indigo-500">location_on</span>
+                            {{ $user->region ?? 'National Office' }}
+                        </span>
+
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-[var(--text-dark)] border border-slate-200/80 dark:border-slate-700/80">
+                            <span class="material-symbols-outlined text-sm text-purple-500">calendar_month</span>
+                            Joined {{ $user->created_at ? $user->created_at->format('M Y') : 'N/A' }}
+                        </span>
+
+                        @if($user->roles->isNotEmpty())
+                            @foreach($user->roles as $role)
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-semibold bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60">
+                                    <span class="material-symbols-outlined text-xs">shield_person</span>
+                                    {{ $role->name }}
+                                </span>
+                            @endforeach
+                        @endif
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        {{-- Profile Forms Container --}}
+        <div class="space-y-6">
             
-            <div class="header-flex">
-                <h2 class="page-title">Profile Settings</h2>
+            {{-- Update Profile Information Card --}}
+            <div class="bg-[var(--card-bg)] border border-[var(--border-light)] rounded-2xl shadow-xs transition-colors duration-300 p-5 sm:p-6 lg:p-8">
+                @include('profile.partials.update-profile-information-form')
             </div>
 
-            <div class="profile-container">
-                
-                <div class="profile-card">
-                    <div class="profile-card-content">
-                        @include('profile.partials.update-profile-information-form')
-                    </div>
-                </div>
-                
-                <div class="profile-card">
-                    <div class="profile-card-content">
-                        @include('profile.partials.update-password-form')
-                    </div>
-                </div>
-                @can('delete_profile')
-                <div class="profile-card profile-card-danger">
-                    <div class="profile-card-content">
-                        @include('profile.partials.delete-user-form')
-                    </div>
-                </div>
-                @endcan
+            {{-- Update Password Card --}}
+            <div class="bg-[var(--card-bg)] border border-[var(--border-light)] rounded-2xl shadow-xs transition-colors duration-300 p-5 sm:p-6 lg:p-8">
+                @include('profile.partials.update-password-form')
             </div>
+
+            {{-- Danger Zone: Delete Account (Conditional) --}}
+            @can('delete_profile')
+                <div class="bg-[var(--card-bg)] border border-rose-200 dark:border-rose-900/60 rounded-2xl shadow-xs transition-colors duration-300 p-5 sm:p-6 lg:p-8">
+                    @include('profile.partials.delete-user-form')
+                </div>
+            @endcan
+
         </div>
     </div>
 
-    <!-- Hidden form for logging out securely via POST -->
-    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+    {{-- Hidden form for logging out securely via POST on password change --}}
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
         @csrf
     </form>
 
-    <!-- SweetAlert Notification Listener -->
+    {{-- SweetAlert Notification Script with Dark Mode Theme Integration --}}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const getComputedColor = (cssVar) => getComputedStyle(document.body).getPropertyValue(cssVar).trim();
+
             @if (session('status') === 'password-updated')
                 Swal.fire({
                     icon: 'success',
                     title: 'Password Updated Successfully',
                     text: 'For your security, you will now be logged out. Please log in again with your new password.',
-                    confirmButtonColor: '#0f172a',
-                    allowOutsideClick: false, // Prevents closing by clicking outside
-                    allowEscapeKey: false     // Prevents closing by pressing ESC
+                    confirmButtonColor: '#4f46e5',
+                    background: getComputedColor('--card-bg'),
+                    color: getComputedColor('--text-dark'),
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Submit the hidden logout form when they click OK
                         document.getElementById('logout-form').submit();
                     }
                 });
@@ -109,14 +180,20 @@
                     icon: 'success',
                     title: 'Profile Updated',
                     text: 'Your profile information has been successfully updated.',
-                    confirmButtonColor: '#0f172a'
+                    confirmButtonColor: '#4f46e5',
+                    background: getComputedColor('--card-bg'),
+                    color: getComputedColor('--text-dark'),
+                    timer: 2500,
+                    showConfirmButton: false
                 });
             @elseif (session('status'))
                 Swal.fire({
                     icon: 'info',
                     title: 'Notice',
-                    text: "{{ session('status') }}",
-                    confirmButtonColor: '#0f172a'
+                    text: "{!! addslashes(session('status')) !!}",
+                    confirmButtonColor: '#4f46e5',
+                    background: getComputedColor('--card-bg'),
+                    color: getComputedColor('--text-dark')
                 });
             @endif
 
@@ -124,8 +201,12 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Success!',
-                    text: "{{ session('success') }}",
-                    confirmButtonColor: '#0f172a'
+                    text: "{!! addslashes(session('success')) !!}",
+                    confirmButtonColor: '#4f46e5',
+                    background: getComputedColor('--card-bg'),
+                    color: getComputedColor('--text-dark'),
+                    timer: 2500,
+                    showConfirmButton: false
                 });
             @endif
 
@@ -133,8 +214,12 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Error!',
-                    text: "{{ session('error') }}",
-                    confirmButtonColor: '#0f172a'
+                    text: "{!! addslashes(session('error')) !!}",
+                    confirmButtonColor: '#4f46e5',
+                    background: getComputedColor('--card-bg'),
+                    color: getComputedColor('--text-dark'),
+                    timer: 3000,
+                    showConfirmButton: false
                 });
             @endif
         });

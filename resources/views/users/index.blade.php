@@ -1,362 +1,199 @@
 <x-app-layout>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-    
-    <style>
-        /* --- Theme Variables --- */
-        :root {
-            --card-bg: #ffffff;
-            --bg-alt: #f8fafc;
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
-            --border-light: #e2e8f0;
-            --border-subtle: #f1f5f9;
-            --input-bg: #ffffff;
-            --input-border: #cbd5e1;
-            --input-text: #334155;
-
-            /* Action Buttons (Gray) */
-            --btn-gray-bg: #f1f5f9;
-            --btn-gray-text: #475569;
-            --btn-gray-border: #e2e8f0;
-            --btn-gray-hover-bg: #e2e8f0;
-            --btn-gray-hover-text: #0f172a;
-
-            /* Error States */
-            --error-bg: #fef2f2;
-            --error-border: #fecaca;
-            --error-text: #991b1b;
-            --error-title: #7f1d1d;
-            
-            /* Readonly */
-            --readonly-bg: #f8fafc;
-            
-            /* Badges */
-            --badge-role-bg: #eef2ff;
-            --badge-role-text: #4f46e5;
-            --badge-role-border: #c7d2fe;
-            --badge-none-text: #ef4444;
-        }
-
-        body.dark {
-            --card-bg: #0f172a; 
-            --bg-alt: #1e293b; 
-            --text-dark: #f8fafc;
-            --text-muted: #9ca3af;
-            --border-light: #334155; 
-            --border-subtle: #1e293b;
-            --input-bg: #0f172a;
-            --input-border: #4b5563;
-            --input-text: #f1f5f9;
-
-            /* Action Buttons (Gray) - Dark */
-            --btn-gray-bg: #1e293b;
-            --btn-gray-text: #9ca3af;
-            --btn-gray-border: #334155;
-            --btn-gray-hover-bg: #334155;
-            --btn-gray-hover-text: #f8fafc;
-
-            /* Error States - Dark */
-            --error-bg: rgba(153, 27, 27, 0.2);
-            --error-border: rgba(248, 113, 113, 0.4);
-            --error-text: #fca5a5;
-            --error-title: #f87171;
-            
-            /* Readonly */
-            --readonly-bg: #1e293b;
-            
-            /* Badges - Dark */
-            --badge-role-bg: rgba(79, 70, 229, 0.2);
-            --badge-role-text: #a5b4fc;
-            --badge-role-border: #4f46e5;
-            --badge-none-text: #f87171;
-        }
-
-        /* Global Box Sizing & Font Fix */
-        *, *::before, *::after { box-sizing: border-box; }
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
-
-        /* Main Layout - Mobile First 100% Width & Dark Mode Outline */
-        .panel { background-color: var(--card-bg); border-radius: 1rem; border: 1px solid var(--border-light); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); padding: 1.25rem; width: 100%; transition: background-color 0.3s ease, border-color 0.3s ease; }
-        
-        /* Typography */
-        .header-flex { display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 1.5rem; gap: 1rem; width: 100%; }
-        .title { font-size: 1.75rem; font-weight: 800; color: var(--text-dark); margin: 0; letter-spacing: -0.025em; transition: color 0.3s ease; }
-        
-        /* --- Action Container & Search Toolbar - Mobile First --- */
-        .action-container { display: flex; flex-direction: column; width: 100%; gap: 1rem; margin-bottom: 1.5rem; }
-        
-        .search-form { display: flex; align-items: stretch; width: 100%; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border-radius: 0.5rem; }
-        .search-input { height: 44px; flex: 1; min-width: 0; padding: 0 1rem; font-size: 0.95rem; font-family: inherit; background-color: var(--input-bg); color: var(--input-text); border: 1px solid var(--input-border); border-right: none; border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; outline: none; transition: all 0.2s; position: relative; z-index: 1; }
-        .search-input:focus { border-color: #6366f1; box-shadow: inset 0 0 0 1px #6366f1, 0 0 0 3px rgba(99, 102, 241, 0.15); z-index: 10; }
-        .search-input::placeholder { color: var(--text-muted); opacity: 0.7; }
-        .search-btn { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 1.25rem; border: none; border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; background-color: #4f46e5; color: white; cursor: pointer; transition: background-color 0.2s; z-index: 2; width: auto; }
-        .search-btn:hover { background-color: #4338ca; }
-
-        /* --- Buttons - Uniform Heights --- */
-        .btn { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 1.5rem; border-radius: 0.5rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s ease; width: 100%; text-decoration: none; font-family: inherit; }
-        .btn i { margin-right: 0.5rem; font-size: 1rem; }
-        
-        /* Modern Green */
-        .btn-green { background-color: #10b981; color: white; box-shadow: 0 1px 2px rgba(16, 185, 129, 0.2); }
-        .btn-green:hover { background-color: #059669; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
-        .btn-green:active { transform: translateY(0); box-shadow: 0 1px 2px rgba(16, 185, 129, 0.2); }
-
-        /* Modern Indigo */
-        .btn-indigo { background-color: #4f46e5; color: white; box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2); }
-        .btn-indigo:hover { background-color: #4338ca; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
-        .btn-indigo:active { transform: translateY(0); box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2); }
-
-        /* Modern Gray */
-        .btn-gray { background-color: var(--btn-gray-bg); color: var(--btn-gray-text); border: 1px solid var(--btn-gray-border); transition: all 0.3s ease; }
-        .btn-gray:hover { background-color: var(--btn-gray-hover-bg); color: var(--btn-gray-hover-text); }
-
-        /* Action Buttons inside Table */
-        .action-cell { display: flex; flex-wrap: wrap; justify-content: flex-start; align-items: center; gap: 0.5rem; }
-        .action-link { display: inline-flex; align-items: center; justify-content: center; height: 34px; padding: 0 0.85rem; border-radius: 0.375rem; font-size: 0.85rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; text-decoration: none; background: transparent; white-space: nowrap; box-sizing: border-box; }
-        .action-link i { margin-right: 0.35rem; font-size: 0.9rem; }
-        
-        .link-blue { color: #3b82f6; border: 1px solid #bfdbfe; } 
-        .link-blue:hover { background-color: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
-        
-        .link-red { color: #ef4444; border: 1px solid #fecaca; } 
-        .link-red:hover { background-color: #fef2f2; color: #b91c1c; border-color: #fca5a5; }
-
-        /* Dark Mode Action Link Overrides */
-        body.dark .link-blue { color: #60a5fa; border-color: #1e3a8a; }
-        body.dark .link-blue:hover { background-color: rgba(30, 58, 138, 0.4); color: #93c5fd; }
-        body.dark .link-red { color: #f87171; border-color: #7f1d1d; }
-        body.dark .link-red:hover { background-color: rgba(127, 29, 29, 0.4); color: #fca5a5; }
-
-        /* Table & Badges */
-        .table-container { overflow-x: auto; background-color: var(--card-bg); border-radius: 0.75rem; border: 1px solid var(--border-light); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); width: 100%; -webkit-overflow-scrolling: touch; margin-bottom: 1.5rem; transition: background-color 0.3s ease, border-color 0.3s ease; }
-        .data-table { width: 100%; min-width: 900px; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
-        .data-table th { padding: 1rem 1.5rem; background-color: var(--bg-alt); color: var(--text-muted); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--border-light); white-space: nowrap; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
-        .data-table td { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-subtle); color: var(--text-dark); vertical-align: middle; font-weight: 500; transition: color 0.3s ease, border-color 0.3s ease; }
-        .data-table tbody tr { transition: background-color 0.15s; }
-        .data-table tbody tr:hover { background-color: var(--bg-alt); }
-        .text-center { text-align: center; }
-        .font-bold-name { font-weight: 700; color: var(--text-dark); transition: color 0.3s ease; }
-
-        /* Clean Role Badges */
-        .role-badge { display: inline-flex; align-items: center; padding: 0.35rem 0.85rem; background-color: var(--badge-role-bg); color: var(--badge-role-text); border: 1px solid var(--badge-role-border); border-radius: 9999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.025em; white-space: nowrap; margin-bottom: 0.25rem; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
-        .role-none { font-size: 0.8rem; color: var(--badge-none-text); font-style: italic; font-weight: 600; transition: color 0.3s ease; }
-
-        /* --- Modern UI Pagination (Laravel Structure Fix) --- */
-        .pagination-wrapper { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-light); width: 100%; transition: border-color 0.3s ease; }
-        .pagination-wrapper nav { display: flex; flex-direction: column; gap: 1.25rem; width: 100%; align-items: center; }
-        
-        /* Pagination Sub-Text */
-        .pagination-wrapper p { margin: 0; font-size: 0.875rem; color: var(--text-muted); font-weight: 500; text-align: center; transition: color 0.3s ease; }
-        .pagination-wrapper p span { font-weight: 700; color: var(--text-dark); transition: color 0.3s ease; }
-
-        /* Container for links */
-        .pagination-wrapper div > span.relative.z-0.inline-flex,
-        .pagination-wrapper .flex.justify-between { display: flex; flex-wrap: wrap; gap: 0.5rem; box-shadow: none !important; justify-content: center; align-items: center; }
-
-        /* Uniform Button Styling for Page Numbers & Arrows */
-        .pagination-wrapper a, 
-        .pagination-wrapper span[aria-current="page"] > span,
-        .pagination-wrapper span[aria-disabled="true"] > span { display: inline-flex; align-items: center; justify-content: center; min-width: 2.25rem; height: 2.25rem; padding: 0 0.5rem; border-radius: 0.375rem !important; font-size: 0.875rem; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.2s ease; border: 1px solid transparent; margin: 0 !important; text-decoration: none; line-height: 1; }
-
-        /* Default Inactive Links */
-        .pagination-wrapper a { background-color: var(--card-bg); color: var(--text-muted); border-color: var(--border-light); }
-        .pagination-wrapper a:hover { background-color: var(--bg-alt); color: var(--text-dark); border-color: var(--input-border); transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-
-        /* Active Page Link */
-        .pagination-wrapper span[aria-current="page"] > span { background-color: #4f46e5; color: #ffffff; border-color: #4f46e5; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.25); z-index: 2; position: relative; }
-
-        /* Disabled Navigation Arrows */
-        .pagination-wrapper span[aria-disabled="true"] > span { background-color: var(--bg-alt); color: var(--text-muted); border-color: var(--border-light); cursor: not-allowed; opacity: 0.7; }
-
-        /* "..." Separator Fix */
-        .pagination-wrapper span[aria-disabled="true"]:not([aria-label]) > span { background: transparent; border: none; opacity: 1; color: var(--text-muted); }
-
-        /* Standardize Arrow SVGs */
-        .pagination-wrapper svg { width: 1.25rem !important; height: 1.25rem !important; display: block; }
-
-        /* Modals - Smooth Scaling Transitions */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 1; visibility: visible; transition: all 0.3s ease; }
-        .modal-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        
-        .modal-box { position: relative; background-color: var(--card-bg); border-radius: 1rem; border: 1px solid var(--border-light); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 100%; max-width: 48rem; max-height: 90vh; overflow-y: auto; padding: 1.5rem; transform: scale(1); transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease; }
-        .modal-overlay.hidden .modal-box { transform: scale(0.95); }
-        
-        /* Fixed Modal Close Button */
-        .close-btn { position: absolute; top: 1.25rem; right: 1.25rem; color: var(--text-muted); font-size: 2.25rem; background: none; border: none; cursor: pointer; transition: color 0.2s, background-color 0.2s; line-height: 1; border-radius: 0.25rem; padding: 0 0.5rem; }
-        .close-btn:hover { color: var(--text-dark); }
-        
-        .modal-title { font-size: 1.5rem; font-weight: 800; color: var(--text-dark); margin-top: 0; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-light); padding-bottom: 1rem; padding-right: 2.5rem; transition: color 0.3s ease, border-color 0.3s ease; }
-        
-        /* Form Grid - Mobile First 100% Width */
-        .form-grid { display: flex; flex-direction: column; gap: 1.25rem; width: 100%; }
-
-        /* Form Controls - Unified Heights */
-        .form-group { display: flex; flex-direction: column; width: 100%; }
-        .form-label { font-size: 0.875rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; width: 100%; transition: color 0.3s ease; }
-        .form-input, .form-select { height: 44px; padding: 0 1rem; font-size: 0.95rem; color: var(--input-text); border: 1px solid var(--input-border); border-radius: 0.5rem; background-color: var(--input-bg); outline: none; transition: all 0.2s; font-family: inherit; width: 100%; box-sizing: border-box; }
-        .form-input:focus, .form-select:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
-        
-        .form-input[readonly] { background-color: var(--readonly-bg) !important; color: var(--text-muted) !important; cursor: not-allowed; border-color: var(--border-light); }
-        .form-input[readonly]:focus { box-shadow: none; border-color: var(--border-light); }
-
-        /* Custom Radio Buttons */
-        .radio-group { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem; }
-        .radio-label { display: flex; align-items: center; gap: 0.75rem; font-size: 0.95rem; font-weight: 500; color: var(--input-text); cursor: pointer; transition: color 0.3s ease; }
-        .radio-input { width: 1.15rem; height: 1.15rem; accent-color: #4f46e5; cursor: pointer; margin: 0; }
-        
-        .modal-footer { display: flex; flex-direction: column; padding-top: 1.5rem; border-top: 1px solid var(--border-light); margin-top: 1.5rem; gap: 0.75rem; width: 100%; transition: border-color 0.3s ease; }
-
-        /* Error Box */
-        .error-box { background-color: var(--error-bg); border: 1px solid var(--error-border); color: var(--error-text); padding: 1.25rem; border-radius: 0.5rem; margin-bottom: 1.5rem; transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
-        .error-title { margin: 0 0 0.5rem 0; font-weight: 700; font-size: 0.95rem; color: var(--error-title); transition: color 0.3s ease; }
-        .error-list { margin: 0; padding-left: 1.5rem; font-size: 0.9rem; font-weight: 500; }
-
-        /* Full-Screen Loading Overlay */
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: #ffffff; }
-        .loading-overlay.active { display: flex; }
-        .spinner { width: 44px; height: 44px; border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: #ffffff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* --------------------------------------------------- */
-        /* Responsive Overrides                                */
-        /* --------------------------------------------------- */
-        
-        /* Mobile Breakpoint for Pagination */
-        @media (max-width: 639px) {
-            .pagination-wrapper nav .hidden { display: none !important; }
-            .pagination-wrapper nav .sm\:hidden { display: flex; width: 100%; justify-content: space-between; }
-        }
-
-        /* Desktop & Tablet Overrides */
-        @media (min-width: 640px) {
-            .panel { padding: 2rem; }
-            .header-flex { flex-direction: row; justify-content: space-between; align-items: center; }
-            
-            /* Align Add button and Search inline */
-            .action-container { flex-direction: row; justify-content: space-between; align-items: center; }
-            .search-form { width: auto; min-width: 320px; }
-            
-            /* Un-stretch buttons on desktop */
-            .btn { width: auto; }
-            
-            /* Restore Grid layout for Desktop */
-            .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-            .col-span-2 { grid-column: span 2; }
-            
-            /* Modal formatting for Desktop */
-            .modal-box { padding: 2.5rem; }
-            .close-btn { top: 1.5rem; right: 2rem; }
-            
-            /* Modal Footer Buttons */
-            .modal-footer { flex-direction: row; justify-content: flex-end; }
-
-            /* Pagination Layout */
-            .pagination-wrapper nav { flex-direction: row; justify-content: space-between; }
-            .pagination-wrapper nav > div.sm\:hidden { display: none !important; }
-            .pagination-wrapper nav > div.hidden.sm\:flex-1 { display: flex !important; width: 100%; justify-content: space-between; align-items: center; }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 
     <!-- Full-Screen Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay">
-        <div class="spinner"></div>
-        <p style="font-size: 1rem; font-weight: 600; letter-spacing: 0.025em;">Processing User, please wait...</p>
+        <div class="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
+        <p class="text-base font-semibold tracking-wide text-white">Processing User Account, please wait...</p>
     </div>
 
-    <div id="main-content">
-        <div class="panel">
+    <div id="main-content" class="w-full">
+        <div class="panel bg-[var(--card-bg)] border border-[var(--border-light)] rounded-2xl shadow-xs transition-colors duration-300 p-4 sm:p-6 lg:p-8">
             
-            <div class="header-flex">
-                <h3 class="title">All Users</h3>
-            </div>
+            {{-- Header Title Banner --}}
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 mb-6 border-b border-[var(--border-light)]">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-violet-600 via-purple-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-purple-500/20 shrink-0">
+                        <span class="material-symbols-outlined text-2xl">manage_accounts</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2.5 flex-wrap">
+                            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--text-dark)] m-0 leading-tight">
+                                User Accounts
+                            </h1>
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 border border-purple-200/60 dark:border-purple-800/60">
+                                {{ $users->total() }} Registered Users
+                            </span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-[var(--text-muted)] m-0 mt-0.5 font-medium">
+                            Manage user profiles, regional office assignments, contact info, and security role permissions
+                        </p>
+                    </div>
+                </div>
 
-            <div class="action-container">
                 @can('create_tech_users')
-                    <button id="openModal" class="btn btn-green">
-                        <span class="material-symbols-outlined" style="font-size: 1.25rem; margin-right: 0.2rem;">add</span> Add User
+                    <button id="openModal" 
+                            class="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 active:scale-95 shadow-md shadow-emerald-600/20 transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-xl">person_add</span>
+                        <span>Add User</span>
                     </button>
                 @endcan
-
-                <form action="{{ route('users.index') }}" method="GET" class="search-form">
-                    <input type="text" name="search_query" value="{{ request('search_query') }}" placeholder="Search users..." class="search-input" autocomplete="off">
-                    <button type="submit" class="search-btn">
-                        <span class="material-symbols-outlined" style="font-size: 1.25rem; margin-right: 0.2rem;">search</span>
-                    </button>
-                </form>
             </div>
 
-            <div class="table-container">
-                <table class="data-table">
+            {{-- Action Toolbar: Search Form --}}
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+                <form action="{{ route('users.index') }}" method="GET" class="w-full sm:max-w-md m-0">
+                    <div class="relative flex items-center">
+                        <span class="absolute left-3.5 text-slate-400 material-symbols-outlined text-xl pointer-events-none">search</span>
+                        <input type="text" 
+                               name="search_query" 
+                               value="{{ request('search_query') }}" 
+                               placeholder="Search users by name, email, or region..." 
+                               autocomplete="off"
+                               class="w-full h-11 pl-10 pr-24 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                        <button type="submit" 
+                                class="absolute right-1.5 h-8 px-3 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer">
+                            Search
+                        </button>
+                    </div>
+                </form>
+
+                @if(request('search_query'))
+                    <a href="{{ route('users.index') }}" 
+                       class="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-dark)] transition-colors">
+                        <span class="material-symbols-outlined text-base">close</span>
+                        <span>Clear search filter</span>
+                    </a>
+                @endif
+            </div>
+
+            {{-- Table Container --}}
+            <div class="overflow-x-auto rounded-2xl border border-[var(--border-light)] bg-[var(--card-bg)] shadow-xs">
+                <table class="w-full min-w-[850px] text-left border-collapse text-sm">
                     <thead>
-                        <tr>
-                            <th>FullName</th>
-                            <th>Email Address</th>
-                            <th>Region</th>
-                            <th>Contact Number</th>
-                            <th>Role</th>
-                            @can('delete_tech_users')<th class="text-center">Actions</th>@endcan
+                        <tr class="border-b border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/60 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                            <th class="py-3.5 px-4 sm:px-6">Full Name</th>
+                            <th class="py-3.5 px-4 sm:px-6">Email Address</th>
+                            <th class="py-3.5 px-4 sm:px-6">Region</th>
+                            <th class="py-3.5 px-4 sm:px-6">Contact Number</th>
+                            <th class="py-3.5 px-4 sm:px-6">System Role(s)</th>
+                            @if(auth()->user()->can('edit_tech_users') || auth()->user()->can('delete_tech_users'))
+                                <th class="py-3.5 px-4 sm:px-6 text-center">Actions</th>
+                            @endif
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-[var(--border-subtle)]">
                         @forelse ($users as $user)
-                            <tr>
-                                <td class="font-bold-name">{{ $user->name }}</td>
-                                <td>{{ $user->email }}</td>
-                                <td>{{ $user->region }}</td>
-                                <td>{{ $user->contact_number ?: 'N/A' }}</td>
-
-                                <td>
-                                    @if($user->roles->isNotEmpty())
-                                        @foreach($user->roles as $role)
-                                            <span class="role-badge">
-                                                {{ $role->name }}
+                            <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                                
+                                {{-- Name & Avatar Initial --}}
+                                <td class="py-4 px-4 sm:px-6 align-middle">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-bold text-xs flex items-center justify-center shrink-0 border border-purple-200/60 dark:border-purple-800/60">
+                                            {{ strtoupper(substr($user->name, 0, 2)) }}
+                                        </div>
+                                        <div>
+                                            <span class="font-bold text-[var(--text-dark)] block">
+                                                {{ $user->name }}
                                             </span>
-                                        @endforeach
+                                            <span class="text-xs text-[var(--text-muted)]">User ID: #{{ $user->id }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                {{-- Email Address --}}
+                                <td class="py-4 px-4 sm:px-6 align-middle">
+                                    <div class="flex items-center gap-1.5 text-[var(--text-dark)]">
+                                        <span class="material-symbols-outlined text-base text-[var(--text-muted)]">mail</span>
+                                        <span class="font-mono text-xs">{{ $user->email }}</span>
+                                    </div>
+                                </td>
+
+                                {{-- Region --}}
+                                <td class="py-4 px-4 sm:px-6 align-middle">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-[var(--text-dark)] border border-slate-200 dark:border-slate-700">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                                        {{ $user->region }}
+                                    </span>
+                                </td>
+
+                                {{-- Contact Number --}}
+                                <td class="py-4 px-4 sm:px-6 align-middle">
+                                    @if($user->contact_number)
+                                        <div class="flex items-center gap-1.5 text-xs text-[var(--text-dark)] font-mono">
+                                            <span class="material-symbols-outlined text-base text-[var(--text-muted)]">call</span>
+                                            <span>{{ $user->contact_number }}</span>
+                                        </div>
                                     @else
-                                        <span class="role-none">
-                                            No Role Assigned
-                                        </span>
+                                        <span class="text-xs text-[var(--text-muted)] italic">N/A</span>
                                     @endif
                                 </td>
 
+                                {{-- Roles --}}
+                                <td class="py-4 px-4 sm:px-6 align-middle">
+                                    <div class="flex flex-wrap gap-1.5">
+                                        @if($user->roles->isNotEmpty())
+                                            @foreach($user->roles as $role)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60">
+                                                    {{ $role->name }}
+                                                </span>
+                                            @endforeach
+                                        @else
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-800/60">
+                                                No Role Assigned
+                                            </span>
+                                        @endif
+                                    </div>
+                                </td>
+
+                                {{-- Actions --}}
                                 @if(auth()->user()->can('edit_tech_users') || auth()->user()->can('delete_tech_users'))
-                                <td>
-                                    <div class="action-cell" @if(auth()->user()->can('edit_tech_users') && auth()->user()->can('delete_tech_users')) style="justify-content: center;" @endif>
+                                <td class="py-4 px-4 sm:px-6 align-middle text-center">
+                                    <div class="inline-flex items-center justify-center">
                                         
                                         {{-- Edit Button --}}
                                         @can('edit_tech_users')
-                                            <button type="button" class="action-link link-blue editBtn"
+                                            <button type="button" title="Edit"
+                                                class="editBtn inline-flex items-center h-8 px-3 text-xs font-semibold text-blue-600 dark:text-blue-400 active:scale-95 transition-all cursor-pointer"
                                                 data-id="{{ $user->id }}"
                                                 data-name="{{ $user->name }}"
                                                 data-email="{{ $user->email }}"
                                                 data-region="{{ $user->region }}"
                                                 data-contact-number="{{ $user->contact_number }}"
                                                 data-role-ids="{{ $user->roles->pluck('id')->toJson() }}">
-                                                <span class="material-symbols-outlined" style="font-size: 1.25rem; margin-right: 0.2rem;">edit</span> Edit
+                                                <span class="material-symbols-outlined text-sm">edit</span>
                                             </button>
                                         @endcan
 
                                         {{-- Delete Button --}}
                                         @can('delete_tech_users')
-                                            <form id="delete-form-{{ $user->id }}" action="{{ route('users.destroy', $user->id) }}" method="POST" style="margin:0;">
+                                            <form id="delete-form-{{ $user->id }}" action="{{ route('users.destroy', $user->id) }}" method="POST" class="m-0 inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="button" class="action-link link-red delete-btn" data-id="{{ $user->id }}">
-                                                    <span class="material-symbols-outlined" style="font-size: 1.25rem; margin-right: 0.2rem;">delete</span> Delete
+                                                <button type="button" title="Delete"
+                                                        class="delete-btn inline-flex items-center h-8 px-3 text-xs font-semibold text-rose-600 dark:text-rose-400 active:scale-95 transition-all cursor-pointer" 
+                                                        data-id="{{ $user->id }}">
+                                                    <span class="material-symbols-outlined text-sm">delete</span>
                                                 </button>
                                             </form>
                                         @endcan
+
                                     </div>
                                 </td>
                                 @endif
+
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center" style="padding: 3rem; color: var(--text-muted); font-size: 1rem;">
-                                    No Users found.
+                                <td colspan="6" class="py-12 px-4 text-center">
+                                    <div class="flex flex-col items-center justify-center gap-2">
+                                        <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                                            <span class="material-symbols-outlined text-2xl">person_off</span>
+                                        </div>
+                                        <p class="text-sm font-semibold text-[var(--text-dark)] m-0">No Users Found</p>
+                                        <p class="text-xs text-[var(--text-muted)] m-0">Try changing your search keywords or register a new user</p>
+                                    </div>
                                 </td>
                             </tr>
                         @endforelse
@@ -364,7 +201,8 @@
                 </table>
             </div>
 
-            <div class="pagination-wrapper">
+            {{-- Pagination Wrapper --}}
+            <div class="mt-6 pt-4 border-t border-[var(--border-light)]">
                 {{ $users->links() }}
             </div>
             
@@ -372,39 +210,73 @@
     </div>
 
     {{-- Modal: Add User --}}
-    <div id="userModal" class="modal-overlay hidden">
-        <div id="userModalContent" class="modal-box">
-            <button id="closeModal" class="close-btn" aria-label="Close Modal">&times;</button>
+    <div id="userModal" 
+         class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden [&:not(.hidden)]:flex items-center justify-center p-4 transition-all duration-300">
+        <div id="userModalContent" 
+             class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[var(--card-bg)] border border-[var(--border-light)] rounded-3xl shadow-2xl p-6 sm:p-8 transition-all">
+            
+            <button id="closeModal" 
+                    class="absolute top-5 right-5 w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center justify-center transition-all cursor-pointer" 
+                    aria-label="Close Modal">
+                <span class="material-symbols-outlined text-xl">close</span>
+            </button>
 
             @if ($errors->any())
-                <div class="error-box">
-                    <h4 class="error-title"><span class="material-symbols-outlined" style="font-size: 1.25rem; margin-right: 0.2rem;">error</span> Please fix the following error(s):</h4>
-                    <ul class="error-list">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+                <div class="mb-6 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 flex items-start gap-3">
+                    <span class="material-symbols-outlined text-xl text-rose-600 shrink-0">error</span>
+                    <div class="text-xs">
+                        <h4 class="font-bold text-rose-900 dark:text-rose-100 mb-1">Please fix the following error(s):</h4>
+                        <ul class="list-disc pl-4 space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
             @endif
 
-            <h2 class="modal-title">Add New User</h2>
+            <div class="flex items-center gap-3 pb-5 mb-6 border-b border-[var(--border-light)] pr-10">
+                <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-xl">person_add</span>
+                </div>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight text-[var(--text-dark)] m-0">
+                        Add New User
+                    </h2>
+                    <p class="text-xs text-[var(--text-muted)] m-0 font-medium">Create a user account with assigned regional scope and permissions</p>
+                </div>
+            </div>
 
-            <form action="{{ route('users.store') }}" method="POST">
+            <form action="{{ route('users.store') }}" method="POST" class="space-y-5">
                 @csrf
-                <div class="form-grid">
-                    <div class="form-group col-span-2">
-                        <label for="name" class="form-label">Full Name<span style="color:#ef4444;">*</span></label>
-                        <input type="text" name="name" id="name" required placeholder="e.g., Juan A. Dela Cruz" class="form-input" autocomplete="name" value="{{ old('name') }}">
+                
+                {{-- Name & Email --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="name" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                            Full Name <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" name="name" id="name" required placeholder="e.g., Juan A. Dela Cruz" value="{{ old('name') }}" autocomplete="name"
+                               class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
                     </div>
 
-                    <div class="form-group col-span-2">
-                        <label for="email" class="form-label">Email Address<span style="color:#ef4444;">*</span></label>
-                        <input type="email" name="email" id="email" required placeholder="e.g., j_delacruz@cda.gov.ph" class="form-input" autocomplete="email" value="{{ old('email') }}">
+                    <div>
+                        <label for="email" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                            Email Address <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="email" name="email" id="email" required placeholder="e.g., j_delacruz@cda.gov.ph" value="{{ old('email') }}" autocomplete="email"
+                               class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none font-mono">
                     </div>
+                </div>
 
-                    <div class="form-group col-span-2">
-                        <label for="region" class="form-label">Region Assignment<span style="color:#ef4444;">*</span></label>
-                        <select name="region" id="region" required class="form-select">
+                {{-- Region & Contact Number --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="region" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                            Region Assignment <span class="text-rose-500">*</span>
+                        </label>
+                        <select name="region" id="region" required 
+                                class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
                             <option value="" disabled {{ old('region') ? '' : 'selected' }}>Select Region</option>
                             @foreach ($region as $area)
                                 <option value="{{ $area }}" {{ old('region') == $area ? 'selected' : '' }}>{{ $area }}</option>
@@ -412,98 +284,154 @@
                         </select>
                     </div>
 
-                    <div class="form-group col-span-2">
-                        <label for="contact_number" class="form-label">Contact Number</label>
-                        <input type="text" name="contact_number" id="contact_number" placeholder="e.g., 09123456789" class="form-input" autocomplete="tel" value="{{ old('contact_number') }}">
-                    </div>
-
-                    <!-- Password Options -->
-                    <div class="form-group col-span-2">
-                        <label class="form-label" for="auto_generate_password">
-                            <input type="checkbox" id="auto_generate_password" class="form-checkbox">
-                            <span>Generate Password Automatically</span>
+                    <div>
+                        <label for="contact_number" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                            Contact Number
                         </label>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password" class="form-label">Password<span style="color:#ef4444;">*</span></label>
-                        <div style="position: relative; display: flex; align-items: center;">
-                            <input type="password" name="password" id="password" required class="form-input" autocomplete="new-password" style="padding-right: 2.5rem;">
-                            <button type="button" id="regenerateBtn" class="hidden" style="position: absolute; right: 0.5rem; background: none; border: none; cursor: pointer; color: #4f46e5;" title="Regenerate Password">
-                                <span class="material-symbols-outlined" style="font-size: 1.25rem;">refresh</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password_confirmation" class="form-label">Confirm Password<span style="color:#ef4444;">*</span></label>
-                        <input type="password" name="password_confirmation" id="password_confirmation" required class="form-input" autocomplete="new-password">
-                    </div>
-
-                    <div class="form-group col-span-2">
-                        <span class="form-label">Select System Role(s)<span style="color:#ef4444;">*</span></span>
-                        <div class="radio-group">
-                            @foreach ($roles as $role)
-                                <label class="radio-label">
-                                    <input type="checkbox" name="roles[]" id="add_role_{{ $loop->index }}" value="{{ $role->id }}" class="radio-input" {{ in_array($role->id, old('roles', [])) ? 'checked' : '' }}>
-                                    <span>{{ $role->name }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                        @error('roles')
-                            <p style="color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem; font-weight: 500;">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="form-group col-span-2">
-                        <label for="created_at" class="form-label">Date Added</label>
-                        <input type="text" value="{{ \Carbon\Carbon::now()->setTimezone('Asia/Manila')->format('F j, Y h:i A') }}" readonly class="form-input">
+                        <input type="text" name="contact_number" id="contact_number" placeholder="e.g., 09123456789" value="{{ old('contact_number') }}" autocomplete="tel"
+                               class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none font-mono">
                     </div>
                 </div>
 
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-indigo">Register User</button>
-                    <button type="button" class="btn btn-gray" id="cancelAddModal">Cancel</button>
+                {{-- Password Options --}}
+                <div class="p-4 rounded-2xl border border-[var(--border-light)] bg-slate-50/50 dark:bg-slate-800/30 space-y-4">
+                    <label class="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-[var(--text-dark)]" for="auto_generate_password">
+                        <input type="checkbox" id="auto_generate_password" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 cursor-pointer">
+                        <span>Generate Password Automatically (Strong 12-character string)</span>
+                    </label>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="password" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                                Password <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="relative flex items-center">
+                                <input type="password" name="password" id="password" required autocomplete="new-password"
+                                       class="w-full h-11 pl-3.5 pr-10 rounded-xl border border-[var(--border-light)] bg-white dark:bg-slate-800 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                                <button type="button" id="regenerateBtn" class="hidden absolute right-2 w-8 h-8 rounded-lg text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-700 flex items-center justify-center transition-colors cursor-pointer" title="Regenerate Password">
+                                    <span class="material-symbols-outlined text-lg">refresh</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="password_confirmation" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                                Confirm Password <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="password" name="password_confirmation" id="password_confirmation" required autocomplete="new-password"
+                                   class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-white dark:bg-slate-800 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Roles Checkbox Grid --}}
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2">
+                        Select System Role(s) <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-3 rounded-2xl border border-[var(--border-light)] bg-slate-50/50 dark:bg-slate-800/30 max-h-48 overflow-y-auto">
+                        @foreach ($roles as $role)
+                            <label class="flex items-center gap-2.5 p-2 rounded-xl bg-white dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors cursor-pointer text-xs font-medium text-[var(--text-dark)]">
+                                <input type="checkbox" name="roles[]" id="add_role_{{ $loop->index }}" value="{{ $role->id }}" 
+                                       class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 cursor-pointer"
+                                       {{ in_array($role->id, old('roles', [])) ? 'checked' : '' }}>
+                                <span>{{ $role->name }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    @error('roles')
+                        <p class="text-xs font-medium text-rose-500 mt-1.5">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="created_at" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Date Added</label>
+                    <input type="text" value="{{ \Carbon\Carbon::now()->setTimezone('Asia/Manila')->format('F j, Y h:i A') }}" readonly 
+                           class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-100 dark:bg-slate-800/40 text-sm text-[var(--text-muted)] cursor-not-allowed outline-none">
+                </div>
+
+                {{-- Modal Footer --}}
+                <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-[var(--border-light)]">
+                    <button type="button" id="cancelAddModal" 
+                            class="w-full sm:w-auto h-11 px-5 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="w-full sm:w-auto h-11 px-6 rounded-xl text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
+                        <span>Register User</span>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
     {{-- Modal: Edit User --}}
-    <div id="editModal" class="modal-overlay hidden">
-        <div id="editModalContent" class="modal-box">
-            <button id="closeEditModal" class="close-btn" aria-label="Close Modal">&times;</button>
+    <div id="editModal" 
+         class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden [&:not(.hidden)]:flex items-center justify-center p-4 transition-all duration-300">
+        <div id="editModalContent" 
+             class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[var(--card-bg)] border border-[var(--border-light)] rounded-3xl shadow-2xl p-6 sm:p-8 transition-all">
+            
+            <button id="closeEditModal" 
+                    class="absolute top-5 right-5 w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center justify-center transition-all cursor-pointer" 
+                    aria-label="Close Modal">
+                <span class="material-symbols-outlined text-xl">close</span>
+            </button>
 
             @if ($errors->any())
-                <div class="error-box">
-                    <h4 class="error-title"><span class="material-symbols-outlined" style="font-size: 1.25rem; margin-right: 0.2rem;">error</span> Please fix the following error(s):</h4>
-                    <ul class="error-list">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+                <div class="mb-6 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 flex items-start gap-3">
+                    <span class="material-symbols-outlined text-xl text-rose-600 shrink-0">error</span>
+                    <div class="text-xs">
+                        <h4 class="font-bold text-rose-900 dark:text-rose-100 mb-1">Please fix the following error(s):</h4>
+                        <ul class="list-disc pl-4 space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
             @endif
 
-            <h2 class="modal-title">Edit User Details</h2>
+            <div class="flex items-center gap-3 pb-5 mb-6 border-b border-[var(--border-light)] pr-10">
+                <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-xl">manage_accounts</span>
+                </div>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight text-[var(--text-dark)] m-0">
+                        Edit User Details
+                    </h2>
+                    <p class="text-xs text-[var(--text-muted)] m-0 font-medium">Update account information, regional scope, and security roles</p>
+                </div>
+            </div>
 
-            <form id="editForm" method="POST" action="#">
+            <form id="editForm" method="POST" action="#" class="space-y-5">
                 @csrf
                 @method('PUT')
-                <div class="form-grid">
-                    <div class="form-group col-span-2">
-                        <label for="edit_name" class="form-label">Full Name</label>
-                        <input type="text" name="name" id="edit_name" value="" required class="form-input" autocomplete="name">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="edit_name" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                            Full Name <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" name="name" id="edit_name" value="" required autocomplete="name"
+                               class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
                     </div>
 
-                    <div class="form-group col-span-2">
-                        <label for="edit_email" class="form-label">Email Address</label>
-                        <input type="email" name="email" id="edit_email" value="" required class="form-input" autocomplete="email">
+                    <div>
+                        <label for="edit_email" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                            Email Address <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="email" name="email" id="edit_email" value="" required autocomplete="email"
+                               class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none font-mono">
                     </div>
+                </div>
 
-                    <div class="form-group col-span-2">
-                        <label for="edit_region" class="form-label">Region Assignment<span style="color:#ef4444;">*</span></label>
-                        <select name="region" id="edit_region" required class="form-select">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="edit_region" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                            Region Assignment <span class="text-rose-500">*</span>
+                        </label>
+                        <select name="region" id="edit_region" required 
+                                class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
                             <option value="" disabled selected>Select Region</option>
                             @foreach ($region as $area)
                                 <option value="{{ $area }}">{{ $area }}</option>
@@ -511,35 +439,50 @@
                         </select>
                     </div>
 
-                    <div class="form-group col-span-2">
-                        <label for="edit_contact_number" class="form-label">Contact Number</label>
-                        <input type="text" name="contact_number" id="edit_contact_number" value="" class="form-input" autocomplete="tel">
-                    </div>
-
-                    <div class="form-group col-span-2">
-                        <span class="form-label">Select System Role(s)<span style="color:#ef4444;">*</span></span>
-                        <div class="radio-group">
-                            @foreach ($roles as $role)
-                                <label class="radio-label">
-                                    <input type="checkbox" name="roles[]" id="edit_role_{{ $loop->index }}" value="{{ $role->id }}" class="radio-input">
-                                    <span>{{ $role->name }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                        @error('roles')
-                            <p style="color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem; font-weight: 500;">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="form-group col-span-2">
-                        <label class="form-label">Last Updated</label>
-                        <input type="text" value="{{ \Carbon\Carbon::now()->setTimezone('Asia/Manila')->format('F j, Y h:i A') }}" readonly class="form-input">
+                    <div>
+                        <label for="edit_contact_number" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                            Contact Number
+                        </label>
+                        <input type="text" name="contact_number" id="edit_contact_number" value="" autocomplete="tel"
+                               class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none font-mono">
                     </div>
                 </div>
 
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-indigo">Save Changes</button>
-                    <button type="button" class="btn btn-gray" id="cancelEditModal">Cancel</button>
+                {{-- Edit Roles Checkbox Grid --}}
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2">
+                        Select System Role(s) <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-3 rounded-2xl border border-[var(--border-light)] bg-slate-50/50 dark:bg-slate-800/30 max-h-48 overflow-y-auto">
+                        @foreach ($roles as $role)
+                            <label class="flex items-center gap-2.5 p-2 rounded-xl bg-white dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors cursor-pointer text-xs font-medium text-[var(--text-dark)]">
+                                <input type="checkbox" name="roles[]" id="edit_role_{{ $loop->index }}" value="{{ $role->id }}" 
+                                       class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 cursor-pointer">
+                                <span>{{ $role->name }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    @error('roles')
+                        <p class="text-xs font-medium text-rose-500 mt-1.5">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Last Updated</label>
+                    <input type="text" value="{{ \Carbon\Carbon::now()->setTimezone('Asia/Manila')->format('F j, Y h:i A') }}" readonly 
+                           class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-100 dark:bg-slate-800/40 text-sm text-[var(--text-muted)] cursor-not-allowed outline-none">
+                </div>
+
+                {{-- Modal Footer --}}
+                <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-[var(--border-light)]">
+                    <button type="button" id="cancelEditModal" 
+                            class="w-full sm:w-auto h-11 px-5 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="w-full sm:w-auto h-11 px-6 rounded-xl text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
+                        <span>Save Changes</span>
+                    </button>
                 </div>
             </form>
         </div>

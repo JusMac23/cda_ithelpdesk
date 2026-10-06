@@ -1,332 +1,148 @@
 <x-app-layout>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-
-    <style>
-        /* --- Theme Variables --- */
-        :root {
-            --bg-main: #f1f5f9;
-            --card-bg: #ffffff;
-            --bg-alt: #f8fafc;
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
-            --border-light: #e2e8f0;
-            --border-subtle: #f1f5f9;
-            --input-bg: #ffffff;
-            --input-border: #cbd5e1;
-            --input-text: #334155;
-
-            /* Badges */
-            --badge-bg: #eff6ff;
-            --badge-text: #2563eb;
-            --badge-border: #bfdbfe;
-            --badge-hover-bg: #dbeafe;
-
-            /* Action Buttons (Gray) */
-            --btn-gray-bg: #f1f5f9;
-            --btn-gray-text: #475569;
-            --btn-gray-border: #e2e8f0;
-            --btn-gray-hover-bg: #e2e8f0;
-            --btn-gray-hover-text: #0f172a;
-
-            /* Error States */
-            --error-bg: #fef2f2;
-            --error-border: #fecaca;
-            --error-text: #991b1b;
-            --error-title: #7f1d1d;
-            
-            /* Readonly */
-            --readonly-bg: #f8fafc;
-        }
-
-        body.dark {
-            --bg-main: #020617;
-            --card-bg: #0f172a; 
-            --bg-alt: #1e293b; 
-            --text-dark: #f8fafc;
-            --text-muted: #9ca3af;
-            --border-light: #334155; 
-            --border-subtle: #1e293b;
-            --input-bg: #0f172a;
-            --input-border: #4b5563;
-            --input-text: #f1f5f9;
-
-            /* Badges - Dark Mode */
-            --badge-bg: rgba(30, 58, 138, 0.4);
-            --badge-text: #93c5fd;
-            --badge-border: #1e3a8a;
-            --badge-hover-bg: rgba(30, 58, 138, 0.7);
-
-            /* Action Buttons (Gray) - Dark */
-            --btn-gray-bg: #1e293b;
-            --btn-gray-text: #9ca3af;
-            --btn-gray-border: #334155;
-            --btn-gray-hover-bg: #334155;
-            --btn-gray-hover-text: #f8fafc;
-
-            /* Error States - Dark */
-            --error-bg: rgba(153, 27, 27, 0.2);
-            --error-border: rgba(248, 113, 113, 0.4);
-            --error-text: #fca5a5;
-            --error-title: #f87171;
-            
-            /* Readonly */
-            --readonly-bg: #1e293b;
-        }
-
-        /* Global Box Sizing & Font Fix */
-        *, *::before, *::after { box-sizing: border-box; }
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: var(--bg-main); color: var(--text-dark); transition: background-color 0.3s ease, color 0.3s ease; margin: 0; padding: 0; }
-
-        /* Main Layout - Mobile First 100% Width & Dark Mode Outline */
-        .panel { background-color: var(--card-bg); border-radius: 1rem; border: 1px solid var(--border-light); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); padding: 1.25rem; width: 100%; transition: background-color 0.3s ease, border-color 0.3s ease; }
-        
-        /* Typography */
-        .header-flex { display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 1.5rem; gap: 1rem; width: 100%; }
-        .title { font-size: 1.75rem; font-weight: 800; color: var(--text-dark); margin: 0; letter-spacing: -0.025em; transition: color 0.3s ease; }
-        
-        /* --- Action Container & Search Toolbar - Mobile First --- */
-        .action-container { display: flex; flex-direction: column; width: 100%; gap: 1rem; margin-bottom: 1.5rem; }
-        
-        .search-form { display: flex; align-items: stretch; width: 100%; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border-radius: 0.5rem; }
-        .search-input { height: 44px; flex: 1; min-width: 0; padding: 0 1rem; font-size: 0.95rem; font-family: inherit; background-color: var(--input-bg); color: var(--input-text); border: 1px solid var(--input-border); border-right: none; border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; outline: none; transition: all 0.2s; position: relative; z-index: 1; }
-        .search-input:focus { border-color: #6366f1; box-shadow: inset 0 0 0 1px #6366f1, 0 0 0 3px rgba(99, 102, 241, 0.15); z-index: 10; }
-        .search-input::placeholder { color: var(--text-muted); opacity: 0.7; }
-        .search-btn { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 1.25rem; border: none; border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; background-color: #4f46e5; color: white; cursor: pointer; transition: background-color 0.2s; z-index: 2; }
-        .search-btn:hover { background-color: #4338ca; }
-
-        /* --- Buttons - Uniform Heights --- */
-        .btn { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 1.5rem; border-radius: 0.5rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s ease; width: 100%; text-decoration: none; font-family: inherit; }
-        .btn i { margin-right: 0.5rem; font-size: 1rem; }
-        
-        /* Modern Green */
-        .btn-green { background-color: #10b981; color: white; box-shadow: 0 1px 2px rgba(16, 185, 129, 0.2); }
-        .btn-green:hover { background-color: #059669; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
-        .btn-green:active { transform: translateY(0); box-shadow: 0 1px 2px rgba(16, 185, 129, 0.2); }
-
-        /* Modern Indigo */
-        .btn-indigo { background-color: #4f46e5; color: white; box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2); }
-        .btn-indigo:hover { background-color: #4338ca; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
-        .btn-indigo:active { transform: translateY(0); box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2); }
-
-        /* Modern Gray */
-        .btn-gray { background-color: var(--btn-gray-bg); color: var(--btn-gray-text); border: 1px solid var(--btn-gray-border); transition: all 0.3s ease; }
-        .btn-gray:hover { background-color: var(--btn-gray-hover-bg); color: var(--btn-gray-hover-text); }
-
-        /* Action Buttons inside Table */
-        .action-cell { display: flex; flex-wrap: wrap; justify-content: flex-start; align-items: center; gap: 0.5rem; }
-        .action-link { display: inline-flex; align-items: center; justify-content: center; height: 34px; padding: 0 0.85rem; border-radius: 0.375rem; font-size: 0.85rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; text-decoration: none; background: transparent; white-space: nowrap; box-sizing: border-box; }
-        .action-link i { margin-right: 0.35rem; font-size: 0.9rem; }
-        
-        .link-blue { color: #3b82f6; border: 1px solid #bfdbfe; } 
-        .link-blue:hover { background-color: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
-        
-        .link-red { color: #ef4444; border: 1px solid #fecaca; } 
-        .link-red:hover { background-color: #fef2f2; color: #b91c1c; border-color: #fca5a5; }
-
-        /* Dark Mode Action Link Overrides */
-        body.dark .link-blue { color: #60a5fa; border-color: #1e3a8a; }
-        body.dark .link-blue:hover { background-color: rgba(30, 58, 138, 0.4); color: #93c5fd; }
-        body.dark .link-red { color: #f87171; border-color: #7f1d1d; }
-        body.dark .link-red:hover { background-color: rgba(127, 29, 29, 0.4); color: #fca5a5; }
-
-        /* Table */
-        .table-container { overflow-x: auto; background-color: var(--card-bg); border-radius: 0.75rem; border: 1px solid var(--border-light); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); width: 100%; -webkit-overflow-scrolling: touch; margin-bottom: 1.5rem; transition: background-color 0.3s ease, border-color 0.3s ease; }
-        .data-table { width: 100%; min-width: 800px; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
-        .data-table th { padding: 1rem 1.5rem; background-color: var(--bg-alt); color: var(--text-muted); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--border-light); white-space: nowrap; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
-        .data-table td { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-subtle); color: var(--text-dark); vertical-align: middle; font-weight: 500; transition: color 0.3s ease, border-color 0.3s ease; }
-        .data-table tbody tr { transition: background-color 0.15s; }
-        .data-table tbody tr:hover { background-color: var(--bg-alt); }
-        .text-center { text-align: center; }
-        .font-bold-name { font-weight: 700; color: var(--text-dark); transition: color 0.3s ease; }
-
-        /* Container Box inside the table cell */
-        .tech-services-box { display: flex; flex-wrap: wrap; gap: 0.35rem; padding: 0.5rem; border-radius: 0.5rem; max-width: 320px; align-items: center; }
-
-        /* Individual Category Badges - Theme Fixed */
-        .service-badge { display: inline-flex; align-items: center; padding: 0.2rem 0.55rem; font-size: 0.75rem; font-weight: 600; line-height: 1.25; color: var(--badge-text); background-color: var(--badge-bg); border: 1px solid var(--badge-border); border-radius: 0.375rem; white-space: nowrap; transition: all 0.15s ease-in-out; }
-
-        /* Subtle Hover Effect on Badges */
-        .service-badge:hover { background-color: var(--badge-hover-bg); }
-
-        /* Empty State styling */
-        .no-services { font-size: 0.75rem; color: var(--text-muted); }
-
-        /* --- Modern UI Pagination (Laravel Structure Fix) --- */
-        .pagination-wrapper { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-light); width: 100%; transition: border-color 0.3s ease; }
-        .pagination-wrapper nav { display: flex; flex-direction: column; gap: 1.25rem; width: 100%; align-items: center; }
-        
-        /* Pagination Sub-Text */
-        .pagination-wrapper p { margin: 0; font-size: 0.875rem; color: var(--text-muted); font-weight: 500; text-align: center; transition: color 0.3s ease; }
-        .pagination-wrapper p span { font-weight: 700; color: var(--text-dark); transition: color 0.3s ease; }
-
-        /* Container for links */
-        .pagination-wrapper div > span.relative.z-0.inline-flex,
-        .pagination-wrapper .flex.justify-between { display: flex; flex-wrap: wrap; gap: 0.5rem; box-shadow: none !important; justify-content: center; align-items: center; }
-
-        /* Uniform Button Styling for Page Numbers & Arrows */
-        .pagination-wrapper a, 
-        .pagination-wrapper span[aria-current="page"] > span,
-        .pagination-wrapper span[aria-disabled="true"] > span { display: inline-flex; align-items: center; justify-content: center; min-width: 2.25rem; height: 2.25rem; padding: 0 0.5rem; border-radius: 0.375rem !important; font-size: 0.875rem; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.2s ease; border: 1px solid transparent; margin: 0 !important; text-decoration: none; line-height: 1; }
-
-        /* Default Inactive Links */
-        .pagination-wrapper a { background-color: var(--card-bg); color: var(--text-muted); border-color: var(--border-light); }
-        .pagination-wrapper a:hover { background-color: var(--bg-alt); color: var(--text-dark); border-color: var(--input-border); transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-
-        /* Active Page Link */
-        .pagination-wrapper span[aria-current="page"] > span { background-color: #4f46e5; color: #ffffff; border-color: #4f46e5; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.25); z-index: 2; position: relative; }
-
-        /* Disabled Navigation Arrows */
-        .pagination-wrapper span[aria-disabled="true"] > span { background-color: var(--bg-alt); color: var(--text-muted); border-color: var(--border-light); cursor: not-allowed; opacity: 0.7; }
-
-        /* "..." Separator Fix */
-        .pagination-wrapper span[aria-disabled="true"]:not([aria-label]) > span { background: transparent; border: none; opacity: 1; color: var(--text-muted); }
-
-        /* Standardize Arrow SVGs */
-        .pagination-wrapper svg { width: 1.25rem !important; height: 1.25rem !important; display: block; }
-
-        /* Modals - Smooth Scaling Transitions */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 1; visibility: visible; transition: all 0.3s ease; }
-        .modal-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        
-        .modal-box { position: relative; background-color: var(--card-bg); border-radius: 1rem; border: 1px solid var(--border-light); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 100%; max-width: 48rem; max-height: 90vh; overflow-y: auto; padding: 1.5rem; transform: scale(1); transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease; }
-        .modal-overlay.hidden .modal-box { transform: scale(0.95); }
-        
-        /* Fixed Modal Close Button */
-        .close-btn { position: absolute; top: 1.25rem; right: 1.25rem; color: var(--text-muted); font-size: 2.25rem; background: none; border: none; cursor: pointer; transition: color 0.2s, background-color 0.2s; line-height: 1; border-radius: 0.25rem; padding: 0 0.5rem; }
-        .close-btn:hover { color: var(--text-dark); }
-        
-        .modal-title { font-size: 1.5rem; font-weight: 800; color: var(--text-dark); margin-top: 0; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-light); padding-bottom: 1rem; padding-right: 2.5rem; transition: color 0.3s ease, border-color 0.3s ease; }
-        
-        /* Form Grid - Mobile First 100% Width */
-        .form-grid { display: flex; flex-direction: column; gap: 1.25rem; width: 100%; }
-
-        /* NEW: Added Name Grid for Mobile Stacked */
-        .name-grid { display: flex; flex-direction: column; gap: 1.25rem; width: 100%; }
-
-        /* Checkbox Grid - Fixed Variable Fallbacks */
-        .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.5rem; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-light); border-radius: 0.375rem; background-color: var(--bg-alt); transition: all 0.3s ease; }
-        .checkbox-grid label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 500; cursor: pointer; color: var(--text-dark); }
-
-        /* Form Controls - Unified 44px Heights */
-        .form-group { display: flex; flex-direction: column; width: 100%; }
-        .form-label { font-size: 0.875rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; width: 100%; transition: color 0.3s ease; }
-        .form-input, .form-select { height: 44px; padding: 0 1rem; font-size: 0.95rem; color: var(--input-text); border: 1px solid var(--input-border); border-radius: 0.5rem; background-color: var(--input-bg); outline: none; transition: all 0.2s; font-family: inherit; width: 100%; box-sizing: border-box; }
-        .form-input:focus, .form-select:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
-        
-        .form-input[readonly] { background-color: var(--readonly-bg) !important; color: var(--text-muted) !important; cursor: not-allowed; border-color: var(--border-light); }
-        .form-input[readonly]:focus { box-shadow: none; border-color: var(--border-light); }
-        
-        .modal-footer { display: flex; flex-direction: column; padding-top: 1.5rem; border-top: 1px solid var(--border-light); margin-top: 1.5rem; gap: 0.75rem; width: 100%; transition: border-color 0.3s ease; }
-
-        /* Error Box */
-        .error-box { background-color: var(--error-bg); border: 1px solid var(--error-border); color: var(--error-text); padding: 1.25rem; border-radius: 0.5rem; margin-bottom: 1.5rem; transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
-        .error-title { margin: 0 0 0.5rem 0; font-weight: 700; font-size: 0.95rem; color: var(--error-title); transition: color 0.3s ease; }
-        .error-list { margin: 0; padding-left: 1.5rem; font-size: 0.9rem; font-weight: 500; }
-
-        /* Full-Screen Loading Overlay */
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: #ffffff; }
-        .loading-overlay.active { display: flex; }
-        .spinner { width: 44px; height: 44px; border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: #ffffff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Responsive Overrides */
-        @media (max-width: 639px) {
-            .pagination-wrapper nav .hidden { display: none !important; }
-            .pagination-wrapper nav .sm\:hidden { display: flex; width: 100%; justify-content: space-between; }
-        }
-
-        @media (min-width: 640px) {
-            .panel { padding: 2rem; }
-            .header-flex { flex-direction: row; justify-content: space-between; align-items: center; }
-            .action-container { flex-direction: row; justify-content: space-between; align-items: center; }
-            .search-form { width: auto; min-width: 320px; }
-            .btn { width: auto; }
-            .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-            .col-span-2 { grid-column: span 2; }
-            
-            /* NEW: Name grid forces a 3 column layout on Desktop */
-            .name-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-            
-            .modal-box { padding: 2.5rem; }
-            .close-btn { top: 1.5rem; right: 2rem; }
-            .modal-footer { flex-direction: row; justify-content: flex-end; }
-            .pagination-wrapper nav { flex-direction: row; justify-content: space-between; }
-            .pagination-wrapper nav > div.sm\:hidden { display: none !important; }
-            .pagination-wrapper nav > div.hidden.sm\:flex-1 { display: flex !important; width: 100%; justify-content: space-between; align-items: center; }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 
     <!-- Full-Screen Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay">
-        <div class="spinner"></div>
-        <p style="font-size: 1rem; font-weight: 600; letter-spacing: 0.025em;">Processing Technical Personnel, please wait...</p>
+        <div class="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
+        <p class="text-base font-semibold tracking-wide text-white">Processing Technical Personnel, please wait...</p>
     </div>
 
-    <div id="main-content">
-        <div class="panel">
+    <div id="main-content" class="w-full">
+        <div class="panel bg-[var(--card-bg)] border border-[var(--border-light)] rounded-2xl shadow-xs transition-colors duration-300 p-4 sm:p-6 lg:p-8">
             
-            <div class="header-flex">
-                <h3 class="title">All Technical Personnel</h3>
-            </div>
+            {{-- Header Title Banner --}}
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 mb-6 border-b border-[var(--border-light)]">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-600 to-cyan-600 text-white flex items-center justify-center shadow-md shadow-teal-500/20 shrink-0">
+                        <span class="material-symbols-outlined text-2xl">badge</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2.5 flex-wrap">
+                            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--text-dark)] m-0 leading-tight">
+                                Technical Personnel
+                            </h1>
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-teal-50 dark:bg-teal-950/50 text-teal-600 dark:text-teal-400 border border-teal-200/60 dark:border-teal-800/60">
+                                {{ $technical_personnel->total() }} Registered
+                            </span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-[var(--text-muted)] m-0 mt-0.5 font-medium">
+                            Manage IT personnel regional assignments, contact credentials, and technical service competencies
+                        </p>
+                    </div>
+                </div>
 
-            <div class="action-container">
                 @can('create_technical_personnel')
-                    <button id="openModal" class="btn btn-green">
-                        <span class="material-symbols-outlined" style="font-size: 1.25rem; margin-right: 0.2rem;">add</span> Add Personnel
+                    <button id="openModal" 
+                            class="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 active:scale-95 shadow-md shadow-emerald-600/20 transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-xl">person_add</span>
+                        <span>Add Personnel</span>
                     </button>
                 @endcan
+            </div>
 
+            {{-- Action Toolbar: Search Form --}}
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
                 @can('search_technical_personnel')
-                <form action="{{ route('tech_personnel.index') }}" method="GET" class="search-form">
-                    <input type="text" name="search_query" value="{{ request('search_query') }}" placeholder="Search personnel..." class="search-input" autocomplete="off">
-                    <button type="submit" class="search-btn">
-                        <span class="material-symbols-outlined" style="font-size: 1.25rem; margin-right: 0.2rem;">search</span>
-                    </button>
+                <form action="{{ route('tech_personnel.index') }}" method="GET" class="w-full sm:max-w-md m-0">
+                    <div class="relative flex items-center">
+                        <span class="absolute left-3.5 text-slate-400 material-symbols-outlined text-xl pointer-events-none">search</span>
+                        <input type="text" 
+                               name="search_query" 
+                               value="{{ request('search_query') }}" 
+                               placeholder="Search personnel by name, email, or area..." 
+                               autocomplete="off"
+                               class="w-full h-11 pl-10 pr-24 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                        <button type="submit" 
+                                class="absolute right-1.5 h-8 px-3 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer">
+                            Search
+                        </button>
+                    </div>
                 </form>
                 @endcan
+
+                @if(request('search_query'))
+                    <a href="{{ route('tech_personnel.index') }}" 
+                       class="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-dark)] transition-colors">
+                        <span class="material-symbols-outlined text-base">close</span>
+                        <span>Clear search filter</span>
+                    </a>
+                @endif
             </div>
 
-            <div class="table-container">
-                <table class="data-table">
+            {{-- Table Container --}}
+            <div class="overflow-x-auto rounded-2xl border border-[var(--border-light)] bg-[var(--card-bg)] shadow-xs">
+                <table class="w-full min-w-[760px] text-left border-collapse text-sm">
                     <thead>
-                        <tr>
-                            <th>FullName / Division</th>
-                            <th>Email Address</th>
-                            <th>Region Assignment</th>
-                            <th>Technical Services Category</th>
+                        <tr class="border-b border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/60 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                            <th class="py-3.5 px-4 sm:px-6">Full Name / Personnel</th>
+                            <th class="py-3.5 px-4 sm:px-6">Email Address</th>
+                            <th class="py-3.5 px-4 sm:px-6">Region Assignment</th>
+                            <th class="py-3.5 px-4 sm:px-6">Technical Services Category</th>
                             @if(auth()->user()->can('edit_technical_personnel') || auth()->user()->can('delete_technical_personnel'))
-                            <th class="text-center" @if(auth()->user()->can('edit_technical_personnel') && auth()->user()->can('delete_technical_personnel')) style="text-align: center;" @endif>Actions</th>
+                                <th class="py-3.5 px-4 sm:px-6 text-center">Actions</th>
                             @endif
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-[var(--border-subtle)]">
                         @forelse ($technical_personnel as $tech_personnel)
-                            <tr>
-                                <td class="font-bold-name">{{ $tech_personnel->firstname }} {{ $tech_personnel->middle_initial }} {{ $tech_personnel->lastname }}</td>
-                                <td>{{ $tech_personnel->it_email }}</td>
-                                <td>{{ $tech_personnel->it_area }}</td>
-                                <td>
-                                    <div class="tech-services-box">
+                            <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                                
+                                {{-- Name with Avatar Initial --}}
+                                <td class="py-4 px-4 sm:px-6 align-middle">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold text-xs flex items-center justify-center shrink-0 border border-indigo-200/60 dark:border-indigo-800/60">
+                                            {{ strtoupper(substr($tech_personnel->firstname, 0, 1) . substr($tech_personnel->lastname, 0, 1)) }}
+                                        </div>
+                                        <div>
+                                            <span class="font-bold text-[var(--text-dark)] block">
+                                                {{ $tech_personnel->firstname }} {{ $tech_personnel->middle_initial }} {{ $tech_personnel->lastname }}
+                                            </span>
+                                            <span class="text-xs text-[var(--text-muted)]">ID: #{{ $tech_personnel->id }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                {{-- Email --}}
+                                <td class="py-4 px-4 sm:px-6 align-middle">
+                                    <div class="flex items-center gap-1.5 text-[var(--text-dark)]">
+                                        <span class="material-symbols-outlined text-base text-[var(--text-muted)]">mail</span>
+                                        <span class="font-mono text-xs">{{ $tech_personnel->it_email }}</span>
+                                    </div>
+                                </td>
+
+                                {{-- Region --}}
+                                <td class="py-4 px-4 sm:px-6 align-middle">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-[var(--text-dark)] border border-slate-200 dark:border-slate-700">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
+                                        {{ $tech_personnel->it_area }}
+                                    </span>
+                                </td>
+
+                                {{-- Services Category Badges --}}
+                                <td class="py-4 px-4 sm:px-6 align-middle">
+                                    <div class="flex flex-wrap gap-1.5 max-w-sm">
                                         @if (!empty($tech_personnel->tech_services_category))
                                             @foreach (explode(',', $tech_personnel->tech_services_category) as $service)
-                                                <span class="service-badge">{{ trim($service) }}</span>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-medium bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60">
+                                                    {{ trim($service) }}
+                                                </span>
                                             @endforeach
                                         @else
-                                            <span class="no-services">No categories assigned</span>
+                                            <span class="text-xs text-[var(--text-muted)] italic">No categories assigned</span>
                                         @endif
                                     </div>
                                 </td>
-                                
+
+                                {{-- Actions --}}
                                 @if(auth()->user()->can('edit_technical_personnel') || auth()->user()->can('delete_technical_personnel'))
-                                <td>
-                                    <div class="action-cell" @if(auth()->user()->can('edit_technical_personnel') && auth()->user()->can('delete_technical_personnel')) style="justify-content: center;" @endif>
+                                <td class="py-4 px-4 sm:px-6 align-middle text-center">
+                                    <div class="inline-flex items-center justify-center">
                                         
                                         {{-- Edit Button --}}
                                         @can('edit_technical_personnel')
-                                            <button type="button" class="action-link link-blue editBtn"
+                                            <button type="button" title="Edit"
+                                                class="editBtn inline-flex items-center h-8 px-3 text-xs font-semibold text-blue-600 dark:text-blue-400 active:scale-95 transition-all cursor-pointer"
                                                 data-id="{{ $tech_personnel->id }}"
                                                 data-firstname="{{ $tech_personnel->firstname }}"
                                                 data-middle_initial="{{ $tech_personnel->middle_initial }}"
@@ -334,28 +150,38 @@
                                                 data-it_email="{{ $tech_personnel->it_email }}"
                                                 data-it_area="{{ $tech_personnel->it_area }}"
                                                 data-tech_services="{{ $tech_personnel->tech_services_category }}">
-                                                <span class="material-symbols-outlined" style="font-size: 1.25rem; margin-right: 0.2rem;">edit</span> Edit
+                                                <span class="material-symbols-outlined text-sm">edit</span>
                                             </button>
                                         @endcan
 
                                         {{-- Delete Button --}}
                                         @can('delete_technical_personnel')
-                                            <form id="delete-form-{{ $tech_personnel->id }}" action="{{ route('tech_personnel.destroy', $tech_personnel->id) }}" method="POST" style="margin:0;">
+                                            <form id="delete-form-{{ $tech_personnel->id }}" action="{{ route('tech_personnel.destroy', $tech_personnel->id) }}" method="POST" class="m-0 inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="button" class="action-link link-red delete-btn" data-id="{{ $tech_personnel->id }}">
-                                                    <span class="material-symbols-outlined" style="font-size: 1.25rem; margin-right: 0.2rem;">delete</span> Delete
+                                                <button type="button" title="Delete"
+                                                        class="delete-btn inline-flex items-center h-8 px-3 text-xs font-semibold text-rose-600 dark:text-rose-400 active:scale-95 transition-all cursor-pointer" 
+                                                        data-id="{{ $tech_personnel->id }}">
+                                                    <span class="material-symbols-outlined text-sm">delete</span>
                                                 </button>
                                             </form>
                                         @endcan
+
                                     </div>
                                 </td>
                                 @endif
+
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center" style="padding: 3rem; color: var(--text-muted); font-size: 1rem;">
-                                    No Technical Personnel found.
+                                <td colspan="5" class="py-12 px-4 text-center">
+                                    <div class="flex flex-col items-center justify-center gap-2">
+                                        <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                                            <span class="material-symbols-outlined text-2xl">person_off</span>
+                                        </div>
+                                        <p class="text-sm font-semibold text-[var(--text-dark)] m-0">No Technical Personnel Found</p>
+                                        <p class="text-xs text-[var(--text-muted)] m-0">Try changing your search terms or add a new personnel record</p>
+                                    </div>
                                 </td>
                             </tr>
                         @endforelse
@@ -363,7 +189,8 @@
                 </table>
             </div>
 
-            <div class="pagination-wrapper">
+            {{-- Pagination Wrapper --}}
+            <div class="mt-6 pt-4 border-t border-[var(--border-light)]">
                 {{ $technical_personnel->links() }}
             </div>
             
@@ -371,163 +198,261 @@
     </div>
 
     {{-- Modal: Add Personnel --}}
-    <div id="personnelModal" class="modal-overlay hidden">
-        <div id="personnelModalContent" class="modal-box">
-            <button id="closeModal" class="close-btn" aria-label="Close Modal">&times;</button>
+    <div id="personnelModal" 
+         class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden [&:not(.hidden)]:flex items-center justify-center p-4 transition-all duration-300">
+        <div id="personnelModalContent" 
+             class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[var(--card-bg)] border border-[var(--border-light)] rounded-3xl shadow-2xl p-6 sm:p-8 transition-all">
+            
+            <button id="closeModal" 
+                    class="absolute top-5 right-5 w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center justify-center transition-all cursor-pointer" 
+                    aria-label="Close Modal">
+                <span class="material-symbols-outlined text-xl">close</span>
+            </button>
 
             @if ($errors->any())
-                <div class="error-box">
-                    <h4 class="error-title"><i class="fas fa-exclamation-circle"></i> Please fix the following error(s):</h4>
-                    <ul class="error-list">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+                <div class="mb-6 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 flex items-start gap-3">
+                    <span class="material-symbols-outlined text-xl text-rose-600 shrink-0">error</span>
+                    <div class="text-xs">
+                        <h4 class="font-bold text-rose-900 dark:text-rose-100 mb-1">Please fix the following error(s):</h4>
+                        <ul class="list-disc pl-4 space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
             @endif
 
-            <h2 class="modal-title">Create Technical Personnel</h2>
+            <div class="flex items-center gap-3 pb-5 mb-6 border-b border-[var(--border-light)] pr-10">
+                <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-xl">person_add</span>
+                </div>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight text-[var(--text-dark)] m-0">
+                        Create Technical Personnel
+                    </h2>
+                    <p class="text-xs text-[var(--text-muted)] m-0 font-medium">Add a new IT staff member and configure service competencies</p>
+                </div>
+            </div>
 
-            <form action="{{ route('tech_personnel.store') }}" method="POST">
+            <form action="{{ route('tech_personnel.store') }}" method="POST" class="space-y-5">
                 @csrf
-                <div class="form-grid">
-                    <!-- Adjusted: Added name-grid class to align inputs side-by-side horizontally -->
-                    <div class="name-grid col-span-2">
-                        <div class="form-group">
-                            <label for="firstname" class="form-label">First Name</label>
-                            <input type="text" name="firstname" id="firstname" placeholder="e.g., Juan" required class="form-input" autocomplete="off">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="middle_initial" class="form-label">Middle Initial</label>
-                            <input type="text" name="middle_initial" id="middle_initial" placeholder="e.g., A." class="form-input" autocomplete="off">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="lastname" class="form-label">Last Name</label>
-                            <input type="text" name="lastname" id="lastname" placeholder="e.g., DelaCruz" required class="form-input" autocomplete="off">
-                        </div>
-                    </div> 
-
-                    <div class="form-group col-span-2">
-                        <label for="it_email" class="form-label">Email Address</label>
-                        <input type="email" name="it_email" id="it_email" placeholder="e.g., j_delacruz@cda.gov.ph" required class="form-input" autocomplete="email">
+                
+                {{-- Names in 3-column grid --}}
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label for="firstname" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                            First Name <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" name="firstname" id="firstname" placeholder="e.g., Juan" required autocomplete="off"
+                               class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
                     </div>
 
-                    <div class="form-group col-span-2">
-                        <label for="it_area" class="form-label">IT Area / Region <span style="color:#ef4444;">*</span></label>
-                        <select name="it_area" id="it_area" required class="form-select">
-                            <option value="" disabled selected>Select Region</option>
-                            @foreach ($region as $area)
-                                <option value="{{ $area }}">{{ $area }}</option>
-                            @endforeach
-                        </select>
+                    <div>
+                        <label for="middle_initial" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                            Middle Initial
+                        </label>
+                        <input type="text" name="middle_initial" id="middle_initial" placeholder="e.g., A." autocomplete="off"
+                               class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
                     </div>
 
-                    <!-- Checkboxes for Technical Services Category -->
-                    <div class="form-group col-span-2">
-                        <label class="form-label">Technical Services Category <span style="color:#ef4444;">*</span></label>
-                        <div class="checkbox-grid">
-                            @foreach($services as $service)
-                                <label>
-                                    <input type="checkbox" name="tech_services_category[]" value="{{ $service }}"> {{ $service }}
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <div class="form-group col-span-2">
-                        <label for="date_added" class="form-label">Date Added</label>
-                        <input type="text" value="{{ \Carbon\Carbon::now()->setTimezone('Asia/Manila')->format('F j, Y h:i A') }}" readonly class="form-input">
-                        <input type="hidden" name="date_added" value="{{ \Carbon\Carbon::now()->setTimezone('Asia/Manila')->format('Y-m-d') }}">
+                    <div>
+                        <label for="lastname" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                            Last Name <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" name="lastname" id="lastname" placeholder="e.g., Dela Cruz" required autocomplete="off"
+                               class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
                     </div>
                 </div>
 
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-indigo">Submit Personnel</button>
-                    <button type="button" class="btn btn-gray" id="cancelAddModal">Cancel</button>
+                {{-- Email Address --}}
+                <div>
+                    <label for="it_email" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                        Email Address <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="email" name="it_email" id="it_email" placeholder="e.g., j_delacruz@cda.gov.ph" required autocomplete="email"
+                           class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none font-mono">
+                </div>
+
+                {{-- IT Area / Region --}}
+                <div>
+                    <label for="it_area" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                        IT Area / Region <span class="text-rose-500">*</span>
+                    </label>
+                    <select name="it_area" id="it_area" required 
+                            class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                        <option value="" disabled selected>Select Region</option>
+                        @foreach ($region as $area)
+                            <option value="{{ $area }}">{{ $area }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Checkboxes for Technical Services Category --}}
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2">
+                        Technical Services Category <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-3 rounded-2xl border border-[var(--border-light)] bg-slate-50/50 dark:bg-slate-800/30 max-h-48 overflow-y-auto">
+                        @foreach($services as $service)
+                            <label class="flex items-center gap-2.5 p-2 rounded-xl bg-white dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors cursor-pointer text-xs font-medium text-[var(--text-dark)]">
+                                <input type="checkbox" name="tech_services_category[]" value="{{ $service }}" 
+                                       class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 cursor-pointer">
+                                <span>{{ $service }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Date Added --}}
+                <div>
+                    <label for="date_added" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Date Added</label>
+                    <input type="text" value="{{ \Carbon\Carbon::now()->setTimezone('Asia/Manila')->format('F j, Y h:i A') }}" readonly 
+                           class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-100 dark:bg-slate-800/40 text-sm text-[var(--text-muted)] cursor-not-allowed outline-none">
+                    <input type="hidden" name="date_added" value="{{ \Carbon\Carbon::now()->setTimezone('Asia/Manila')->format('Y-m-d') }}">
+                </div>
+
+                {{-- Modal Footer --}}
+                <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-[var(--border-light)]">
+                    <button type="button" id="cancelAddModal" 
+                            class="w-full sm:w-auto h-11 px-5 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="w-full sm:w-auto h-11 px-6 rounded-xl text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
+                        <span>Submit Personnel</span>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
     {{-- Modal: Edit Personnel --}}
-    <div id="editModal" class="modal-overlay hidden">
-        <div id="editModalContent" class="modal-box">
-            <button id="closeEditModal" class="close-btn" aria-label="Close Modal">&times;</button>
+    <div id="editModal" 
+         class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden [&:not(.hidden)]:flex items-center justify-center p-4 transition-all duration-300">
+        <div id="editModalContent" 
+             class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[var(--card-bg)] border border-[var(--border-light)] rounded-3xl shadow-2xl p-6 sm:p-8 transition-all">
+            
+            <button id="closeEditModal" 
+                    class="absolute top-5 right-5 w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center justify-center transition-all cursor-pointer" 
+                    aria-label="Close Modal">
+                <span class="material-symbols-outlined text-xl">close</span>
+            </button>
 
             @if ($errors->any())
-                <div class="error-box">
-                    <h4 class="error-title"><i class="fas fa-exclamation-circle"></i> Please fix the following error(s):</h4>
-                    <ul class="error-list">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+                <div class="mb-6 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 flex items-start gap-3">
+                    <span class="material-symbols-outlined text-xl text-rose-600 shrink-0">error</span>
+                    <div class="text-xs">
+                        <h4 class="font-bold text-rose-900 dark:text-rose-100 mb-1">Please fix the following error(s):</h4>
+                        <ul class="list-disc pl-4 space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
             @endif
 
-            <h2 class="modal-title">Edit Technical Personnel</h2>
+            <div class="flex items-center gap-3 pb-5 mb-6 border-b border-[var(--border-light)] pr-10">
+                <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-xl">edit_note</span>
+                </div>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight text-[var(--text-dark)] m-0">
+                        Edit Technical Personnel
+                    </h2>
+                    <p class="text-xs text-[var(--text-muted)] m-0 font-medium">Update technical personnel information and service skills</p>
+                </div>
+            </div>
 
-            <form id="editForm" method="POST" action="#">
+            <form id="editForm" method="POST" action="#" class="space-y-5">
                 @csrf
                 @method('PUT')
-                <div class="form-grid">
-                    <!-- Adjusted: Added name-grid class to align inputs side-by-side horizontally -->
-                    <div class="name-grid col-span-2">
-                        <div class="form-group">
-                            <label for="edit_firstname" class="form-label">First Name</label>
-                            <input type="text" name="firstname" id="edit_firstname" class="form-input" required autocomplete="off">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="edit_middle_initial" class="form-label">Middle Initial</label>
-                            <input type="text" name="middle_initial" id="edit_middle_initial" class="form-input" autocomplete="off">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="edit_lastname" class="form-label">Last Name</label>
-                            <input type="text" name="lastname" id="edit_lastname" class="form-input" required autocomplete="off">
-                        </div>
+                
+                {{-- Names in 3-column grid --}}
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label for="edit_firstname" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                            First Name <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" name="firstname" id="edit_firstname" required autocomplete="off"
+                               class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
                     </div>
 
-                    <div class="form-group col-span-2">
-                        <label for="edit_it_email" class="form-label">Email Address</label>
-                        <input type="email" name="it_email" id="edit_it_email" class="form-input" required autocomplete="email">
+                    <div>
+                        <label for="edit_middle_initial" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                            Middle Initial
+                        </label>
+                        <input type="text" name="middle_initial" id="edit_middle_initial" autocomplete="off"
+                               class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
                     </div>
 
-                    <div class="form-group col-span-2">
-                        <label for="edit_it_area" class="form-label">IT Area / Region <span style="color:#ef4444;">*</span></label>
-                        <select name="it_area" id="edit_it_area" class="form-select" required>
-                            <option value="" disabled>Select Region</option>
-                            @foreach ($region as $area)
-                                <option value="{{ $area }}">{{ $area }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Added Checkboxes for Edit Modal -->
-                    <div class="form-group col-span-2">
-                        <label class="form-label">Technical Services Category <span style="color:#ef4444;">*</span></label>
-                        <div class="checkbox-grid">
-                            @foreach($services as $service)
-                                <label>
-                                    <input type="checkbox" name="tech_services_category[]" value="{{ $service }}" class="edit-tech-service-checkbox"> {{ $service }}
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <div class="form-group col-span-2">
-                        <label class="form-label">Date Updated</label>
-                        <input type="text" value="{{ \Carbon\Carbon::now()->setTimezone('Asia/Manila')->format('F j, Y h:i A') }}" readonly class="form-input">
-                        <input type="hidden" name="date_updated" value="{{ \Carbon\Carbon::now()->setTimezone('Asia/Manila')->format('Y-m-d') }}">
+                    <div>
+                        <label for="edit_lastname" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                            Last Name <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" name="lastname" id="edit_lastname" required autocomplete="off"
+                               class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
                     </div>
                 </div>
 
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-indigo">Save Changes</button>
-                    <button type="button" class="btn btn-gray" id="cancelEditModal">Cancel</button>
+                {{-- Email Address --}}
+                <div>
+                    <label for="edit_it_email" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                        Email Address <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="email" name="it_email" id="edit_it_email" required autocomplete="email"
+                           class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none font-mono">
+                </div>
+
+                {{-- IT Area / Region --}}
+                <div>
+                    <label for="edit_it_area" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                        IT Area / Region <span class="text-rose-500">*</span>
+                    </label>
+                    <select name="it_area" id="edit_it_area" required 
+                            class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                        <option value="" disabled>Select Region</option>
+                        @foreach ($region as $area)
+                            <option value="{{ $area }}">{{ $area }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Checkboxes for Technical Services Category --}}
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2">
+                        Technical Services Category <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-3 rounded-2xl border border-[var(--border-light)] bg-slate-50/50 dark:bg-slate-800/30 max-h-48 overflow-y-auto">
+                        @foreach($services as $service)
+                            <label class="flex items-center gap-2.5 p-2 rounded-xl bg-white dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors cursor-pointer text-xs font-medium text-[var(--text-dark)]">
+                                <input type="checkbox" name="tech_services_category[]" value="{{ $service }}" 
+                                       class="edit-tech-service-checkbox w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 cursor-pointer">
+                                <span>{{ $service }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Date Updated --}}
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Date Updated</label>
+                    <input type="text" value="{{ \Carbon\Carbon::now()->setTimezone('Asia/Manila')->format('F j, Y h:i A') }}" readonly 
+                           class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-100 dark:bg-slate-800/40 text-sm text-[var(--text-muted)] cursor-not-allowed outline-none">
+                    <input type="hidden" name="date_updated" value="{{ \Carbon\Carbon::now()->setTimezone('Asia/Manila')->format('Y-m-d') }}">
+                </div>
+
+                {{-- Modal Footer --}}
+                <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-[var(--border-light)]">
+                    <button type="button" id="cancelEditModal" 
+                            class="w-full sm:w-auto h-11 px-5 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="w-full sm:w-auto h-11 px-6 rounded-xl text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
+                        <span>Save Changes</span>
+                    </button>
                 </div>
             </form>
         </div>

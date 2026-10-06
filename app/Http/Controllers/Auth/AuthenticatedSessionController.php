@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -28,16 +29,45 @@ class AuthenticatedSessionController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        // Support either 'username' or 'email' input
+        $loginInput = trim($request->input('username') ?? $request->input('email') ?? '');
+
         // Validate credentials
         $request->validate([
-            'email' => ['required', 'string', 'email'],
+            'username' => ['nullable', 'string'],
+            'email'    => ['nullable', 'string'],
             'password' => ['required', 'string'],
         ]);
 
-        // Attempt to authenticate the user
-        if (!Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+        if (empty($loginInput)) {
             throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
+                'username' => 'The username or email field is required.',
+            ]);
+        }
+
+        // Determine if input is email format or name/username
+        $isEmail = filter_var($loginInput, FILTER_VALIDATE_EMAIL);
+        $primaryField = $isEmail ? 'email' : 'name';
+        $secondaryField = $isEmail ? 'name' : 'email';
+        $remember = $request->boolean('remember');
+
+        // First attempt with the inferred field
+        $authenticated = Auth::attempt([$primaryField => $loginInput, 'password' => $request->password], $remember);
+
+        // If not authenticated, attempt with the fallback field
+        if (!$authenticated) {
+            $authenticated = Auth::attempt([$secondaryField => $loginInput, 'password' => $request->password], $remember);
+        }
+
+        // If database table has a username column, check it as well
+        if (!$authenticated && Schema::hasColumn('users', 'username')) {
+            $authenticated = Auth::attempt(['username' => $loginInput, 'password' => $request->password], $remember);
+        }
+
+        if (!$authenticated) {
+            throw ValidationException::withMessages([
+                'username' => __('auth.failed'),
+                'email'    => __('auth.failed'),
             ]);
         }
 

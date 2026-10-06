@@ -3,197 +3,64 @@
 @endphp
 
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-auto">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>CDA-ICT Helpdesk</title>
+    <title>CDA-ICT Helpdesk - Submit Ticket</title>
     <link rel="icon" href="{{ asset('images/CDA-logo-RA11364-PNG.png') }}" type="image/png">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="/assets/js/sweetalert2.min.js"></script>
-
-    <style>
-        /* CSS Variables derived from snippet & header theme */
-        :root { 
-            --card-bg: #ffffff;
-            --border-light: #e2e8f0;
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
-            --input-border: #cbd5e1;
-            --input-text: #1e293b;
-            --input-bg: #ffffff;
-            --bg-alt: #f8fafc;
-            --btn-gray-bg: #e2e8f0;
-            --btn-gray-text: #475569;
-            --btn-gray-hover-bg: #cbd5e1;
-            --btn-gray-hover-text: #1e293b;
-            --accent-blue: #3b82f6; 
-            --alert-red: #ef4444; 
-            --glass-bg: rgba(15, 23, 42, 0.9); 
-            --glass-border: rgba(255, 255, 255, 0.1); 
-            --primary-indigo: #4f46e5; 
-            --indigo-hover: #4338ca; 
-            --bg-body: #f8fafc; 
-            --error-bg: #fef2f2; 
-            --error-text: #991b1b; 
-        }
-
-        /* Base Resets & Typography */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: var(--bg-body); color: var(--input-text); font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; line-height: 1.5; }
-        a { text-decoration: none; }
-        ul { list-style: none; }
-
-        /* Animations */
-        @keyframes fade-in-down { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in-down { animation: fade-in-down 0.5s ease-out forwards; }
-
-        /* Header Styles */
-        .app-header { background-color: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--glass-border); }
-        .header-gradient { height: 3px; background: linear-gradient(90deg, var(--accent-blue), var(--alert-red)); }
-        .container { max-width: 1280px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
-        
-        /* Branding */
-        .brand { font-size: 1.5rem; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 0.75rem; letter-spacing: -0.025em; }
-        .brand img { width: 44px; height: 44px; object-fit: contain; transition: transform 0.3s ease; }
-        .brand:hover img { transform: scale(1.1) rotate(-5deg); }
-
-        /* Navigation */
-        .nav-links { display: flex; gap: 1rem; align-items: center; font-weight: 600; font-size: 0.95rem; }
-        .nav-link { color: #e2e8f0; padding: 0.6rem 1.25rem; border-radius: 8px; display: flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; border: 1px solid transparent; }
-        .nav-link:hover { color: #ffffff; background-color: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); }
-        .nav-link.nav-link-logout { color: #fca5a5; background: none; cursor: pointer; font: inherit; border: none; }
-        .nav-link.nav-link-logout:hover { color: #ffffff; background-color: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); }
-
-        @media (max-width: 768px) {
-            .nav-text { display: none !important; }
-            .nav-link { padding: 0.6rem 0.8rem; margin: 0 !important; justify-content: center; }
-        }
-
-        /* Form Page Container */
-        .page-form-container { position: relative; background-color: var(--card-bg); border-radius: 1rem; border: 1px solid var(--border-light); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08); width: calc(100% - 2rem); max-width: 1150px; margin: 2.5rem auto 4rem; padding: 2rem; transition: background-color 0.3s ease, border-color 0.3s ease; }
-
-        @media (max-width: 640px) {
-            .page-form-container { padding: 1.25rem; margin: 1.5rem auto 2.5rem; width: calc(100% - 1.25rem); }
-        }
-
-        /* Form Title Design */
-        .form-title { font-size: 1.5rem; font-weight: 800; color: var(--text-dark); margin-top: 0; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-light); padding-bottom: 1rem; padding-right: 2.5rem; letter-spacing: -0.025em; display: flex; align-items: center; gap: 0.75rem; }
-
-        /* Close Button Design */
-        .close-btn { position: absolute; top: 1.25rem; right: 1.25rem; color: var(--text-muted); font-size: 2rem; background: none; border: none; cursor: pointer; transition: all 0.2s; line-height: 1; border-radius: 0.25rem; padding: 0 0.5rem; }
-        .close-btn:hover { color: var(--text-dark); }
-
-        /* Form Grids & Layout */
-        form { width: 100%; }
-        .form-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; width: 100%; }
-        
-        @media (min-width: 768px) {
-            .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-            .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-        }
-
-        .form-group { display: flex; flex-direction: column; width: 100%; margin-bottom: 1rem; }
-        .form-label { font-weight: 600; margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--text-muted); transition: color 0.3s ease; }
-        .text-required { color: var(--alert-red); margin-left: 0.125rem; }
-
-        /* Form Inputs & Selects Design */
-        .form-input, .form-select { height: 44px; padding: 0 1rem; border: 1px solid var(--input-border); border-radius: 0.5rem; font-size: 0.95rem; color: var(--input-text); width: 100%; box-sizing: border-box; outline: none; transition: all 0.2s; background-color: var(--input-bg); font-family: inherit; }
-        .form-input:focus, .form-select:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
-        textarea.form-input { height: auto; resize: vertical; padding: 0.75rem 1rem; min-height: 100px; }
-
-        /* Validation State Classes */
-        .border-red-500 { border-color: var(--alert-red) !important; }
-        .bg-red-50 { background-color: var(--error-bg) !important; }
-
-        /* Fieldset Design */
-        fieldset.form-fieldset { border: 1px solid var(--border-light); border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1.75rem; background: var(--card-bg); transition: background-color 0.3s ease, border-color 0.3s ease; }
-        fieldset.form-fieldset legend { font-weight: 700; color: var(--text-dark); padding: 0 0.5rem; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.3s ease; }
-
-        /* Form Footer Design */
-        .form-footer { display: flex; flex-direction: column; padding-top: 1.5rem; border-top: 1px solid var(--border-light); margin-top: 1.5rem; gap: 0.75rem; transition: border-color 0.3s ease; }
-        @media (min-width: 768px) { .form-footer { flex-direction: row; justify-content: flex-end; align-items: center; } }
-
-        /* Readonly & Disabled Input Styling */
-        .form-input:read-only, .form-select:disabled, .form-input[readonly] { background-color: var(--bg-alt) !important; color: var(--text-muted) !important; cursor: not-allowed; opacity: 0.85; border-color: var(--border-light); }
-        .form-input[readonly]:focus { box-shadow: none; border-color: var(--border-light); }
-
-        /* File Input Styling */
-        input[type="file"].form-input { padding: 0.4rem 0.5rem; line-height: 1.75; }
-        input[type="file"]::file-selector-button { margin-right: 1rem; border: none; background: var(--btn-gray-bg); color: var(--btn-gray-text); padding: 0.4rem 0.8rem; border-radius: 0.25rem; cursor: pointer; transition: all 0.2s ease; font-weight: 600; font-size: 0.85rem; font-family: inherit; }
-        input[type="file"]::file-selector-button:hover { background: var(--btn-gray-hover-bg); color: var(--btn-gray-hover-text); }
-
-        /* Terms & Submit Button */
-        .terms-wrapper { margin-top: 1.25rem; margin-bottom: 1.25rem; width: 100%; }
-        .terms-label { display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; }
-        .terms-checkbox { margin-top: 0.2rem; width: 1.1rem; height: 1.1rem; accent-color: var(--primary-indigo); cursor: pointer; flex-shrink: 0; }
-        .terms-link { color: var(--primary-indigo); font-weight: 600; }
-        .terms-link:hover { text-decoration: underline; }
-
-        .btn-submit { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 2rem; background-color: var(--primary-indigo); color: #f8fafc; font-size: 0.95rem; font-weight: 600; border: none; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2); }
-        .btn-submit:hover:not(:disabled) { background-color: var(--indigo-hover); color: #f8fafc; transform: translateY(-1px); }
-        .btn-submit:disabled { background-color: #cbd5e1; color: #f8fafc; cursor: not-allowed; box-shadow: none; transform: none; }
-
-        /* Error Banner */
-        .alert-error { width: 100%; background-color: var(--error-bg); border-left: 4px solid var(--alert-red); color: var(--error-text); padding: 1.25rem; margin-bottom: 1.5rem; border-radius: 0.5rem; display: flex; gap: 0.75rem; }
-        .alert-error h4 { margin-bottom: 0.5rem; font-size: 0.95rem; font-weight: 700; }
-        .alert-error ul { padding-left: 1.25rem; list-style-type: disc; font-size: 0.875rem; }
-
-        /* Full-Screen Loading Overlay */
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: #ffffff; }
-        .loading-overlay.active { display: flex; }
-        .spinner { width: 44px; height: 44px; border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: #ffffff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
 </head>
 
-<body>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-['Inter',sans-serif] antialiased min-h-screen flex flex-col transition-colors duration-300 overflow-y-auto overflow-x-hidden">
 
 <!-- Full-Screen Loading Overlay -->
 <div id="loadingOverlay" class="loading-overlay">
-    <div class="spinner"></div>
-    <p style="font-size: 1rem; font-weight: 600; letter-spacing: 0.025em;">Submitting Ticket, please wait...</p>
+    <div class="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
+    <p class="text-base font-semibold tracking-wide text-white">Submitting Ticket, please wait...</p>
 </div>
 
-<header class="app-header">
-    <div class="header-gradient"></div>
-    <div class="container">
-        <h1 class="brand">
-            <img src="{{ asset('images/CDA-logo-RA11364-PNG.png') }}" alt="CDA Seal">
+<!-- Header Navigation Bar -->
+<header class="sticky top-0 z-50 bg-slate-900/75 backdrop-blur-xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+    <div class="h-[3px] bg-gradient-to-r from-blue-500 via-violet-500 to-red-500"></div>
+    <div class="w-full max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <a href="{{ url('/') }}" aria-label="Home" class="group flex items-center gap-3 text-2xl font-extrabold text-slate-50 tracking-tight transition-colors focus-visible:outline-2 focus-visible:outline-blue-500 focus-visible:outline-offset-4 focus-visible:rounded">
+            <img src="{{ asset('images/CDA-logo-RA11364-PNG.png') }}" alt="CDA Seal" loading="lazy" class="w-11 h-11 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.2)] transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-rotate-6 group-hover:drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]">
             <span>CDA-ICT Helpdesk</span>
-        </h1>
+        </a>
 
-        <nav>
-            <ul class="nav-links">
+        <nav aria-label="Main Navigation">
+            <ul class="flex items-center gap-4 text-[0.95rem] font-semibold list-none m-0 p-0">
                 @auth
                     <li>
-                        <a href="{{ url('/tickets/overview_tickets') }}" class="nav-link">
-                            <span class="material-symbols-outlined" style="font-size: 1.25rem;">table_chart_view</span> 
-                            <span class="nav-text">Tickets Overview</span>
+                        <a href="{{ url('/tickets/overview_tickets') }}" class="flex items-center justify-center md:justify-start gap-2 px-3 md:px-5 py-2.5 rounded-lg text-slate-50 border border-transparent transition-all duration-300 ease-out hover:bg-blue-500/10 hover:border-blue-500/30 hover:shadow-[0_4px_12px_rgba(59,130,246,0.15)] focus-visible:outline-2 focus-visible:outline-blue-500 focus-visible:outline-offset-4 focus-visible:rounded" aria-label="Tickets Overview">
+                            <span class="material-symbols-outlined text-[1.25rem]" aria-hidden="true">table_chart_view</span> 
+                            <span class="nav-text hidden md:inline">Tickets Overview</span>
                         </a>
                     </li>
                     <li>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="nav-link nav-link-logout">
-                                <span class="material-symbols-outlined" style="font-size: 1.25rem;">logout</span> 
-                                <span class="nav-text">Logout</span>
+                            <button type="submit" class="flex items-center justify-center md:justify-start gap-2 px-3 md:px-5 py-2.5 rounded-lg text-red-300 border border-transparent transition-all duration-300 ease-out hover:text-slate-50 hover:bg-red-500/15 hover:border-red-500/30 hover:shadow-[0_4px_12px_rgba(239,68,68,0.15)] cursor-pointer focus-visible:outline-2 focus-visible:outline-blue-500 focus-visible:outline-offset-4 focus-visible:rounded" aria-label="Logout">
+                                <span class="material-symbols-outlined text-[1.25rem]" aria-hidden="true">logout</span> 
+                                <span class="nav-text hidden md:inline">Logout</span>
                             </button>
                         </form>
                     </li>
                 @else
                     <li>
-                        <a href="{{ route('login') }}" class="nav-link">
-                            <span class="material-symbols-outlined" style="font-size: 1.25rem;">login</span> 
-                            <span class="nav-text">Login</span>
+                        <a href="{{ route('login') }}" class="flex items-center justify-center md:justify-start gap-2 px-3 md:px-5 py-2.5 rounded-lg text-slate-50 border border-transparent transition-all duration-300 ease-out hover:bg-blue-500/10 hover:border-blue-500/30 hover:shadow-[0_4px_12px_rgba(59,130,246,0.15)] focus-visible:outline-2 focus-visible:outline-blue-500 focus-visible:outline-offset-4 focus-visible:rounded" aria-label="Login">
+                            <span class="material-symbols-outlined text-[1.25rem]" aria-hidden="true">login</span> 
+                            <span class="nav-text hidden md:inline">Login</span>
                         </a>
                     </li>
                 @endauth
@@ -202,181 +69,263 @@
     </div>
 </header>
 
-<section class="page-form-container animate-fade-in-down">
-    <button id="close" onclick="window.location.href='{{ url('/') }}'" class="close-btn" aria-label="Close form">
-        &times;
-    </button>
-
-    <!-- Display Error -->
-    @if ($errors->any())
-        <div class="alert-error">
-            <i class="fas fa-exclamation-circle text-lg mt-0.5"></i>
-            <div>
-                <h4>Please fix the following errors:</h4>
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
-    @endif
-
-    <h2 class="form-title"><span>Tickets Form</span> </h2>
-
-    <form action="{{ route('tickets.store.client') }}" method="POST" enctype="multipart/form-data">
-        @csrf
-
-        <!-- Client Information -->
-        <fieldset class="form-fieldset">
-            <legend>Client Information</legend>
-            <div class="form-grid grid-cols-3">
-                <div class="form-group">
-                    <label for="firstname" class="form-label">
-                        First Name <span class="text-required">*</span>
-                    </label>
-                    <input type="text" id="firstname" name="firstname" placeholder="e.g., Juan" required class="form-input">
-                </div>
-
-                <div class="form-group">
-                    <label for="middle_initial" class="form-label">
-                        Middle Initial <span class="text-required">*</span>
-                    </label>
-                    <input type="text" id="middle_initial" name="middle_initial" placeholder="e.g.,A." class="form-input">
-                </div>
-
-                <div class="form-group">
-                    <label for="lastname" class="form-label">
-                        Last Name <span class="text-required">*</span>
-                    </label>
-                    <input type="text" id="lastname" name="lastname" placeholder="e.g., Dela Cruz" required class="form-input">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="email" class="form-label">
-                    Email <span class="text-required">*</span>
-                </label>
-                <input type="email" id="email" name="email" placeholder="e.g., j_delacruz@cda.gov.ph" pattern=".*@cda\.gov\.ph$" title="Please use a valid @cda.gov.ph email address." required class="form-input">
-            </div>
-
-            <div class="form-grid grid-cols-2">
-                <div class="form-group">
-                    <label class="form-label">Date Created</label>
-                    <input type="text" value="{{ \Carbon\Carbon::now('Asia/Manila')->format('F j, Y h:i A') }}" readonly class="form-input">
-                    <input type="hidden" name="date_created" value="{{ \Carbon\Carbon::now('Asia/Manila')->format('Y-m-d') }}">
-                </div>
-
-                <div class="form-group">
-                    <label for="division" class="form-label">
-                        Division <span class="text-required">*</span>
-                    </label>
-                    <select id="division" name="division" required class="form-select">
-                        <option value="" disabled selected>Select Division</option>
-                        @foreach ($sections_divisions as $division)
-                            <option value="{{ $division }}">{{ $division }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-grid grid-cols-2">
-                <div class="form-group">
-                    <label for="device" class="form-label">
-                        Device <span class="text-required">*</span>
-                    </label>
-                    <select id="device" name="device" required class="form-select">
-                        <option value="" disabled selected>Select Device</option>
-                        @foreach (['Desktop PC', 'Laptop/Netbook PC', 'Tablet PC', 'All-in-1 Printer', 'Printer Only', 'Scanner Only', 'Others'] as $device)
-                            <option value="{{ $device }}">{{ $device }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="service" class="form-label">
-                        Technical Service <span class="text-required">*</span>
-                    </label>
-                    <select id="service" name="service" required class="form-select">
-                        <option value="" disabled selected>Select Service</option>
-                        @foreach ($technical_services as $service)
-                            <option value="{{ $service }}">{{ $service }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="request" class="form-label">
-                    Request Details <i style="font-size: 0.85em;">(Note for CDA website postings, please include the Google Drive link in the description.)</i> <span class="text-required">*</span>
-                </label>
-                <textarea id="request" name="request" rows="4" placeholder="Please describe your issue or request in detail..." required class="form-input"></textarea>
-            </div>
-
-            <div class="form-grid grid-cols-2">
-                <div class="form-group">
-                    <label for="photo" class="form-label">Attach Photo <i style="font-size: 0.85em;">(Upload a photo if it helps explain your issue.)</i></label>
-                    <input type="file" id="photo" name="photo" accept="image/*" class="form-input">
-                    <small style="color: #6b7280; font-size: 0.8rem; margin-top: 0.25rem; display: block;">Max file size: 20MB (JPEG, PNG, JPG, GIF, WEBP)</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="priority" class="form-label">Priority Level <span class="text-required">*</span></label>
-                    <select id="priority" name="priority" required class="form-select">
-                        <option value="" disabled selected>Select Priority Level</option>
-                        <option value="High">High</option>
-                        <option value="Medium">Medium</option>
-                        <option value="Low">Low</option>
-                        <option value="Critical">Critical</option>
-                    </select>
-                </div>
-            </div> 
-
-        </fieldset>
-
-        <!-- Designated Personnel -->
-        <fieldset class="form-fieldset">
-            <legend>Designated Personnel</legend>
-            
-            <div class="form-grid grid-cols-2">
-                <div class="form-group">
-                    <label for="it_area" class="form-label">
-                        Region <span class="text-required">*</span>
-                    </label>
-                    <select id="it_area" name="it_area" required class="form-select">
-                        <option value="" disabled selected>Select Region</option>
-                        @foreach($it_area as $area)
-                            <option value="{{ $area }}">{{ $area }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="status" class="form-label">Status</label>
-                    <input type="text" id="status" name="status" value="Pending" readonly class="form-input">
-                </div>
-            </div>
-
-            <input type="hidden" id="it_personnel" name="it_personnel" value="">
-            <input type="hidden" id="it_email" name="it_email" value="">
-        </fieldset>
-
-        <!-- Form Footer & Terms -->
-        <div class="terms-wrapper">
-            <label class="terms-label" for="terms_agree">
-                <input type="checkbox" id="terms_agree" name="terms_agree" required class="terms-checkbox">
-                <span>I have read and agree to the <a href="https://cda.gov.ph/cda-privacy-policy/" class="terms-link" target="_blank">Terms and Conditions</a> and the <a href="https://cda.gov.ph/cda-privacy-policy/" class="terms-link" target="_blank">Privacy Policy</a>, and I confirm that the information provided is accurate and true to the best of my knowledge. <span class="text-required">*</span></span>
-            </label>
-        </div>
-
-        <div class="form-footer">
-            <button type="submit" id="submitTicketBtn" class="btn-submit" disabled>
-                Submit Ticket
-            </button>
-        </div>
+<!-- Main Page Content -->
+<main class="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    
+    <div class="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xl p-5 sm:p-8 lg:p-10 transition-colors duration-300">
         
-    </form>
-</section>
+        {{-- Close / Back button --}}
+        <button id="close" 
+                onclick="window.location.href='{{ url('/') }}'" 
+                class="absolute top-5 right-5 sm:top-8 sm:right-8 w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center justify-center transition-all cursor-pointer" 
+                aria-label="Close form" 
+                title="Cancel & Back">
+            <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+
+        {{-- Form Header --}}
+        <div class="flex items-center gap-3.5 pb-6 mb-8 border-b border-slate-200 dark:border-slate-800 pr-12">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
+                <span class="material-symbols-outlined text-2xl">confirmation_number</span>
+            </div>
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white m-0">
+                    Create Support Ticket
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 m-0 mt-0.5 font-medium">
+                    Submit your technical request or incident to the CDA Information & Communications Technology team
+                </p>
+            </div>
+        </div>
+
+        {{-- Validation Errors Banner --}}
+        @if ($errors->any())
+            <div class="mb-8 p-4 sm:p-5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 flex items-start gap-3.5">
+                <span class="material-symbols-outlined text-2xl text-rose-600 shrink-0">error</span>
+                <div class="text-sm">
+                    <h4 class="font-bold text-rose-900 dark:text-rose-100 mb-1">Please fix the following issues:</h4>
+                    <ul class="list-disc pl-5 space-y-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        @endif
+
+        {{-- Ticket Submission Form --}}
+        <form action="{{ route('tickets.store.client') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
+            @csrf
+
+            <!-- Section 1: Client Information -->
+            <fieldset class="rounded-2xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-6">
+                <legend class="px-3 text-xs sm:text-sm font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base">person</span>
+                    <span>Client Information</span>
+                </legend>
+
+                {{-- Name Grid --}}
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label for="firstname" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                            First Name <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" id="firstname" name="firstname" placeholder="e.g., Juan" required 
+                               class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                    </div>
+
+                    <div>
+                        <label for="middle_initial" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                            Middle Initial <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" id="middle_initial" name="middle_initial" placeholder="e.g., A." 
+                               class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                    </div>
+
+                    <div>
+                        <label for="lastname" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                            Last Name <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" id="lastname" name="lastname" placeholder="e.g., Dela Cruz" required 
+                               class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                    </div>
+                </div>
+
+                {{-- Email & Date Created Grid --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="email" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                            Official Email <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="email" id="email" name="email" placeholder="e.g., j_delacruz@cda.gov.ph" 
+                               pattern=".*@cda\.gov\.ph$" 
+                               title="Please use a valid @cda.gov.ph email address." 
+                               required 
+                               class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Date Created</label>
+                        <input type="text" value="{{ \Carbon\Carbon::now('Asia/Manila')->format('F j, Y h:i A') }}" readonly 
+                               class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-sm cursor-not-allowed outline-none">
+                        <input type="hidden" name="date_created" value="{{ \Carbon\Carbon::now('Asia/Manila')->format('Y-m-d') }}">
+                    </div>
+                </div>
+
+                {{-- Division & Equipment Grid --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="division" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                            Division / Section <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="division" name="division" required 
+                                class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                            <option value="" disabled selected>Select Division / Section</option>
+                            @foreach ($sections_divisions as $division)
+                                <option value="{{ $division }}">{{ $division }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="device" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                            Device Equipment <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="device" name="device" required 
+                                class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                            <option value="" disabled selected>Select Device Equipment</option>
+                            @foreach (['Desktop PC', 'Laptop/Netbook PC', 'Tablet PC', 'All-in-1 Printer', 'Printer Only', 'Scanner Only', 'Others'] as $device)
+                                <option value="{{ $device }}">{{ $device }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                {{-- Technical Service & Priority Level Grid --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="service" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                            Technical Service <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="service" name="service" required 
+                                class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                            <option value="" disabled selected>Select Technical Service</option>
+                            @foreach ($technical_services as $service)
+                                <option value="{{ $service }}">{{ $service }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="priority" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                            Priority Level <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="priority" name="priority" required 
+                                class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                            <option value="" disabled selected>Select Priority Level</option>
+                            <option value="Low">Low (Minor request, non-blocking)</option>
+                            <option value="Medium">Medium (Normal daily tasks affected)</option>
+                            <option value="High">High (Major task / urgent milestone)</option>
+                            <option value="Critical">Critical (System down, widespread impact)</option>
+                        </select>
+                    </div>
+                </div>
+
+                {{-- Request Description Details --}}
+                <div>
+                    <label for="request" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                        Request Details / Problem Description <span class="text-rose-500">*</span>
+                    </label>
+                    <textarea id="request" name="request" rows="4" required 
+                              placeholder="Please describe your issue or technical assistance request in detail... (For CDA website postings, please include the Google Drive share link)" 
+                              class="w-full p-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none resize-y"></textarea>
+                    <span class="block mt-1 text-2xs text-slate-400">For CDA website postings, please include the public Google Drive link inside the description.</span>
+                </div>
+
+                {{-- Photo Evidence Attachment --}}
+                <div>
+                    <label for="photo" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                        Attach Screenshot / Evidence Photo <span class="text-xs font-normal text-slate-400 lowercase">(optional)</span>
+                    </label>
+                    <input type="file" id="photo" name="photo" accept="image/*" 
+                           class="w-full p-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-xs sm:text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-950 dark:file:text-indigo-300 transition-all">
+                    <span class="block mt-1 text-2xs text-slate-400">Max file size: 20MB (JPEG, PNG, JPG, GIF, WEBP)</span>
+                </div>
+            </fieldset>
+
+            <!-- Section 2: Designated Personnel & Assignment -->
+            <fieldset class="rounded-2xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-6">
+                <legend class="px-3 text-xs sm:text-sm font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base">support_agent</span>
+                    <span>Designated Support Area</span>
+                </legend>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="it_area" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                            Operating Region / Area <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="it_area" name="it_area" required 
+                                class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                            <option value="" disabled selected>Select Region / Area</option>
+                            @foreach($it_area as $area)
+                                <option value="{{ $area }}">{{ $area }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="status" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Ticket Status</label>
+                        <div class="relative">
+                            <input type="text" id="status" name="status" value="Pending" readonly 
+                                   class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-sm font-semibold cursor-not-allowed outline-none">
+                            <span class="absolute right-3 top-3 w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Hidden Auto-Assignment Attributes --}}
+                <input type="hidden" id="it_personnel" name="it_personnel" value="">
+                <input type="hidden" id="it_email" name="it_email" value="">
+            </fieldset>
+
+            <!-- Terms & Consent Agreement -->
+            <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                <label class="flex items-start gap-3 cursor-pointer text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed" for="terms_agree">
+                    <input type="checkbox" id="terms_agree" name="terms_agree" required 
+                           class="mt-1 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-700 cursor-pointer">
+                    <span>
+                        I have read and agree to the 
+                        <a href="https://cda.gov.ph/cda-privacy-policy/" class="text-indigo-600 dark:text-indigo-400 font-semibold underline hover:text-indigo-500" target="_blank" rel="noopener noreferrer">Terms and Conditions</a> 
+                        and the 
+                        <a href="https://cda.gov.ph/cda-privacy-policy/" class="text-indigo-600 dark:text-indigo-400 font-semibold underline hover:text-indigo-500" target="_blank" rel="noopener noreferrer">Privacy Policy</a>, 
+                        and I confirm that the information provided is accurate and true to the best of my knowledge. 
+                        <span class="text-rose-500 font-bold">*</span>
+                    </span>
+                </label>
+            </div>
+
+            <!-- Form Action Footer -->
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+                <a href="{{ url('/') }}" 
+                   class="w-full sm:w-auto h-11 px-5 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer">
+                    Cancel
+                </a>
+
+                <button type="submit" id="submitTicketBtn" disabled 
+                        class="w-full sm:w-auto h-11 px-8 rounded-xl text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed shadow-md shadow-indigo-600/20 disabled:shadow-none flex items-center justify-center gap-2 transition-all cursor-pointer">
+                    <span>Submit Ticket</span>
+                </button>
+            </div>
+            
+        </form>
+    </div>
+
+</main>
+
+<footer class="mt-auto py-6 border-t border-slate-200 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 text-center text-xs text-slate-400">
+    <p class="m-0">&copy; {{ $year }} Cooperative Development Authority - Information & Communications Technology Division. All rights reserved.</p>
+</footer>
 
 <script>
     // SweetAlert notifications
@@ -451,7 +400,7 @@
     emailField.addEventListener('blur', function() {
         const emailVal = this.value.trim();
         if (emailVal && !emailVal.toLowerCase().endsWith('@cda.gov.ph')) {
-            this.classList.add('border-red-500', 'bg-red-50');
+            this.classList.add('border-red-500', 'bg-red-50', 'dark:bg-red-950/30');
             Swal.fire({
                 icon: 'error',
                 title: 'Invalid Email Domain',
@@ -459,7 +408,7 @@
                 confirmButtonColor: '#3085d6'
             });
         } else {
-            this.classList.remove('border-red-500', 'bg-red-50');
+            this.classList.remove('border-red-500', 'bg-red-50', 'dark:bg-red-950/30');
         }
     });
 
@@ -472,9 +421,9 @@
         requiredFields.forEach(field => {
             if (!field.value.trim()) {
                 isValid = false;
-                field.classList.add('border-red-500', 'bg-red-50');
+                field.classList.add('border-red-500', 'bg-red-50', 'dark:bg-red-950/30');
             } else {
-                field.classList.remove('border-red-500', 'bg-red-50');
+                field.classList.remove('border-red-500', 'bg-red-50', 'dark:bg-red-950/30');
             }
         });
 
@@ -482,7 +431,7 @@
         const emailVal = emailField.value.trim();
         if (emailVal && !emailVal.toLowerCase().endsWith('@cda.gov.ph')) {
             isValid = false;
-            emailField.classList.add('border-red-500', 'bg-red-50');
+            emailField.classList.add('border-red-500', 'bg-red-50', 'dark:bg-red-950/30');
             errorMessage = 'Only @cda.gov.ph email addresses are permitted to submit a ticket. For example: j_delacruz@cda.gov.ph';
         }
 
@@ -504,21 +453,21 @@
     document.querySelectorAll('[required]').forEach(field => {
         field.addEventListener('blur', function() {
             if (!this.value.trim()) {
-                this.classList.add('border-red-500', 'bg-red-50');
+                this.classList.add('border-red-500', 'bg-red-50', 'dark:bg-red-950/30');
             } else {
-                this.classList.remove('border-red-500', 'bg-red-50');
+                this.classList.remove('border-red-500', 'bg-red-50', 'dark:bg-red-950/30');
             }
         });
 
         field.addEventListener('input', function() {
             if (this.value.trim()) {
-                this.classList.remove('border-red-500', 'bg-red-50');
+                this.classList.remove('border-red-500', 'bg-red-50', 'dark:bg-red-950/30');
             }
             if (this.id === 'email') {
                 if (this.value.trim() && !this.value.trim().toLowerCase().endsWith('@cda.gov.ph')) {
-                    this.classList.add('border-red-500', 'bg-red-50');
+                    this.classList.add('border-red-500', 'bg-red-50', 'dark:bg-red-950/30');
                 } else {
-                    this.classList.remove('border-red-500', 'bg-red-50');
+                    this.classList.remove('border-red-500', 'bg-red-50', 'dark:bg-red-950/30');
                 }
             }
         });

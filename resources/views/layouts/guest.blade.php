@@ -1,80 +1,70 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="CDA-ICT Helpdesk – Secure IT Support Portal Login">
 
-        <title>{{ config('app.name', 'CDA-ICT Helpdesk') }}</title>
-        <link rel="icon" href="{{ asset('images/CDA-logo-RA11364-PNG.png') }}" type="image/png">
+    <title>{{ config('app.name', 'CDA-ICT Helpdesk') }}</title>
+    <link rel="icon" href="{{ asset('images/CDA-logo-RA11364-PNG.png') }}" type="image/png">
 
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 
-        <style>
-            /* CSS Variables & Base Resets */
-            :root { 
-                --primary-color: #2563eb; 
-                --bg-gradient: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%); 
-                --card-bg: rgba(255, 255, 255, 0.95); 
-                --text-main: #0f172a; 
-                --text-muted: #64748b; 
-                --border-light: rgba(0, 0, 0, 0.05); 
-            }
-            body { margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; color: var(--text-main); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background: var(--bg-gradient); min-height: 100vh; }
-            * { box-sizing: border-box; }
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body class="min-h-screen antialiased" style="font-family:'Inter',system-ui,sans-serif; background:linear-gradient(135deg,#e0e7ff 0%,#f0f9ff 40%,#dbeafe 80%,#ede9fe 100%); overflow:auto;">
 
-            /* Layout & Animations */
-            @keyframes cardFadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-            .page-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
-            .auth-card { width: 100%; max-width: 28rem; padding: 3rem 2.5rem; background-color: var(--card-bg); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01), 0 0 0 1px var(--border-light); border-radius: 1.25rem; backdrop-filter: blur(10px); animation: cardFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    {{-- Full-page centered layout --}}
+    <div class="min-h-screen flex items-center justify-center px-4 py-10 sm:py-16">
 
-            /* Logo Styles */
-            .logo-container { display: flex; justify-content: center; margin-bottom: 2rem; transition: transform 0.3s ease; }
-            .logo-container:hover { transform: translateY(-3px) scale(1.02); }
-            .logo-link { display: block; outline: none; }
-            .logo-img { width: 6.5rem; height: 6.5rem; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.06)); }
+        {{-- Auth Card --}}
+        <div class="w-full max-w-md animate-card-fade"
+             style="background:rgba(255,255,255,0.96);
+                    border-radius:1.5rem;
+                    padding:2.75rem 2.5rem;
+                    box-shadow:0 25px 50px -12px rgba(0,0,0,0.1),0 0 0 1px rgba(0,0,0,0.04);
+                    backdrop-filter:blur(12px);">
 
-            /* Typography & Headings */
-            .auth-heading { text-align: center; margin-bottom: 2.25rem; }
-            .login-header { display: flex; flex-direction: column; gap: 0.35rem; }
-            .login-title { font-size: 1.25rem; font-weight: 700; color: var(--primary-color); margin: 0; line-height: 1.2; }
-            .login-subtitle { font-size: 0.95rem; color: var(--text-muted); margin: 0; font-weight: 400; line-height: 1.5; }
-        </style>
-    </head>
-    <body>
-        <div class="page-wrapper">
-            <div class="auth-card">
-
-                <div class="logo-container">
-                    <a href="{{ route('login') }}" class="logo-link">
-                        <img src="{{ asset('images/CDA-logo-RA11364-PNG.png') }}" alt="Cooperative Development Authority Seal" class="logo-img" />
-                    </a>
-                </div>
-
-                <div class="auth-heading">
-                    @php
-                        $route = Route::currentRouteName();
-                    @endphp
-
-                    @if ($route === 'login')
-                        <div class="login-header">
-                            <h2 class="login-title">Welcome to CDA-ICT Helpdesk !</h2>
-                            <p class="login-subtitle">A few more clicks to sign in to your account.</p>
-                        </div>
-                    @elseif ($route === 'register')
-                        <h2 class="login-title">Sign Up User</h2>
-                    @elseif ($route === 'forgot-password')
-                        <h2 class="login-title">Forgot Password</h2>
-                    @elseif ($route === 'reset-password')
-                        <h2 class="login-title">Reset Password</h2>
-                    @endif
-                </div>
-
-                {{-- Slot for the inner forms --}}
-                {{ $slot }}
-                
+            {{-- Logo --}}
+            <div class="flex justify-center mb-7">
+                <a href="{{ route('login') }}"
+                   class="block transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-4 rounded-xl">
+                    <img src="{{ asset('images/CDA-logo-RA11364-PNG.png') }}"
+                         alt="Cooperative Development Authority Seal"
+                         class="w-24 h-24 object-contain"
+                         style="filter:drop-shadow(0 6px 12px rgba(0,0,0,0.10));">
+                </a>
             </div>
+
+            {{-- Heading --}}
+            <div class="text-center mb-8">
+                @php $route = Route::currentRouteName(); @endphp
+
+                @if ($route === 'login')
+                    <h1 class="text-xl font-bold text-blue-600 leading-tight mb-1">
+                        Welcome to CDA-ICT Helpdesk!
+                    </h1>
+                    <p class="text-sm text-slate-500 font-normal leading-relaxed">
+                        A few more clicks to sign in to your account.
+                    </p>
+                @elseif ($route === 'register')
+                    <h1 class="text-xl font-bold text-blue-600">Sign Up User</h1>
+                @elseif ($route === 'forgot-password')
+                    <h1 class="text-xl font-bold text-blue-600">Forgot Password</h1>
+                @elseif ($route === 'reset-password')
+                    <h1 class="text-xl font-bold text-blue-600">Reset Password</h1>
+                @endif
+            </div>
+
+            {{-- Slot for inner forms --}}
+            {{ $slot }}
+
         </div>
-    </body>
+    </div>
+
+</body>
 </html>

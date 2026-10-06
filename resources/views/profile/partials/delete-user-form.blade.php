@@ -1,103 +1,113 @@
-<section class="delete-section">
-    <style>
-        /* Section Header Title */ 
-        .title { font-size: 1.25rem; font-weight: 800; color: var(--text-dark); margin-bottom: 0.25rem; margin-top: 0; transition: color 0.3s ease; }
-        
-        /* Section Header Desc */ 
-        .section-header p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0; font-weight: 500; line-height: 1.5; transition: color 0.3s ease; }
-        
-        /* Delete Section Spacing */ 
-        .delete-section { display: flex; flex-direction: column; gap: 1.5rem; }
-        
-        /* Form Input - Unified 44px Height */ 
-        .form-input { height: 44px; width: 100%; padding: 0 1rem; border: 1px solid var(--input-border); border-radius: 0.5rem; font-size: 0.95rem; color: var(--input-text); background-color: var(--input-bg); transition: all 0.2s ease; font-family: inherit; box-sizing: border-box; }
-        
-        /* Form Input Focus - Red theme for destructive action */ 
-        .form-input:focus { outline: none; border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15); }
-        
-        /* Input Width 75 Desktop */ 
-        .input-w-75 { width: 100%; }
-        @media (min-width: 640px) { .input-w-75 { width: 75%; } }
-        
-        /* Danger Button - Unified Styling */ 
-        .btn-danger { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 2rem; border-radius: 0.5rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; color: white; background-color: #ef4444; transition: all 0.2s ease; font-family: inherit; box-shadow: 0 1px 2px rgba(239, 68, 68, 0.2); }
-        .btn-danger:hover { background-color: #dc2626; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
-        .btn-danger:active { transform: translateY(0); box-shadow: 0 1px 2px rgba(239, 68, 68, 0.2); }
-        
-        /* Secondary Button (Cancel) */ 
-        .btn-secondary { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 2rem; border-radius: 0.5rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: 1px solid var(--border-light); color: var(--text-muted); background-color: transparent; transition: all 0.2s ease; font-family: inherit; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
-        .btn-secondary:hover { background-color: var(--bg-alt); color: var(--text-dark); border-color: var(--input-border); transform: translateY(-1px); }
-        .btn-secondary:active { transform: translateY(0); }
-        
-        /* Modal Spacing */ 
-        .modal-content-pad { padding: 2rem; background-color: var(--card-bg); transition: background-color 0.3s ease; }
-        .modal-actions { margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem; }
-        
-        .mt-6 { margin-top: 1.5rem; }
-        .mt-2 { margin-top: 0.5rem; }
-        
-        /* Error Text */ 
-        .text-error { font-size: 0.875rem; color: #ef4444; font-weight: 500; display: block; margin-top: 0.5rem; transition: color 0.3s ease; }
-        body.dark .text-error { color: #f87171; }
-        
-        /* Screen Reader Only */ 
-        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
-        
-        /* Mobile Buttons Stretch */ 
-        @media (max-width: 640px) { 
-            .btn-danger, .btn-secondary { width: 100%; } 
-            .modal-actions { flex-direction: column; align-items: stretch; gap: 1rem; } 
-            .modal-content-pad { padding: 1.5rem; }
-        }
-    </style>
+<section class="space-y-6">
+    <header class="flex items-start justify-between gap-4 pb-5 border-b border-rose-200/80 dark:border-rose-900/50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 border border-rose-200/60 dark:border-rose-800/60">
+                <span class="material-symbols-outlined text-xl">delete_forever</span>
+            </div>
+            <div>
+                <h2 class="text-lg sm:text-xl font-bold tracking-tight text-rose-600 dark:text-rose-400 m-0">
+                    {{ __('Danger Zone: Delete Account') }}
+                </h2>
+                <p class="text-xs sm:text-sm text-[var(--text-muted)] m-0 mt-0.5 font-medium">
+                    {{ __('Permanently remove your account, credentials, and associated user data.') }}
+                </p>
+            </div>
+        </div>
 
-    <header class="section-header">
-        <h2 class="title">{{ __('Delete Account') }}</h2>
-        <p class="mt-2">{{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.') }}</p>
+        <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60 shrink-0">
+            <span class="material-symbols-outlined text-xs">warning</span>
+            Irreversible
+        </span>
     </header>
 
-    <div class="mt-6">
+    <div class="p-4 rounded-xl bg-rose-50/60 dark:bg-rose-950/30 border border-rose-200/70 dark:border-rose-900/50 flex items-start gap-3">
+        <span class="material-symbols-outlined text-rose-600 dark:text-rose-400 text-xl shrink-0 mt-0.5">report_problem</span>
+        <div class="text-xs sm:text-sm text-rose-800 dark:text-rose-200 leading-relaxed">
+            {{ __('Once your account is deleted, all associated resources, tickets, and user settings will be permanently erased. Before proceeding, please ensure you have saved or archived any critical data you need to keep.') }}
+        </div>
+    </div>
+
+    <div>
         <button 
             type="button"
-            class="btn-danger"
             x-data=""
             x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
+            class="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-xl text-xs sm:text-sm font-semibold text-white bg-rose-600 hover:bg-rose-500 active:scale-95 shadow-md shadow-rose-600/20 transition-all cursor-pointer"
         >
+            <span class="material-symbols-outlined text-lg">delete</span>
             {{ __('Delete Account') }}
         </button>
     </div>
 
+    {{-- Confirmation Modal --}}
     <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
-        <form method="post" action="{{ route('profile.destroy') }}" class="modal-content-pad">
+        <form method="post" action="{{ route('profile.destroy') }}" class="p-6 sm:p-8 bg-[var(--card-bg)] text-[var(--text-dark)]" x-data="{ showModalPassword: false }">
             @csrf
             @method('delete')
 
-            <div class="section-header">
-                <h2 class="title" style="font-size: 1.5rem;">{{ __('Are you sure you want to delete your account?') }}</h2>
-                <p class="mt-2">{{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.') }}</p>
+            <div class="flex items-start gap-3.5 mb-5 pb-5 border-b border-[var(--border-light)]">
+                <div class="w-11 h-11 rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 border border-rose-200 dark:border-rose-800/60">
+                    <span class="material-symbols-outlined text-2xl">warning</span>
+                </div>
+                <div>
+                    <h3 class="text-lg sm:text-xl font-bold tracking-tight text-[var(--text-dark)] m-0">
+                        {{ __('Are you sure you want to delete your account?') }}
+                    </h3>
+                    <p class="text-xs sm:text-sm text-[var(--text-muted)] m-0 mt-1 font-medium leading-relaxed">
+                        {{ __('This action cannot be undone. Please enter your password below to confirm that you wish to permanently delete your account.') }}
+                    </p>
+                </div>
             </div>
 
-            <div class="mt-6">
-                <x-input-label for="password" value="{{ __('Password') }}" class="sr-only" />
+            <div class="mb-6">
+                <label for="password" class="block text-xs sm:text-sm font-bold text-[var(--text-dark)] mb-1.5">
+                    {{ __('Confirm Your Password') }} <span class="text-rose-500">*</span>
+                </label>
 
-                <x-text-input
-                    id="password"
-                    name="password"
-                    type="password"
-                    class="form-input input-w-75"
-                    placeholder="{{ __('Password') }}"
-                />
+                <div class="relative flex items-center">
+                    <span class="absolute left-3.5 text-slate-400 material-symbols-outlined text-lg pointer-events-none">
+                        lock
+                    </span>
+                    <input
+                        id="password"
+                        name="password"
+                        :type="showModalPassword ? 'text' : 'password'"
+                        placeholder="{{ __('Enter your current password to confirm') }}"
+                        class="w-full h-11 pl-10 pr-11 rounded-xl border border-[var(--border-light)] bg-white dark:bg-slate-800/60 text-sm text-[var(--text-dark)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all outline-none"
+                    />
+                    <button 
+                        type="button" 
+                        @click="showModalPassword = !showModalPassword" 
+                        class="absolute right-2.5 w-7 h-7 rounded-lg text-slate-400 hover:text-[var(--text-dark)] hover:bg-slate-100 dark:hover:bg-slate-700/60 flex items-center justify-center transition-colors cursor-pointer"
+                        :title="showModalPassword ? 'Hide password' : 'Show password'"
+                    >
+                        <span class="material-symbols-outlined text-lg" x-text="showModalPassword ? 'visibility_off' : 'visibility'"></span>
+                    </button>
+                </div>
 
-                <x-input-error :messages="$errors->userDeletion->get('password')" class="text-error" />
+                @if ($errors->userDeletion->get('password'))
+                    <p class="mt-1.5 text-xs text-rose-500 flex items-center gap-1 font-medium">
+                        <span class="material-symbols-outlined text-sm">error</span>
+                        {{ $errors->userDeletion->get('password')[0] }}
+                    </p>
+                @endif
             </div>
 
-            <div class="modal-actions">
-                <button type="button" class="btn-secondary" x-on:click="$dispatch('close')">
+            <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center sm:justify-end gap-3 pt-2">
+                <button 
+                    type="button" 
+                    x-on:click="$dispatch('close')"
+                    class="inline-flex items-center justify-center gap-1.5 h-11 px-5 rounded-xl text-xs sm:text-sm font-semibold border border-[var(--border-light)] text-[var(--text-muted)] hover:text-[var(--text-dark)] hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
+                >
                     {{ __('Cancel') }}
                 </button>
 
-                <button type="submit" class="btn-danger">
-                    {{ __('Delete Account') }}
+                <button 
+                    type="submit" 
+                    class="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-xl text-xs sm:text-sm font-semibold text-white bg-rose-600 hover:bg-rose-500 active:scale-95 shadow-md shadow-rose-600/20 transition-all cursor-pointer"
+                >
+                    <span class="material-symbols-outlined text-lg">delete_forever</span>
+                    {{ __('Permanently Delete') }}
                 </button>
             </div>
         </form>

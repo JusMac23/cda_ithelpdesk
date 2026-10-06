@@ -186,19 +186,33 @@ class AssignedToMeController extends Controller
     {
         $ticket = Tickets::findOrFail($ticket_id);
 
-        if ($ticket->photo && Storage::disk('public')->exists($ticket->photo)) {
-            Storage::disk('public')->delete($ticket->photo);
+        // Remove attached photo files from storage if stored as file paths (BLOB data is stored directly in DB).
+        foreach (['photo', 'photo_evidence'] as $column) {
+            $path = $ticket->{$column} ?? null;
+            if (is_string($path) && strlen($path) < 260 && ! str_contains($path, "\0") && ! preg_match('/[\r\n]/', $path)) {
+                try {
+                    if (Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->delete($path);
+                    }
+                } catch (\Throwable $e) {
+                    // Suppress any storage / Flysystem path validation exceptions
+                }
+            }
         }
 
         $ticketNumber = $ticket->ticket_number;
         $ticket->delete();
 
         // Create notification
-        $this->createNotification(
-            $ticket,
-            'ticket_deleted',
-            "Ticket #{$ticketNumber} was deleted"
-        );
+        try {
+            $this->createNotification(
+                $ticket,
+                'ticket_deleted',
+                "Ticket #{$ticketNumber} was deleted"
+            );
+        } catch (\Throwable $e) {
+            // Suppress notification creation errors
+        }
 
         return redirect()->route('assignedtome_tickets.index')->with('success', 'Ticket deleted successfully.');
     }

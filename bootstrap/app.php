@@ -131,8 +131,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], 500);
             }
             
-            // For Web: Allow standard 500 page or custom view
-            return response()->view('errors.500', ['exception' => $e], 500);
+            // For Web: Render custom 500 page or fallback to redirect
+            if (view()->exists('errors.500')) {
+                return response()->view('errors.500', ['exception' => $e], 500);
+            }
+            return response('Internal Server Error', 500);
         });
 
     })->create();

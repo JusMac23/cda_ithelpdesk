@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Bus\Queueable;
 use Illuminate\Http\Request;
-use Illuminate\Mail\Mailable;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Http\Response;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\StreamedResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 use App\Models\Tickets;
@@ -31,145 +31,224 @@ use App\Mail\TicketReassigned;
 use App\Mail\TicketReassignedRequester;
 
 class TicketsController extends Controller
-{   
-    use RoundRobinAssignable; 
+{
+    use RoundRobinAssignable;
+
+    // -------------------------------------------------------------------------
+    // Private Helpers
+    // -------------------------------------------------------------------------
 
     /**
-     * Helper Method: Generates a base ticket query scoped by the user's assigned role and region.
+     * Returns a base Tickets query scoped to the authenticated user's role and region.
+     * Super Admin → all tickets.
+     * ICTS Admin   → tickets within their region (it_area).
+     * ICTD / ICTS  → tickets assigned to them personally (it_email).
+     * Others       → tickets within their region if set, otherwise all.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     private function getTicketQuery()
     {
         $query = Tickets::query();
-        $user = Auth::user();
+        $user  = Auth::user();
 
-        if ($user) {
-            // Helper closure to check roles safely (supports both Spatie hasRole and column-based role)
-            $hasRole = function($roleName) use ($user) {
-                return method_exists($user, 'hasRole') 
-                    ? $user->hasRole($roleName) 
-                    : (isset($user->role) && strcasecmp((string)$user->role, $roleName) === 0);
-            };
+        if (! $user) {
+            return $query;
+        }
 
-            $isSuperAdmin = $hasRole('Super Admin');
-            $isIctsAdmin  = $hasRole('ICTS Admin');
-            $isIctd       = $hasRole('ICTD');
-            $isIcts       = $hasRole('ICTS');
-
-            if ($isSuperAdmin) {
-                // Super Admin: View ALL tickets (no filters applied)
-            } elseif ($isIctsAdmin) {
-                // ICTS Admin: View all tickets assigned to their region
-                if (!empty($user->region)) {
-                    $query->where('it_area', $user->region);
-                }
-            } elseif ($isIctd || $isIcts) {
-                // ICTD and ICTS: View ONLY tickets assigned to them
-                $query->where('it_email', $user->email);
-                
-            } else {
-                // Default Fallback for any other roles (scopes to region if they have one)
-                if (!empty($user->region)) {
-                    $query->where('it_area', $user->region);
-                }
+        if ($user->hasRole('Super Admin')) {
+            // No additional constraints — see all tickets.
+        } elseif ($user->hasRole('ICTS Admin')) {
+            if (! empty($user->region)) {
+                $query->where('it_area', $user->region);
+            }
+        } elseif ($user->hasAnyRole(['ICTD', 'ICTS'])) {
+            $query->where('it_email', $user->email);
+        } else {
+            // Fallback: scope to region if the user has one.
+            if (! empty($user->region)) {
+                $query->where('it_area', $user->region);
             }
         }
 
         return $query;
     }
 
+    /**
+     * Resolves the IT personnel's email address.
+     * Uses the provided email if valid; otherwise looks up the email from the
+     * ITPersonnel table by matching against the provided full name.
+     * Falls back to the ticket's current it_email, and finally a placeholder.
+     *
+     * @param  string|null  $inputEmail
+     * @param  string       $personnelName
+     * @param  Tickets      $ticket
+     * @return string
+     */
+    private function resolvePersonnelEmail(?string $inputEmail, string $personnelName, Tickets $ticket): string
+    {
+        if (! empty($inputEmail)) {
+            return $inputEmail;
+        }
+
+        if ($personnelName === 'Unassigned') {
+            return $ticket->it_email ?? 'no-email@cda.gov.ph';
+        }
+
+        // Query by name instead of loading all records into memory.
+        $personnel = ITPersonnel::where(function ($q) use ($personnelName) {
+            // Try "firstname middle_initial lastname" and "firstname lastname" variants.
+            $q->whereRaw("TRIM(CONCAT(firstname, ' ', COALESCE(middle_initial,''), ' ', lastname)) = ?", [$personnelName])
+              ->orWhereRaw("TRIM(CONCAT(firstname, ' ', lastname)) = ?", [$personnelName]);
+        })->first();
+
+        return $personnel?->it_email ?? $ticket->it_email ?? 'no-email@cda.gov.ph';
+    }
+
+    /**
+     * Dispatches in-app notifications to the reassigned IT personnel and the
+     * ticket requester. Silently skips if neither user account exists.
+     *
+     * @param  Tickets  $ticket
+     * @param  string   $reAssignedTo
+     * @param  string   $reAssignedEmail
+     * @return void
+     */
+    private function dispatchReassignmentNotifications(Tickets $ticket, string $reAssignedTo, string $reAssignedEmail): void
+    {
+        // Notify the newly assigned IT personnel.
+        $itUser = User::where('email', $reAssignedEmail)->first();
+        if ($itUser) {
+            Notification::create([
+                'user_id'   => $itUser->id,
+                'ticket_id' => $ticket->ticket_id,
+                'type'      => 'ticket_reassigned',
+                'message'   => "Ticket #{$ticket->ticket_number} has been reassigned to you.",
+            ]);
+        }
+
+        // Notify the ticket requester.
+        $requesterUser = User::where('email', $ticket->email)->first();
+        if ($requesterUser) {
+            Notification::create([
+                'user_id'   => $requesterUser->id,
+                'ticket_id' => $ticket->ticket_id,
+                'type'      => 'ticket_reassigned_requester',
+                'message'   => "Your ticket #{$ticket->ticket_number} has been reassigned to {$reAssignedTo}.",
+            ]);
+        }
+    }
+
+    /**
+     * Safely attempts to send a mailable, logging any failure without
+     * interrupting the application flow.
+     *
+     * @param  string    $toEmail
+     * @param  \Illuminate\Mail\Mailable  $mailable
+     * @param  string    $context   Human-readable label used in log messages.
+     * @return void
+     */
+    private function sendMailSafely(string $toEmail, $mailable, string $context = ''): void
+    {
+        if (empty($toEmail) || ! filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
+
+        try {
+            Mail::to($toEmail)->send($mailable);
+        } catch (\Exception $e) {
+            Log::error("Mail send failed [{$context}]: " . $e->getMessage());
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Public Actions
+    // -------------------------------------------------------------------------
+
+    /**
+     * Display the paginated ticket list with filters, SLA overdue detection,
+     * CSV export, and dropdown data for the Add / Reassign modals.
+     *
+     * @param  Request  $request
+     * @return \Illuminate\View\View|\Illuminate\Http\Response
+     */
     public function index(Request $request)
     {
-        // Initialize base query scoped by user role/region
-        $query = $this->getTicketQuery();
-
+        $query       = $this->getTicketQuery();
         $currentTime = Carbon::now('Asia/Manila');
 
-        // Load all Technical Services into memory indexed by lowercased service name
-        $allTechServices = TechnicalServices::all()->keyBy(function ($item) {
-            return strtolower(trim($item->technical_services));
-        });
+        // Load SLA configuration once, keyed by lowercase service name.
+        $allTechServices = TechnicalServices::all()->keyBy(
+            fn($item) => strtolower(trim($item->technical_services))
+        );
 
-        // Exact pending status strings as saved in the tickets.status database column
         $pendingStatuses = [
             'Pending',
             'Pending/Re-Assigned',
             'Pending / Re-Assigned',
             'Pending/Reassigned',
-            'pending',
-            'pending/re-assigned'
         ];
 
-        // SLA Overdue Calculation Closure
-        $isTicketOverdue = function ($ticket) use ($allTechServices, $currentTime, $pendingStatuses) {
+        // Closure: determines whether a ticket has breached its SLA deadline.
+        $isTicketOverdue = function ($ticket) use ($allTechServices, $currentTime, $pendingStatuses): bool {
             $status = trim($ticket->status ?? '');
 
-            // Check if ticket status matches pending states
-            $isPending = in_array($status, $pendingStatuses, true) || 
-                         in_array(strtolower($status), array_map('strtolower', $pendingStatuses), true);
+            $isPending = collect($pendingStatuses)
+                ->contains(fn($s) => strcasecmp($s, $status) === 0);
 
-            if (!$isPending) {
+            if (! $isPending) {
                 return false;
             }
 
             $serviceName = strtolower(trim($ticket->service ?? ''));
             $priorityKey = strtolower(trim($ticket->priority ?? ''));
 
-            // Match against technical_services table record
-            if (!isset($allTechServices[$serviceName])) {
+            $serviceConfig = $allTechServices[$serviceName] ?? null;
+
+            if (! $serviceConfig) {
                 return false;
             }
 
-            $serviceConfig = $allTechServices[$serviceName];
-
-            // Validate priority column exists ('low', 'medium', 'high', 'critical')
-            if (!in_array($priorityKey, ['low', 'medium', 'high', 'critical'], true)) {
+            if (! in_array($priorityKey, ['low', 'medium', 'high', 'critical'], true)) {
                 return false;
             }
 
             $slaTimeStr = $serviceConfig->{$priorityKey} ?? null;
 
-            // Skip calculation if SLA is set to N/A, empty, or null
             if (empty($slaTimeStr) || strtoupper(trim($slaTimeStr)) === 'N/A') {
                 return false;
             }
 
-            // Parse datetime created from tickets.date_created
             try {
-                $createdAt = Carbon::parse($ticket->date_created, 'Asia/Manila');
-            } catch (\Exception $e) {
+                $deadline = Carbon::parse($ticket->date_created, 'Asia/Manila');
+            } catch (\Exception) {
                 return false;
             }
 
-            $deadline = $createdAt->copy();
-
-            // Extract days, hours, and minutes from SLA duration string (e.g. "3 days 30 mins")
-            if (preg_match('/(\d+)\s*days?/', $slaTimeStr, $matches)) {
-                $deadline->addDays((int)$matches[1]);
+            // Parse SLA duration string e.g. "3 days 2 hours 30 mins".
+            if (preg_match('/(\d+)\s*days?/i', $slaTimeStr, $m)) {
+                $deadline->addDays((int) $m[1]);
             }
-            if (preg_match('/(\d+)\s*hours?/', $slaTimeStr, $matches)) {
-                $deadline->addHours((int)$matches[1]);
+            if (preg_match('/(\d+)\s*hours?/i', $slaTimeStr, $m)) {
+                $deadline->addHours((int) $m[1]);
             }
-            if (preg_match('/(\d+)\s*mins?/', $slaTimeStr, $matches)) {
-                $deadline->addMinutes((int)$matches[1]);
+            if (preg_match('/(\d+)\s*mins?/i', $slaTimeStr, $m)) {
+                $deadline->addMinutes((int) $m[1]);
             }
 
-            // Return true if current time has passed SLA deadline
             return $currentTime->greaterThan($deadline);
         };
 
-        // Calculate total count strictly based on role/regional scope
+        // Counts (pre-filter, scoped to role).
         $ticketsCount = (clone $query)->count();
 
-        // Fetch pending tickets to compute overdue count
-        $pendingScopedTickets = (clone $query)
+        $overdueCount = (clone $query)
             ->whereIn('status', $pendingStatuses)
-            ->get();
+            ->get()
+            ->filter($isTicketOverdue)
+            ->count();
 
-        $overdueCount = $pendingScopedTickets->filter($isTicketOverdue)->count();
-
-        // Apply Request Filters
-        $isOverdueFilterActive = ($request->input('filter') === 'overdue');
-
+        // ── Request Filters ──────────────────────────────────────────────────
         if ($request->filled('it_area')) {
             $query->where('it_area', trim($request->input('it_area')));
         }
@@ -190,59 +269,51 @@ class TicketsController extends Controller
             $query->whereDate('date_created', '<=', $request->input('end_date'));
         }
 
-        // Search Query Filter across schema columns
         if ($request->filled('search_query')) {
             $search = trim($request->input('search_query'));
             $query->where(function ($q) use ($search) {
-                $q->where('ticket_id', 'like', "%{$search}%")
-                  ->orWhere('ticket_number', 'like', "%{$search}%")
-                  ->orWhere('firstname', 'like', "%{$search}%")
-                  ->orWhere('middle_initial', 'like', "%{$search}%")
-                  ->orWhere('lastname', 'like', "%{$search}%")
-                  ->orWhere('division', 'like', "%{$search}%")
-                  ->orWhere('it_area', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('device', 'like', "%{$search}%")
-                  ->orWhere('service', 'like', "%{$search}%")
-                  ->orWhere('request', 'like', "%{$search}%")
-                  ->orWhere('status', 'like', "%{$search}%")
-                  ->orWhere('it_personnel', 'like', "%{$search}%")
-                  ->orWhere('action_taken', 'like', "%{$search}%")
-                  ->orWhere('priority', 'like', "%{$search}%");
+                $columns = [
+                    'ticket_id', 'ticket_number', 'firstname', 'middle_initial',
+                    'lastname', 'division', 'it_area', 'email', 'device',
+                    'service', 'request', 'status', 'it_personnel',
+                    'action_taken', 'priority',
+                ];
+                foreach ($columns as $i => $column) {
+                    $method = $i === 0 ? 'where' : 'orWhere';
+                    $q->{$method}($column, 'like', "%{$search}%");
+                }
             });
         }
 
-        // CSV Export Handler
+        // ── CSV Export ───────────────────────────────────────────────────────
         if ($request->input('action') === 'generate') {
             $exportRecords = $query->get();
-            if ($isOverdueFilterActive) {
+            if ($request->input('filter') === 'overdue') {
                 $exportRecords = $exportRecords->filter($isTicketOverdue);
             }
             return $this->generateCSVReport($exportRecords);
         }
 
-        // Pagination Handling with Primary Key (ticket_id)
+        // ── Pagination ───────────────────────────────────────────────────────
+        $isOverdueFilterActive = ($request->input('filter') === 'overdue');
+
         if ($isOverdueFilterActive) {
-            $filteredOverdue = $query->get()->filter($isTicketOverdue);
-            
-            $page = \Illuminate\Pagination\Paginator::resolveCurrentPage() ?: 1;
-            $perPage = 10;
-            
-            $tickets = new \Illuminate\Pagination\LengthAwarePaginator(
-                $filteredOverdue->forPage($page, $perPage)->values(),
-                $filteredOverdue->count(),
+            $allFiltered = $query->get()->filter($isTicketOverdue)->values();
+            $page        = Paginator::resolveCurrentPage() ?: 1;
+            $perPage     = 10;
+
+            $tickets = new LengthAwarePaginator(
+                $allFiltered->forPage($page, $perPage)->values(),
+                $allFiltered->count(),
                 $perPage,
                 $page,
                 ['path' => $request->url(), 'query' => $request->query()]
             );
         } else {
-            $tickets = $query->orderBy('ticket_id', 'desc')->paginate(10);
-            $tickets->appends($request->all());
+            $tickets = $query->orderBy('ticket_id', 'desc')->paginate(10)->appends($request->all());
         }
 
-        $ticket = null;
-
-        // Fetch Dropdowns & Round-Robin Data required by the embedded Add Ticket Modal
+        // ── Dropdown & Round-Robin Data ──────────────────────────────────────
         $sections_divisions = Divisions::pluck('sections_divisions')->filter()->toArray();
         $technical_services = TechnicalServices::pluck('technical_services')->filter()->toArray();
 
@@ -253,7 +324,6 @@ class TicketsController extends Controller
             ->values();
 
         $nextAssignment = [];
-
         foreach ($it_area as $area) {
             foreach ($technical_services as $service) {
                 $assigned = $this->getNextAssignedPersonnel($area, $service);
@@ -274,54 +344,55 @@ class TicketsController extends Controller
             }
         }
 
-        // Fetch Reassignable IT Personnel and group purely by IT Area
         $reassignable_personnel = ITPersonnel::all(['firstname', 'middle_initial', 'lastname', 'it_email', 'it_area']);
-        $reassignable_it_area = $reassignable_personnel->pluck('it_area')->unique()->values();
-        $reassignable_it_mapping = $reassignable_personnel->groupBy('it_area')
-            ->map(fn($group) => 
-                $group->values()->map(fn($p) => [
-                    'name'  => trim("{$p->firstname} {$p->middle_initial} {$p->lastname}"),
-                    'email' => $p->it_email,
-                ])
-            )->toArray();
+        $reassignable_it_area   = $reassignable_personnel->pluck('it_area')->unique()->values();
+        $reassignable_it_mapping = $reassignable_personnel->groupBy('it_area')->map(
+            fn($group) => $group->values()->map(fn($p) => [
+                'name'  => trim("{$p->firstname} {$p->middle_initial} {$p->lastname}"),
+                'email' => $p->it_email,
+            ])
+        )->toArray();
 
-        // Render View
         return view('tickets.index', compact(
             'request',
             'ticketsCount',
             'overdueCount',
             'tickets',
-            'ticket',
             'sections_divisions',
             'technical_services',
             'it_area',
             'reassignable_it_area',
             'reassignable_it_mapping',
-            'nextAssignment'
+            'nextAssignment',
         ));
     }
 
     /**
-     * Generate downloadable CSV report.
+     * Generate and stream a downloadable CSV report of the given ticket collection.
+     *
+     * @param  \Illuminate\Support\Collection  $tickets
+     * @return StreamedResponse
      */
-    public function generateCSVReport($tickets)
+    public function generateCSVReport($tickets): StreamedResponse
     {
-        $filename = "tickets_report_" . date('Y-m-d_H-i-s') . ".csv";
+        $filename = 'tickets_report_' . now()->format('Y-m-d_H-i-s') . '.csv';
 
         $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename={$filename}",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => "attachment; filename={$filename}",
+            'Pragma'              => 'no-cache',
+            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires'             => '0',
         ];
 
         $columns = [
-            'Ticket Number', 'First Name', 'Middle Initial', 'Last Name', 'Division', 'Region', 'Email',
-            'Device', 'Service', 'Request', 'Status', 'Date Created', 'Date Resolved', 'IT Personnel', 'Priority', 'Action Taken'
+            'Ticket Number', 'First Name', 'Middle Initial', 'Last Name',
+            'Division', 'Region', 'Email', 'Device', 'Service', 'Request',
+            'Status', 'Date Created', 'Date Resolved', 'IT Personnel',
+            'Priority', 'Action Taken',
         ];
 
-        $callback = function () use ($tickets, $columns) {
+        return response()->stream(function () use ($tickets, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
 
@@ -342,204 +413,168 @@ class TicketsController extends Controller
                     $ticket->date_resolved,
                     $ticket->it_personnel,
                     $ticket->priority,
-                    $ticket->action_taken
+                    $ticket->action_taken,
                 ]);
             }
 
             fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        }, 200, $headers);
     }
 
-    // Handle View Details
+    /**
+     * Show a ticket's detail view (supports both full-page and AJAX/modal requests).
+     *
+     * @param  Request  $request
+     * @param  int      $ticket_id
+     * @return \Illuminate\View\View|\Illuminate\Http\JsonResponse
+     */
     public function view(Request $request, $ticket_id)
     {
-        // Fetch ticket using base query to enforce user role/regional scope security
         $ticket = $this->getTicketQuery()
             ->where('ticket_id', $ticket_id)
             ->first();
 
-        // Abort if not found or unauthorized for this user's scope
-        if (!$ticket) {
-            abort(404, 'Ticket record not found or access denied.');
-        }
+        abort_if(! $ticket, 404, 'Ticket not found or access denied.');
 
-        // Process Client's Attached Issue Photo Evidence (LONGBLOB)
+        // Decode LONGBLOB photo fields to base64 data URIs and clear raw binary.
         $ticketIssuePhotoEvidenceDataUri = null;
-        if (!empty($ticket->photo)) {
-            $base64Image = base64_encode($ticket->photo);
-            $ticketIssuePhotoEvidenceDataUri = 'data:image/jpeg;base64,' . $base64Image;
-
-            // Unset raw binary data to prevent UTF-8 malformed JSON errors
+        if (! empty($ticket->photo)) {
+            $ticketIssuePhotoEvidenceDataUri = 'data:image/jpeg;base64,' . base64_encode($ticket->photo);
             unset($ticket->photo);
         }
 
-        // Process IT Personnel's Resolved Ticket Photo Evidence (LONGBLOB)
         $resolvedTicketPhotoEvidenceDataUri = null;
-        if (!empty($ticket->photo_evidence)) {
-            $base64Image = base64_encode($ticket->photo_evidence);
-            $resolvedTicketPhotoEvidenceDataUri = 'data:image/jpeg;base64,' . $base64Image;
-
-            // Unset raw binary data to prevent UTF-8 malformed JSON errors
+        if (! empty($ticket->photo_evidence)) {
+            $resolvedTicketPhotoEvidenceDataUri = 'data:image/jpeg;base64,' . base64_encode($ticket->photo_evidence);
             unset($ticket->photo_evidence);
         }
 
         $viewName = 'tickets.view_details_tickets';
 
-        // Handle AJAX/JSON requests for modals
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'status'                             => 'success',
                 'ticket'                             => $ticket,
                 'ticketIssuePhotoEvidenceDataUri'    => $ticketIssuePhotoEvidenceDataUri,
                 'resolvedTicketPhotoEvidenceDataUri' => $resolvedTicketPhotoEvidenceDataUri,
-                'html'                               => view($viewName, compact('ticket', 'ticketIssuePhotoEvidenceDataUri', 'resolvedTicketPhotoEvidenceDataUri'))->render(),
+                'html'                               => view($viewName, compact(
+                    'ticket',
+                    'ticketIssuePhotoEvidenceDataUri',
+                    'resolvedTicketPhotoEvidenceDataUri'
+                ))->render(),
             ]);
         }
 
-        // Standard View Response
-        return view($viewName, compact('ticket', 'ticketIssuePhotoEvidenceDataUri', 'resolvedTicketPhotoEvidenceDataUri'));
+        return view($viewName, compact(
+            'ticket',
+            'ticketIssuePhotoEvidenceDataUri',
+            'resolvedTicketPhotoEvidenceDataUri'
+        ));
     }
 
     /**
-     * Reassign ticket to another IT personnel with validation, priority update, and notifications.
+     * Reassign a ticket to another IT personnel, log the history, and dispatch
+     * email + in-app notifications. The entire operation runs in a DB transaction.
+     *
+     * @param  Request  $request
+     * @return RedirectResponse
      */
-    public function re_assign(Request $request)
+    public function re_assign(Request $request): RedirectResponse
     {
-        // Validate the request with flexible nullable rules
         $request->validate([
-            'ticket_id'             => 'required|integer|exists:tickets,ticket_id',
-            're_assigned_to'        => 'nullable|string', 
-            're_assigned_it_email'  => 'nullable|email',  
-            'priority'              => 'nullable|string|max:255',
-            'notes'                 => 'nullable|string',
+            'ticket_id'            => 'required|integer|exists:tickets,ticket_id',
+            're_assigned_to'       => 'nullable|string|max:255',
+            're_assigned_it_email' => 'nullable|email|max:255',
+            'priority'             => 'nullable|string|max:255',
+            'notes'                => 'nullable|string|max:2000',
         ]);
 
         $ticket = Tickets::findOrFail($request->ticket_id);
 
-        // Prevent assigning if ticket is resolved
         if ($ticket->status === 'Resolved') {
-            return redirect()->back()->with('error', 'Cannot assign a resolved ticket.');
+            return back()->with('error', 'Cannot reassign a resolved ticket.');
         }
 
-        // Determine personnel name
-        $reAssignedTo = $request->input('re_assigned_to') ?: $ticket->it_personnel;
-        if (empty($reAssignedTo)) {
-            $reAssignedTo = 'Unassigned';
-        }
+        // Determine the target personnel name.
+        $reAssignedTo = trim($request->input('re_assigned_to') ?: $ticket->it_personnel ?: 'Unassigned');
 
-        // Determine email (auto-lookup if email input was empty)
-        $reAssignedEmail = $request->input('re_assigned_it_email');
-        if (empty($reAssignedEmail) && $reAssignedTo !== 'Unassigned') {
-            $personnelObj = ITPersonnel::all()->first(function ($p) use ($reAssignedTo) {
-                $fullName = trim("{$p->firstname} {$p->middle_initial} {$p->lastname}");
-                return strcasecmp($fullName, $reAssignedTo) === 0 || strcasecmp("{$p->firstname} {$p->lastname}", $reAssignedTo) === 0;
-            });
-            $reAssignedEmail = $personnelObj ? $personnelObj->it_email : $ticket->it_email;
-        }
+        // Resolve the email via helper (avoids loading all ITPersonnel into memory).
+        $reAssignedEmail = $this->resolvePersonnelEmail(
+            $request->input('re_assigned_it_email'),
+            $reAssignedTo,
+            $ticket
+        );
 
-        if (empty($reAssignedEmail)) {
-            $reAssignedEmail = 'no-email@cda.gov.ph';
-        }
-
-        // Prevent assigning same personnel without any changes
+        // Guard: prevent reassigning to the same person with no other changes.
         if (
             $ticket->it_personnel &&
             $ticket->it_personnel === $reAssignedTo &&
-            $ticket->it_email === $reAssignedEmail &&
-            (!$request->filled('priority') || $ticket->priority === $request->priority)
+            $ticket->it_email     === $reAssignedEmail &&
+            (! $request->filled('priority') || $ticket->priority === $request->input('priority'))
         ) {
-            return redirect()->back()->with('error', 'You cannot reassign the same personnel without changes. Please select another personnel or priority.');
+            return back()->with('error', 'No changes detected. Please select a different personnel or priority.');
         }
 
-        // Save previous assigned personnel
-        $previous_assigned = $ticket->it_personnel ?? 'N/A';
-        $assignedBy = Auth::user() ? Auth::user()->name : 'System';
+        $previousAssigned = $ticket->it_personnel ?? 'N/A';
+        $assignedBy       = Auth::user()->name;
 
-        // Prepare ticket update data
-        $updateData = [
-            'status'                => 'Pending/Re-Assigned',
-            'it_personnel'          => $reAssignedTo,
-            'it_email'              => $reAssignedEmail,
-            're_assigned_to'        => $reAssignedTo,
-            're_assigned_it_email'  => $reAssignedEmail,
-            'notes'                 => $request->notes,
-            're_assigned_at'        => now('Asia/Manila'),
-        ];
+        DB::transaction(function () use ($ticket, $request, $reAssignedTo, $reAssignedEmail, $previousAssigned, $assignedBy) {
+            // Update the ticket.
+            $updateData = [
+                'status'               => 'Pending/Re-Assigned',
+                'it_personnel'         => $reAssignedTo,
+                'it_email'             => $reAssignedEmail,
+                're_assigned_to'       => $reAssignedTo,
+                're_assigned_it_email' => $reAssignedEmail,
+                'notes'                => $request->input('notes'),
+                're_assigned_at'       => now('Asia/Manila'),
+            ];
 
-        if ($request->filled('priority')) {
-            $updateData['priority'] = $request->priority;
-        }
-
-        $ticket->update($updateData);
-
-        // Log reassignment history with priority and NOT-NULL safe fallbacks
-        ReassignedTicket::create([
-            'ticket_number'     => $ticket->ticket_number,
-            'requested_by'      => $ticket->firstname . ' ' . $ticket->lastname,
-            'request'           => $ticket->request ?? 'N/A',
-            'assigned_by'       => $assignedBy,
-            'previous_assigned' => $previous_assigned,
-            're_assigned_to'    => $reAssignedTo,
-            'priority'          => $ticket->priority ?? 'Normal',
-            'notes'             => $request->notes ?? 'No notes provided', 
-            're_assigned_at'    => now('Asia/Manila'),
-            'status'            => 'Pending/Re-Assigned',
-        ]);
-
-        // Safe Mail dispatch to IT personnel
-        if ($ticket->it_email && filter_var($ticket->it_email, FILTER_VALIDATE_EMAIL)) {
-            try {
-                Mail::to($ticket->it_email)->send(new TicketReassigned($ticket));
-            } catch (\Exception $e) {
-                Log::error('Failed sending ticket reassignment email to IT personnel: ' . $e->getMessage());
+            if ($request->filled('priority')) {
+                $updateData['priority'] = $request->input('priority');
             }
-        }
 
-        // Send email to the Ticket Requester
-        if ($ticket->email && filter_var($ticket->email, FILTER_VALIDATE_EMAIL)) {
-            try {
-                Mail::to($ticket->email)->send(new TicketReassignedRequester($ticket, $assignedBy));
-            } catch (\Exception $e) {
-                Log::error('Failed sending ticket reassignment email to requester: ' . $e->getMessage());
-            }
-        }
+            $ticket->update($updateData);
 
-        // Notify the reassigned personnel
-        $user = User::where('email', $reAssignedEmail)->first();
-        if ($user) {
-            Notification::create([
-                'user_id'   => $user->id,
-                'ticket_id' => $ticket->ticket_id,
-                'type'      => 'ticket_reassigned',
-                'message'   => "Ticket #{$ticket->ticket_number} has been reassigned to you",
+            // Log the reassignment history.
+            ReassignedTicket::create([
+                'ticket_number'    => $ticket->ticket_number,
+                'requested_by'     => trim("{$ticket->firstname} {$ticket->lastname}"),
+                'request'          => $ticket->request          ?? 'N/A',
+                'assigned_by'      => $assignedBy,
+                'previous_assigned'=> $previousAssigned,
+                're_assigned_to'   => $reAssignedTo,
+                'priority'         => $ticket->priority         ?? 'Normal',
+                'notes'            => $request->input('notes')  ?? 'No notes provided',
+                're_assigned_at'   => now('Asia/Manila'),
+                'status'           => 'Pending/Re-Assigned',
             ]);
-        }
+        });
 
-        // Notify the requestee (ticket owner)
-        $requesterUser = User::where('email', $ticket->email)->first();
-        if ($requesterUser) {
-            Notification::create([
-                'user_id'   => $requesterUser->id,
-                'ticket_id' => $ticket->ticket_id,
-                'type'      => 'ticket_reassigned_requester',
-                'message'   => "Your ticket #{$ticket->ticket_number} has been reassigned to {$reAssignedTo}",
-            ]);
-        }
+        // Refresh ticket after transaction so email uses latest data.
+        $ticket->refresh();
 
-        return redirect()->back()->with('success', 'Ticket successfully re-assigned.');
+        // Send email notifications outside the transaction to avoid long locks.
+        $this->sendMailSafely($reAssignedEmail, new TicketReassigned($ticket), 'IT personnel reassignment');
+        $this->sendMailSafely($ticket->email, new TicketReassignedRequester($ticket, $assignedBy), 'requester reassignment');
+
+        // Dispatch in-app notifications.
+        $this->dispatchReassignmentNotifications($ticket, $reAssignedTo, $reAssignedEmail);
+
+        return back()->with('success', 'Ticket successfully re-assigned.');
     }
 
     /**
      * Show the edit form for a specific ticket.
+     *
+     * @param  int  $ticket_id
+     * @return \Illuminate\View\View
      */
     public function edit($ticket_id)
     {
-        $ticket = Tickets::findOrFail($ticket_id);
-
-        $it_personnel = ITPersonnel::all();
-        $it_area = $it_personnel->pluck('it_area')->unique()->values();
+        $ticket             = Tickets::findOrFail($ticket_id);
+        $it_personnel       = ITPersonnel::all();
+        $it_area            = $it_personnel->pluck('it_area')->unique()->values();
         $sections_divisions = Divisions::pluck('sections_divisions')->toArray();
         $technical_services = TechnicalServices::pluck('technical_services')->toArray();
 
@@ -547,48 +582,52 @@ class TicketsController extends Controller
     }
 
     /**
-     * Update ticket details with validation, file handling, and notifications.
+     * Update ticket resolution details, handle photo evidence, and send notifications.
+     * Wraps DB writes in a transaction and guards mail sends against invalid emails.
+     *
+     * @param  Request  $request
+     * @param  int      $ticket_id
+     * @return RedirectResponse
      */
-    public function update(Request $request, $ticket_id)
+    public function update(Request $request, $ticket_id): RedirectResponse
     {
-        $validatedData = $request->validate([
-            'priority'      => 'required|string|max:255',
-            'status'        => 'required|string|max:255',
-            'date_resolved' => 'required|date',
-            'action_taken'  => 'required|string',
-            'photo_evidence'=> 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:20480',
-            'link_evidence' => 'nullable|string'
+        $validated = $request->validate([
+            'priority'       => 'required|string|max:255',
+            'status'         => 'required|string|max:255',
+            'date_resolved'  => 'required|date',
+            'action_taken'   => 'required|string',
+            'photo_evidence' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:20480',
+            'link_evidence'  => 'nullable|string|max:2000',
         ]);
 
         $ticket = Tickets::findOrFail($ticket_id);
 
-        $validatedData['date_resolved'] = Carbon::now('Asia/Manila')->format('Y-m-d H:i:s');
+        // Always stamp resolution time server-side (ignore client-submitted value).
+        $validated['date_resolved'] = Carbon::now('Asia/Manila')->format('Y-m-d H:i:s');
 
         if ($request->hasFile('photo_evidence') && $request->file('photo_evidence')->isValid()) {
             $file = $request->file('photo_evidence');
-            $validatedData['photo_evidence'] = file_get_contents($file->getRealPath());
-
+            $validated['photo_evidence'] = file_get_contents($file->getRealPath());
             $file->store('ticket_photos', 'public');
         } else {
-            $validatedData['photo_evidence'] = null;
+            $validated['photo_evidence'] = null;
         }
 
-        $ticket->update($validatedData);
+        DB::transaction(fn() => $ticket->update($validated));
 
-        if ($ticket->email && $ticket->it_email) {
-            // Send email notification to both requester and IT personnel
-            Mail::to($ticket->email)->send(new TicketUpdated($ticket));
-            Mail::to($ticket->it_email)->send(new TicketResolved($ticket));
-        }
+        // Send resolution emails outside the transaction.
+        $this->sendMailSafely($ticket->email,       new TicketUpdated($ticket),  'ticket-updated requester');
+        $this->sendMailSafely($ticket->it_email,    new TicketResolved($ticket), 'ticket-resolved IT personnel');
 
+        // In-app notification for the requester on resolution.
         if ($ticket->status === 'Resolved') {
             $requesterUser = User::where('email', $ticket->email)->first();
             if ($requesterUser) {
                 Notification::create([
-                    'user_id' => $requesterUser->id,
+                    'user_id'   => $requesterUser->id,
                     'ticket_id' => $ticket->ticket_id,
-                    'type' => 'ticket_resolved',
-                    'message' => "Your ticket #{$ticket->ticket_number} has been resolved",
+                    'type'      => 'ticket_resolved',
+                    'message'   => "Your ticket #{$ticket->ticket_number} has been resolved.",
                 ]);
             }
         }
@@ -597,25 +636,34 @@ class TicketsController extends Controller
     }
 
     /**
-     * Delete a ticket.
+     * Delete a ticket and its associated reassignment history records.
+     *
+     * @param  int  $ticket_id
+     * @return RedirectResponse
      */
-    public function destroy($ticket_id)
+    public function destroy($ticket_id): RedirectResponse
     {
-        $ticket = Tickets::findOrFail($ticket_id);
-        
-        // Save ticket number before deleting
+        $ticket       = Tickets::findOrFail($ticket_id);
         $ticketNumber = $ticket->ticket_number;
 
-        // Delete photo if it exists
-        if ($ticket->photo && Storage::disk('public')->exists($ticket->photo)) {
-            Storage::disk('public')->delete($ticket->photo);
+        // Remove attached photo files from storage if stored as file paths (BLOB data is stored directly in DB).
+        foreach (['photo', 'photo_evidence'] as $column) {
+            $path = $ticket->{$column} ?? null;
+            if (is_string($path) && strlen($path) < 260 && ! str_contains($path, "\0") && ! preg_match('/[\r\n]/', $path)) {
+                try {
+                    if (Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->delete($path);
+                    }
+                } catch (\Throwable $e) {
+                    // Suppress any storage / Flysystem path validation exceptions
+                }
+            }
         }
 
-        // Delete the ticket record
-        $ticket->delete();
-
-        // Delete reassigned records
-        ReassignedTicket::where('ticket_number', $ticketNumber)->delete();
+        DB::transaction(function () use ($ticket, $ticketNumber) {
+            $ticket->delete();
+            ReassignedTicket::where('ticket_number', $ticketNumber)->delete();
+        });
 
         return redirect()->route('tickets.index')->with('success', 'Ticket deleted successfully.');
     }

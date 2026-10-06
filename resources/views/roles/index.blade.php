@@ -1,351 +1,136 @@
 <x-app-layout>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-    
-    <style>
-        /* --- Theme Variables --- */
-        :root {
-            --card-bg: #ffffff;
-            --bg-alt: #f8fafc;
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
-            --border-light: #e2e8f0;
-            --border-subtle: #f1f5f9;
-            --input-bg: #ffffff;
-            --input-border: #cbd5e1;
-            --input-text: #334155;
-
-            /* Action Buttons (Gray) */
-            --btn-gray-bg: #f1f5f9;
-            --btn-gray-text: #475569;
-            --btn-gray-border: #e2e8f0;
-            --btn-gray-hover-bg: #e2e8f0;
-            --btn-gray-hover-text: #0f172a;
-
-            /* Error States */
-            --error-bg: #fef2f2;
-            --error-border: #fecaca;
-            --error-text: #991b1b;
-            --error-title: #7f1d1d;
-            
-            /* Readonly */
-            --readonly-bg: #f8fafc;
-            
-            /* Badges */
-            --badge-role-bg: #eef2ff;
-            --badge-role-text: #4f46e5;
-            --badge-role-border: #c7d2fe;
-            --badge-none-text: #ef4444;
-        }
-
-        body.dark {
-            --card-bg: #0f172a; 
-            --bg-alt: #1e293b; 
-            --text-dark: #f8fafc;
-            --text-muted: #9ca3af;
-            --border-light: #334155; 
-            --border-subtle: #1e293b;
-            --input-bg: #0f172a;
-            --input-border: #4b5563;
-            --input-text: #f1f5f9;
-
-            /* Action Buttons (Gray) - Dark */
-            --btn-gray-bg: #1e293b;
-            --btn-gray-text: #9ca3af;
-            --btn-gray-border: #334155;
-            --btn-gray-hover-bg: #334155;
-            --btn-gray-hover-text: #f8fafc;
-
-            /* Error States - Dark */
-            --error-bg: rgba(153, 27, 27, 0.2);
-            --error-border: rgba(248, 113, 113, 0.4);
-            --error-text: #fca5a5;
-            --error-title: #f87171;
-            
-            /* Readonly */
-            --readonly-bg: #1e293b;
-            
-            /* Badges - Dark */
-            --badge-role-bg: rgba(79, 70, 229, 0.2);
-            --badge-role-text: #a5b4fc;
-            --badge-role-border: #4f46e5;
-            --badge-none-text: #f87171;
-        }
-
-        /* Global Box Sizing & Font Fix */
-        *, *::before, *::after { box-sizing: border-box; }
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
-
-        /* Main Layout - Mobile First 100% Width & Dark Mode Outline */
-        .panel { background-color: var(--card-bg); border-radius: 1rem; border: 1px solid var(--border-light); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); padding: 1.25rem; width: 100%; transition: background-color 0.3s ease, border-color 0.3s ease; }
-        
-        /* Typography */
-        .header-flex { display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 1.5rem; gap: 1rem; width: 100%; }
-        .title { font-size: 1.75rem; font-weight: 800; color: var(--text-dark); margin: 0; letter-spacing: -0.025em; transition: color 0.3s ease; }
-        
-        /* --- Action Container & Search Toolbar - Mobile First --- */
-        .action-container { display: flex; flex-direction: column; width: 100%; gap: 1rem; margin-bottom: 1.5rem; }
-        
-        .search-form { display: flex; align-items: stretch; width: 100%; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border-radius: 0.5rem; }
-        .search-input { height: 44px; flex: 1; min-width: 0; padding: 0 1rem; font-size: 0.95rem; font-family: inherit; background-color: var(--input-bg); color: var(--input-text); border: 1px solid var(--input-border); border-right: none; border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; outline: none; transition: all 0.2s; position: relative; z-index: 1; }
-        .search-input:focus { border-color: #6366f1; box-shadow: inset 0 0 0 1px #6366f1, 0 0 0 3px rgba(99, 102, 241, 0.15); z-index: 10; }
-        .search-input::placeholder { color: var(--text-muted); opacity: 0.7; }
-        .search-btn { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 1.25rem; border: none; border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; background-color: #4f46e5; color: white; cursor: pointer; transition: background-color 0.2s; z-index: 2; width: auto; }
-        .search-btn:hover { background-color: #4338ca; }
-
-        /* --- Buttons - Uniform Heights --- */
-        .btn { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 1.5rem; border-radius: 0.5rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s ease; width: 100%; text-decoration: none; font-family: inherit; }
-        .btn i { margin-right: 0.5rem; font-size: 1rem; }
-        
-        /* Modern Green */
-        .btn-green { background-color: #10b981; color: white; box-shadow: 0 1px 2px rgba(16, 185, 129, 0.2); }
-        .btn-green:hover { background-color: #059669; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
-        .btn-green:active { transform: translateY(0); box-shadow: 0 1px 2px rgba(16, 185, 129, 0.2); }
-
-        /* Modern Indigo */
-        .btn-indigo { background-color: #4f46e5; color: white; box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2); }
-        .btn-indigo:hover { background-color: #4338ca; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
-        .btn-indigo:active { transform: translateY(0); box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2); }
-
-        /* Modern Gray */
-        .btn-gray { background-color: var(--btn-gray-bg); color: var(--btn-gray-text); border: 1px solid var(--btn-gray-border); transition: all 0.3s ease; }
-        .btn-gray:hover { background-color: var(--btn-gray-hover-bg); color: var(--btn-gray-hover-text); }
-
-        /* Table & Badges */
-        .table-container { overflow-x: auto; background-color: var(--card-bg); border-radius: 0.75rem; border: 1px solid var(--border-light); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); width: 100%; -webkit-overflow-scrolling: touch; margin-bottom: 1.5rem; transition: background-color 0.3s ease, border-color 0.3s ease; }
-        .data-table { width: 100%; min-width: 900px; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
-        .data-table th { padding: 1rem 1.5rem; background-color: var(--bg-alt); color: var(--text-muted); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--border-light); white-space: nowrap; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
-        .data-table td { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-subtle); color: var(--text-dark); vertical-align: middle; font-weight: 500; transition: color 0.3s ease, border-color 0.3s ease; }
-        .data-table tbody tr { transition: background-color 0.15s; }
-        .data-table tbody tr:hover { background-color: var(--bg-alt); }
-        .text-center { text-align: center; }
-        .font-bold-name { font-weight: 700; color: var(--text-dark); transition: color 0.3s ease; }
-
-        /* Clean Role Badges */
-        .badge-indigo { display: inline-flex; align-items: center; white-space: nowrap; padding: 0.25rem 0.75rem; background-color: var(--badge-role-bg); color: var(--badge-role-text); border: 1px solid var(--badge-role-border); border-radius: 9999px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.025em; margin-bottom: 0.25rem; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
-        .permission-container { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; }
-        .role-none { font-size: 0.8rem; color: var(--badge-none-text); font-style: italic; font-weight: 600; transition: color 0.3s ease; }
-
-        /* Action Buttons inside Table */
-        .action-cell { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0.5rem; }
-        .action-link { display: inline-flex; align-items: center; justify-content: center; height: 34px; padding: 0 0.85rem; border-radius: 0.375rem; font-size: 0.85rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; text-decoration: none; background: transparent; white-space: nowrap; box-sizing: border-box; }
-        .action-link i { margin-right: 0.35rem; font-size: 0.9rem; }
-        
-        .link-blue { color: #3b82f6; border: 1px solid #bfdbfe; } 
-        .link-blue:hover { background-color: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
-        
-        .link-red { color: #ef4444; border: 1px solid #fecaca; } 
-        .link-red:hover { background-color: #fef2f2; color: #b91c1c; border-color: #fca5a5; }
-
-        /* Dark Mode Action Link Overrides */
-        body.dark .link-blue { color: #60a5fa; border-color: #1e3a8a; }
-        body.dark .link-blue:hover { background-color: rgba(30, 58, 138, 0.4); color: #93c5fd; }
-        body.dark .link-red { color: #f87171; border-color: #7f1d1d; }
-        body.dark .link-red:hover { background-color: rgba(127, 29, 29, 0.4); color: #fca5a5; }
-
-        /* --- Modern UI Pagination (Laravel Structure Fix) --- */
-        .pagination-wrapper { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-light); width: 100%; transition: border-color 0.3s ease; }
-        .pagination-wrapper nav { display: flex; flex-direction: column; gap: 1.25rem; width: 100%; align-items: center; }
-        
-        /* Pagination Sub-Text */
-        .pagination-wrapper p { margin: 0; font-size: 0.875rem; color: var(--text-muted); font-weight: 500; text-align: center; transition: color 0.3s ease; }
-        .pagination-wrapper p span { font-weight: 700; color: var(--text-dark); transition: color 0.3s ease; }
-
-        /* Container for links */
-        .pagination-wrapper div > span.relative.z-0.inline-flex,
-        .pagination-wrapper .flex.justify-between { display: flex; flex-wrap: wrap; gap: 0.5rem; box-shadow: none !important; justify-content: center; align-items: center; }
-
-        /* Uniform Button Styling for Page Numbers & Arrows */
-        .pagination-wrapper a, 
-        .pagination-wrapper span[aria-current="page"] > span,
-        .pagination-wrapper span[aria-disabled="true"] > span { display: inline-flex; align-items: center; justify-content: center; min-width: 2.25rem; height: 2.25rem; padding: 0 0.5rem; border-radius: 0.375rem !important; font-size: 0.875rem; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.2s ease; border: 1px solid transparent; margin: 0 !important; text-decoration: none; line-height: 1; }
-
-        /* Default Inactive Links */
-        .pagination-wrapper a { background-color: var(--card-bg); color: var(--text-muted); border-color: var(--border-light); }
-        .pagination-wrapper a:hover { background-color: var(--bg-alt); color: var(--text-dark); border-color: var(--input-border); transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-
-        /* Active Page Link */
-        .pagination-wrapper span[aria-current="page"] > span { background-color: #4f46e5; color: #ffffff; border-color: #4f46e5; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.25); z-index: 2; position: relative; }
-
-        /* Disabled Navigation Arrows */
-        .pagination-wrapper span[aria-disabled="true"] > span { background-color: var(--bg-alt); color: var(--text-muted); border-color: var(--border-light); cursor: not-allowed; opacity: 0.7; }
-
-        /* "..." Separator Fix */
-        .pagination-wrapper span[aria-disabled="true"]:not([aria-label]) > span { background: transparent; border: none; opacity: 1; color: var(--text-muted); }
-
-        /* Standardize Arrow SVGs */
-        .pagination-wrapper svg { width: 1.25rem !important; height: 1.25rem !important; display: block; }
-
-        /* Modals - Smooth Scaling Transitions */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 1; visibility: visible; transition: all 0.3s ease; }
-        .modal-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        
-        .modal-box { position: relative; background-color: var(--card-bg); border-radius: 1rem; border: 1px solid var(--border-light); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 100%; max-width: 48rem; max-height: 90vh; overflow-y: auto; padding: 1.5rem; transform: scale(1); transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease; }
-        .modal-overlay.hidden .modal-box { transform: scale(0.95); }
-        
-        /* Fixed Modal Close Button */
-        .close-btn { position: absolute; top: 1.25rem; right: 1.25rem; color: var(--text-muted); font-size: 2.25rem; background: none; border: none; cursor: pointer; transition: color 0.2s, background-color 0.2s; line-height: 1; border-radius: 0.25rem; padding: 0 0.5rem; }
-        .close-btn:hover { color: var(--text-dark); }
-        
-        .modal-title { font-size: 1.5rem; font-weight: 800; color: var(--text-dark); margin-top: 0; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-light); padding-bottom: 1rem; padding-right: 2.5rem; transition: color 0.3s ease, border-color 0.3s ease; }
-        
-        /* Form Grid - Mobile First 100% Width */
-        .form-grid { display: flex; flex-direction: column; gap: 1.25rem; width: 100%; }
-
-        /* Form Controls - Unified Heights */
-        .form-group { display: flex; flex-direction: column; width: 100%; }
-        .form-label { font-size: 0.875rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; width: 100%; transition: color 0.3s ease; }
-        .form-input, .form-select { height: 44px; padding: 0 1rem; font-size: 0.95rem; color: var(--input-text); border: 1px solid var(--input-border); border-radius: 0.5rem; background-color: var(--input-bg); outline: none; transition: all 0.2s; font-family: inherit; width: 100%; box-sizing: border-box; }
-        .form-input:focus, .form-select:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
-
-        /* Custom Checkbox Grid for Permissions */
-        .checkbox-grid { display: flex; flex-direction: column; gap: 0.85rem; margin-top: 0.5rem; width: 100%; }
-        .checkbox-label { display: flex; align-items: flex-start; gap: 0.75rem; font-size: 0.95rem; font-weight: 500; color: var(--input-text); cursor: pointer; line-height: 1.4; word-break: break-word; transition: color 0.3s ease; }
-        .checkbox-input { margin-top: 0.15rem; width: 1.15rem; height: 1.15rem; accent-color: #4f46e5; cursor: pointer; border-radius: 0.25rem; flex-shrink: 0; }
-        
-        .modal-footer { display: flex; flex-direction: column; padding-top: 1.5rem; border-top: 1px solid var(--border-light); margin-top: 1.5rem; gap: 0.75rem; width: 100%; transition: border-color 0.3s ease; }
-
-        /* Error Box */
-        .error-box { background-color: var(--error-bg); border: 1px solid var(--error-border); color: var(--error-text); padding: 1.25rem; border-radius: 0.5rem; margin-bottom: 1.5rem; transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
-        .error-title { margin: 0 0 0.5rem 0; font-weight: 700; font-size: 0.95rem; color: var(--error-title); transition: color 0.3s ease; }
-        .error-list { margin: 0; padding-left: 1.5rem; font-size: 0.9rem; font-weight: 500; }
-
-        /* Full-Screen Loading Overlay */
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: #ffffff; }
-        .loading-overlay.active { display: flex; }
-        .spinner { width: 44px; height: 44px; border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: #ffffff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* --------------------------------------------------- */
-        /* Responsive Overrides                                */
-        /* --------------------------------------------------- */
-        
-        /* Mobile Breakpoint for Pagination */
-        @media (max-width: 639px) {
-            .pagination-wrapper nav .hidden { display: none !important; }
-            .pagination-wrapper nav .sm\:hidden { display: flex; width: 100%; justify-content: space-between; }
-        }
-
-        /* Desktop & Tablet Overrides */
-        @media (min-width: 640px) {
-            .panel { padding: 2rem; }
-            .header-flex { flex-direction: row; justify-content: space-between; align-items: center; }
-            
-            /* Align Add button inline */
-            .action-container { flex-direction: row; justify-content: flex-end; align-items: center; }
-            
-            /* Un-stretch main page buttons */
-            .action-container .btn { width: auto; min-width: 140px; }
-            
-            /* Restore Grid layout for Desktop */
-            .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-            .col-span-2 { grid-column: span 2; }
-            
-            /* Checkbox grid for Desktop */
-            .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
-            .checkbox-label { align-items: center; }
-            .checkbox-input { margin-top: 0; }
-            
-            /* Modal formatting for Desktop */
-            .modal-box { padding: 2.5rem; }
-            .close-btn { top: 1.5rem; right: 2rem; }
-            
-            /* Modal Footer Buttons */
-            .modal-footer { flex-direction: row; justify-content: flex-end; }
-            .modal-footer .btn { width: auto; }
-
-            /* Pagination Layout */
-            .pagination-wrapper nav { flex-direction: row; justify-content: space-between; }
-            .pagination-wrapper nav > div.sm\:hidden { display: none !important; }
-            .pagination-wrapper nav > div.hidden.sm\:flex-1 { display: flex !important; width: 100%; justify-content: space-between; align-items: center; }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 
     <!-- Full-Screen Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay">
-        <div class="spinner"></div>
-        <p style="font-size: 1rem; font-weight: 600; letter-spacing: 0.025em;">Processing Role, please wait...</p>
+        <div class="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
+        <p class="text-base font-semibold tracking-wide text-white">Processing Role, please wait...</p>
     </div>
 
-    <div id="main-content">
-        <div class="panel">
+    <div id="main-content" class="w-full">
+        <div class="panel bg-[var(--card-bg)] border border-[var(--border-light)] rounded-2xl shadow-xs transition-colors duration-300 p-4 sm:p-6 lg:p-8">
             
-            <div class="header-flex">
-                <h3 class="title">All Roles</h3>
-            </div>
+            {{-- Header Title Banner --}}
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 mb-6 border-b border-[var(--border-light)]">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
+                        <span class="material-symbols-outlined text-2xl">admin_panel_settings</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2.5 flex-wrap">
+                            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--text-dark)] m-0 leading-tight">
+                                Roles & Permissions
+                            </h1>
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/60">
+                                {{ $roles->total() }} Roles Configured
+                            </span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-[var(--text-muted)] m-0 mt-0.5 font-medium">
+                            Configure user access control levels, manage permission sets, and define security groups
+                        </p>
+                    </div>
+                </div>
 
-            <div class="action-container">
                 @can('create_roles')
-                    <button id="openModal" class="btn btn-green">
-                        <span class="material-symbols-outlined" style="font-size: 1.25rem; margin-right: 0.2rem;">add</span> Add Role
+                    <button id="openModal" 
+                            class="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 active:scale-95 shadow-md shadow-emerald-600/20 transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-xl">add_moderator</span>
+                        <span>Add Role</span>
                     </button>
                 @endcan
             </div>
 
-            <div class="table-container">
-                <table class="data-table">
+            {{-- Table Container --}}
+            <div class="overflow-x-auto rounded-2xl border border-[var(--border-light)] bg-[var(--card-bg)] shadow-xs">
+                <table class="w-full min-w-[700px] text-left border-collapse text-sm">
                     <thead>
-                        <tr>
-                            <th class="text-center">Role Name</th>
-                            <th class="text-center">Permissions</th>
+                        <tr class="border-b border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/60 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                            <th class="py-3.5 px-4 sm:px-6 w-1/4">Role Name</th>
+                            <th class="py-3.5 px-4 sm:px-6">Assigned Permissions</th>
                             @if(auth()->user()->can('edit_roles') || auth()->user()->can('delete_roles'))
-                                <th class="text-center">Actions</th>
+                                <th class="py-3.5 px-4 sm:px-6 text-center">Actions</th>
                             @endif
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-[var(--border-subtle)]">
                         @forelse ($roles as $role)
-                            <tr>
-                                <td class="text-center font-bold-name" style="font-size: 1rem;">{{ $role->name }}</td>
-                                <td>
+                            <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                                
+                                {{-- Role Name --}}
+                                <td class="py-4 px-4 sm:px-6 align-top">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 flex items-center justify-center shrink-0">
+                                            <span class="material-symbols-outlined text-base">shield_person</span>
+                                        </div>
+                                        <div>
+                                            <span class="font-bold text-[var(--text-dark)] text-sm sm:text-base block">
+                                                {{ $role->name }}
+                                            </span>
+                                            <span class="text-xs text-[var(--text-muted)]">ID: #{{ $role->id }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                {{-- Permissions List --}}
+                                <td class="py-4 px-4 sm:px-6 align-top">
                                     @if($role->permissions->isNotEmpty())
-                                        <div class="permission-container">
+                                        <div class="flex flex-wrap gap-1.5">
                                             @foreach($role->permissions as $permission)
-                                                <span class="badge-indigo">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60">
                                                     {{ $permission->name }}
                                                 </span>
                                             @endforeach
                                         </div>
                                     @else
-                                        <div class="text-center">
-                                            <span style="font-size: 0.8rem; color: var(--text-muted); font-style: italic; font-weight: 500;">No permissions assigned</span>
-                                        </div>
+                                        <span class="text-xs text-[var(--text-muted)] italic">No permissions assigned to this role</span>
                                     @endif
                                 </td>
 
+                                {{-- Actions --}}
                                 @if(auth()->user()->can('edit_roles') || auth()->user()->can('delete_roles'))
-                                <td>
-                                    <div class="action-cell">
+                                <td class="py-4 px-4 sm:px-6 align-top text-center">
+                                    <div class="inline-flex items-center justify-center">
+                                        
                                         {{-- Edit Button --}}
                                         @can('edit_roles')
-                                            <button type="button" class="action-link link-blue editBtn"
+                                            <button type="button" title="Edit"
+                                                class="editBtn inline-flex items-center h-8 px-3 text-xs font-semibold text-blue-600 dark:text-blue-400 active:scale-95 transition-all cursor-pointer"
                                                 data-id="{{ $role->id }}"
                                                 data-name="{{ $role->name }}"
                                                 data-permissions='@json($role->permissions->pluck("id"))'>
-                                                <span class="material-symbols-outlined" style="font-size: 1.25rem; margin-right: 0.2rem;">edit</span> Edit
+                                                <span class="material-symbols-outlined text-sm">edit</span>
                                             </button>
                                         @endcan
 
                                         {{-- Delete Button --}}
                                         @can('delete_roles')
-                                            <form id="delete-form-{{ $role->id }}" action="{{ route('roles.destroy', $role->id) }}" method="POST" style="margin:0;">
+                                            <form id="delete-form-{{ $role->id }}" action="{{ route('roles.destroy', $role->id) }}" method="POST" class="m-0 inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="button" class="action-link link-red delete-btn" data-id="{{ $role->id }}">
-                                                    <span class="material-symbols-outlined" style="font-size: 1.25rem; margin-right: 0.2rem;">delete</span> Delete
+                                                <button type="button" title="Delete"
+                                                        class="delete-btn inline-flex items-center h-8 px-3 text-xs font-semibold text-rose-600 dark:text-rose-400 active:scale-95 transition-all cursor-pointer" 
+                                                        data-id="{{ $role->id }}">
+                                                    <span class="material-symbols-outlined text-sm">delete</span>
                                                 </button>
                                             </form>
                                         @endcan
+
                                     </div>
                                 </td>
                                 @endif
+
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="3" class="text-center" style="padding: 3rem; color: var(--text-muted); font-size: 1rem;">
-                                    No Roles found.
+                                <td colspan="3" class="py-12 px-4 text-center">
+                                    <div class="flex flex-col items-center justify-center gap-2">
+                                        <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                                            <span class="material-symbols-outlined text-2xl">shield</span>
+                                        </div>
+                                        <p class="text-sm font-semibold text-[var(--text-dark)] m-0">No Roles Found</p>
+                                        <p class="text-xs text-[var(--text-muted)] m-0">Create a new role to establish permission sets for system users</p>
+                                    </div>
                                 </td>
                             </tr>
                         @endforelse
@@ -353,7 +138,8 @@
                 </table>
             </div>
 
-            <div class="pagination-wrapper">
+            {{-- Pagination Wrapper --}}
+            <div class="mt-6 pt-4 border-t border-[var(--border-light)]">
                 {{ $roles->links() }}
             </div>
             
@@ -361,79 +147,139 @@
     </div>
 
     {{-- Modal: Add Role --}}
-    <div id="permissionModal" class="modal-overlay hidden">
-        <div id="permissionModalContent" class="modal-box">
-            <button id="closeModal" class="close-btn" aria-label="Close Modal">&times;</button>
-            <h2 class="modal-title">Create New Role</h2>
+    <div id="permissionModal" 
+         class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden [&:not(.hidden)]:flex items-center justify-center p-4 transition-all duration-300">
+        <div id="permissionModalContent" 
+             class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[var(--card-bg)] border border-[var(--border-light)] rounded-3xl shadow-2xl p-6 sm:p-8 transition-all">
+            
+            <button id="closeModal" 
+                    class="absolute top-5 right-5 w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center justify-center transition-all cursor-pointer" 
+                    aria-label="Close Modal">
+                <span class="material-symbols-outlined text-xl">close</span>
+            </button>
 
-            <form action="{{ route('roles.store') }}" method="POST">
+            <div class="flex items-center gap-3 pb-5 mb-6 border-b border-[var(--border-light)] pr-10">
+                <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-xl">add_moderator</span>
+                </div>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight text-[var(--text-dark)] m-0">
+                        Create New Role
+                    </h2>
+                    <p class="text-xs text-[var(--text-muted)] m-0 font-medium">Define a role title and assign authorized capabilities</p>
+                </div>
+            </div>
+
+            <form action="{{ route('roles.store') }}" method="POST" class="space-y-5">
                 @csrf
-                <div class="form-grid">
-                    <div class="form-group col-span-2">
-                        <label for="name" class="form-label">Role Name</label>
-                        <input type="text" name="name" id="name" required class="form-input" autocomplete="off" placeholder="e.g., Administrator">
-                    </div>
+                
+                <div>
+                    <label for="name" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                        Role Name <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text" name="name" id="name" required autocomplete="off" placeholder="e.g., Regional ICT Officer / System Auditor"
+                           class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                </div>
 
-                    <div class="form-group col-span-2">
-                        <span class="form-label" style="color: var(--text-dark);">Assign Permissions</span>
-                        <div class="checkbox-grid">
-                            @foreach ($permissions as $permission)
-                            <label class="checkbox-label" for="add_perm_{{ $permission->id }}">
+                {{-- Permissions Checkbox Grid --}}
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2">
+                        Assign Permissions <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-3 rounded-2xl border border-[var(--border-light)] bg-slate-50/50 dark:bg-slate-800/30 max-h-60 overflow-y-auto">
+                        @foreach ($permissions as $permission)
+                            <label class="flex items-center gap-2.5 p-2 rounded-xl bg-white dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors cursor-pointer text-xs font-medium text-[var(--text-dark)]" for="add_perm_{{ $permission->id }}">
                                 <input type="checkbox" 
-                                    name="permissions[]" 
-                                    value="{{ $permission->id }}" 
-                                    id="add_perm_{{ $permission->id }}" 
-                                    class="checkbox-input">
+                                       name="permissions[]" 
+                                       value="{{ $permission->id }}" 
+                                       id="add_perm_{{ $permission->id }}" 
+                                       class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 cursor-pointer">
                                 <span>{{ $permission->name }}</span>
                             </label>
-                            @endforeach
-                        </div>
+                        @endforeach
                     </div>
                 </div>
 
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-indigo">Save Role</button>
-                    <button type="button" class="btn btn-gray" id="cancelAddModal">Cancel</button>
+                {{-- Modal Footer --}}
+                <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-[var(--border-light)]">
+                    <button type="button" id="cancelAddModal" 
+                            class="w-full sm:w-auto h-11 px-5 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="w-full sm:w-auto h-11 px-6 rounded-xl text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
+                        <span>Save Role</span>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
     {{-- Modal: Edit Role --}}
-    <div id="editModal" class="modal-overlay hidden">
-        <div id="editModalContent" class="modal-box">
-            <button id="closeEditModal" class="close-btn" aria-label="Close Modal">&times;</button>
-            <h2 class="modal-title">Edit Role Details</h2>
+    <div id="editModal" 
+         class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden [&:not(.hidden)]:flex items-center justify-center p-4 transition-all duration-300">
+        <div id="editModalContent" 
+             class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[var(--card-bg)] border border-[var(--border-light)] rounded-3xl shadow-2xl p-6 sm:p-8 transition-all">
+            
+            <button id="closeEditModal" 
+                    class="absolute top-5 right-5 w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center justify-center transition-all cursor-pointer" 
+                    aria-label="Close Modal">
+                <span class="material-symbols-outlined text-xl">close</span>
+            </button>
 
-            <form id="editForm" method="POST">
+            <div class="flex items-center gap-3 pb-5 mb-6 border-b border-[var(--border-light)] pr-10">
+                <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-xl">security</span>
+                </div>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight text-[var(--text-dark)] m-0">
+                        Edit Role Details
+                    </h2>
+                    <p class="text-xs text-[var(--text-muted)] m-0 font-medium">Update role identifier and modify permission grants</p>
+                </div>
+            </div>
+
+            <form id="editForm" method="POST" class="space-y-5">
                 @csrf
                 @method('PUT')
-                <div class="form-grid">
-                    <div class="form-group col-span-2">
-                        <label for="edit_name" class="form-label">Role Name</label>
-                        <input type="text" name="name" id="edit_name" required class="form-input" autocomplete="off">
-                    </div>
+                
+                <div>
+                    <label for="edit_name" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                        Role Name <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text" name="name" id="edit_name" required autocomplete="off"
+                           class="w-full h-11 px-3.5 rounded-xl border border-[var(--border-light)] bg-slate-50 dark:bg-slate-800/50 text-sm text-[var(--text-dark)] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                </div>
 
-                    <div class="form-group col-span-2">
-                        <span class="form-label" style="color: var(--text-dark);">Update Permissions</span>
-                        <div class="checkbox-grid">
-                            @foreach ($permissions as $permission)
-                            <label class="checkbox-label" for="edit_perm_{{ $permission->id }}">
+                {{-- Edit Permissions Checkbox Grid --}}
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2">
+                        Update Permissions <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-3 rounded-2xl border border-[var(--border-light)] bg-slate-50/50 dark:bg-slate-800/30 max-h-60 overflow-y-auto">
+                        @foreach ($permissions as $permission)
+                            <label class="flex items-center gap-2.5 p-2 rounded-xl bg-white dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors cursor-pointer text-xs font-medium text-[var(--text-dark)]" for="edit_perm_{{ $permission->id }}">
                                 <input type="checkbox" 
-                                    name="permissions[]" 
-                                    value="{{ $permission->id }}" 
-                                    id="edit_perm_{{ $permission->id }}" 
-                                    class="edit-permission checkbox-input">
+                                       name="permissions[]" 
+                                       value="{{ $permission->id }}" 
+                                       id="edit_perm_{{ $permission->id }}" 
+                                       class="edit-permission w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 cursor-pointer">
                                 <span>{{ $permission->name }}</span>
                             </label>
-                            @endforeach
-                        </div>
+                        @endforeach
                     </div>
                 </div>
 
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-indigo">Save Changes</button>
-                    <button type="button" class="btn btn-gray" id="cancelEditModal">Cancel</button>
+                {{-- Modal Footer --}}
+                <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-[var(--border-light)]">
+                    <button type="button" id="cancelEditModal" 
+                            class="w-full sm:w-auto h-11 px-5 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="w-full sm:w-auto h-11 px-6 rounded-xl text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
+                        <span>Save Changes</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -625,5 +471,5 @@
                 }
             });
         });
-        </script>
+    </script>
 </x-app-layout>
