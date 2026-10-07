@@ -399,7 +399,7 @@
 
                 {{-- Pagination Wrapper --}}
                 <div class="mt-6 pt-4 border-t border-[var(--border-light)]">
-                    {{ $tickets->links() ?? '' }}
+                    {{ $tickets->links() }}
                 </div>
             </div>
         </div>

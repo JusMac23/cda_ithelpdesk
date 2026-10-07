@@ -539,15 +539,24 @@ class TicketsOverviewController extends Controller
 
             $deadline = $createdAt->copy();
 
-            // Extract SLA duration values
-            if (preg_match('/(\d+)\s*days?/', $slaTimeStr, $matches)) {
-                $deadline->addDays((int)$matches[1]);
+            // Parse SLA duration string e.g. "1 year/s, 1 month/s, 3 day/s, 2 hour/s, 30 min/s".
+            if (preg_match('/(\d+)\s*years?/i', $slaTimeStr, $m)) {
+                $deadline->addYears((int) $m[1]);
             }
-            if (preg_match('/(\d+)\s*hours?/', $slaTimeStr, $matches)) {
-                $deadline->addHours((int)$matches[1]);
+            if (preg_match('/(\d+)\s*months?/i', $slaTimeStr, $m)) {
+                $deadline->addMonths((int) $m[1]);
             }
-            if (preg_match('/(\d+)\s*mins?/', $slaTimeStr, $matches)) {
-                $deadline->addMinutes((int)$matches[1]);
+            if (preg_match('/(\d+)\s*weeks?/i', $slaTimeStr, $m)) {
+                $deadline->addWeeks((int) $m[1]);
+            }
+            if (preg_match('/(\d+)\s*days?/i', $slaTimeStr, $m)) {
+                $deadline->addDays((int) $m[1]);
+            }
+            if (preg_match('/(\d+)\s*hours?/i', $slaTimeStr, $m)) {
+                $deadline->addHours((int) $m[1]);
+            }
+            if (preg_match('/(\d+)\s*mins?/i', $slaTimeStr, $m)) {
+                $deadline->addMinutes((int) $m[1]);
             }
 
             // Flag as overdue if current time exceeds calculated SLA deadline

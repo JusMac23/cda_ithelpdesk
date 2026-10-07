@@ -102,7 +102,7 @@
                             }
                         }">
                         <span class="material-symbols-outlined">schedule</span>
-                        <span x-text="time"></span>
+                        <span x-text="time" class="clock-text"></span>
                     </div>
 
                     <button @click="toggleTheme()" 

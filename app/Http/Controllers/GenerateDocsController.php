@@ -171,9 +171,11 @@ class GenerateDocsController extends Controller
             'Chronology of Events' => $notification->chronology,
             'Description / Nature of Personal Data Breach' => $notification->description_nature,
             'Likely Consequences' => $notification->likely_consequences,
-            'DPO Details' => $dpoDetails->name . "\n" .
-                             'Email: ' . $dpoDetails->email . "\n" .
-                             'Contact Number: ' . $dpoDetails->contact_number,
+            'DPO Details' => ($dpoDetails
+                             ? $dpoDetails->name . "\n" .
+                               'Email: ' . ($dpoDetails->email ?? 'N/A') . "\n" .
+                               'Contact Number: ' . ($dpoDetails->contact_number ?? 'N/A')
+                             : 'N/A'),
             'Types of Sensitive Personal Info' => $notification->spi,
             'Other Info That May Enable Identity Fraud' => $notification->other_info,
         ];

@@ -225,7 +225,16 @@ class TicketsController extends Controller
                 return false;
             }
 
-            // Parse SLA duration string e.g. "3 days 2 hours 30 mins".
+            // Parse SLA duration string e.g. "1 year/s, 1 month/s, 3 day/s, 2 hour/s, 30 min/s".
+            if (preg_match('/(\d+)\s*years?/i', $slaTimeStr, $m)) {
+                $deadline->addYears((int) $m[1]);
+            }
+            if (preg_match('/(\d+)\s*months?/i', $slaTimeStr, $m)) {
+                $deadline->addMonths((int) $m[1]);
+            }
+            if (preg_match('/(\d+)\s*weeks?/i', $slaTimeStr, $m)) {
+                $deadline->addWeeks((int) $m[1]);
+            }
             if (preg_match('/(\d+)\s*days?/i', $slaTimeStr, $m)) {
                 $deadline->addDays((int) $m[1]);
             }

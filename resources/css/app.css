@@ -523,6 +523,9 @@
     transition: transform 0.3s ease;
     width: 18px;
     height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+    flex-shrink: 0;
     color: inherit;
   }
 
@@ -979,17 +982,21 @@
     }
 
     .top-header {
-      padding: 0 16px;
+      padding: 0 12px;
+    }
+
+    .header-left,
+    .header-right {
+      gap: 8px;
     }
 
     .clock-widget {
       font-size: 12px;
-      margin-right: 4px;
+      padding: 5px 10px;
     }
 
     .clock-widget .material-symbols-outlined {
       font-size: 16px;
-      margin-right: 4px;
     }
 
     .theme-toggle {
@@ -1017,6 +1024,51 @@
       height: auto;
       padding: 16px;
       padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    }
+  }
+
+  /* ─── Extra-small phones (≤ 479px) ─────────────────────────── */
+  @media (max-width: 479px) {
+    .top-header {
+      padding: 0 10px;
+      height: 56px;
+    }
+
+    .header-left,
+    .header-right {
+      gap: 4px;
+    }
+
+    /* Collapse clock to icon-only: hide the time text */
+    .clock-widget .clock-text {
+      display: none;
+    }
+
+    .clock-widget {
+      padding: 5px 8px;
+      gap: 0;
+    }
+
+    /* Slightly smaller icon buttons */
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+    }
+
+    .theme-toggle-btn {
+      width: 34px;
+      height: 34px;
+    }
+
+    /* Avatar a touch smaller */
+    .avatar-btn {
+      width: 34px;
+      height: 34px;
+      font-size: 12px;
+    }
+
+    .profile-dropdown {
+      margin-left: 2px;
     }
   }
 

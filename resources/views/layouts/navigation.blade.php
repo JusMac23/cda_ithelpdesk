@@ -42,7 +42,7 @@
             <button @click="toggleMenu()" title="Ticket Management" class="nav-link {{ request()->routeIs('*tickets.index') ? 'active' : '' }}">
                 <span class="material-symbols-outlined">confirmation_number</span>
                 <span class="nav-text">Ticket Management</span>
-                <svg class="chevron" :class="open ? 'open' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="chevron shrink-0" :class="open ? 'open' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
             </button>
@@ -103,7 +103,7 @@
             <button @click="toggleMenu()" title="Incident Management" class="nav-link {{ (request()->routeIs('databreach.*') || request()->is('overview_databreach*')) ? 'active' : '' }}">
                 <span class="material-symbols-outlined">shield_radar</span>
                 <span class="nav-text">Incident Management</span>
-                <svg class="chevron" :class="open ? 'open' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="chevron shrink-0" :class="open ? 'open' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
             </button>

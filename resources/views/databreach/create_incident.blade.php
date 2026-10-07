@@ -260,8 +260,7 @@
                 </a>
 
                 <button type="submit" id="submitReportBtn" disabled 
-                        class="w-full sm:w-auto h-11 px-8 rounded-xl text-xs sm:text-sm font-semibold text-white bg-rose-600 hover:bg-rose-500 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed shadow-md shadow-rose-600/20 disabled:shadow-none flex items-center justify-center gap-2 transition-all cursor-pointer">
-                    <span class="material-symbols-outlined text-lg">report</span>
+                    class="w-full sm:w-auto h-11 px-8 rounded-xl text-xs sm:text-sm font-semibold text-white bg-rose-600 hover:bg-rose-500 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed shadow-md shadow-rose-600/20 disabled:shadow-none flex items-center justify-center gap-2 transition-all cursor-pointer">
                     <span>Submit Report</span>
                 </button>
             </div>

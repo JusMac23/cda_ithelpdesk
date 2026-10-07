@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL; // <-- 1. Added this import
+use Illuminate\Pagination\Paginator;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 use SocialiteProviders\Authentik\AuthentikExtendSocialite;
 
@@ -20,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
         if (config('app.env') === 'production') {
             URL::forceScheme('https');
         }
+
+        // 3. Use Tailwind CSS for Laravel pagination
+        Paginator::defaultView('pagination::tailwind');
+        Paginator::defaultSimpleView('pagination::simple-tailwind');
 
         // Hook Authentik into Socialite (Your existing code kept intact)
         $this->app->events->listen(
