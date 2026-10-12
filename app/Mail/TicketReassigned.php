@@ -29,11 +29,11 @@ class TicketReassigned extends Mailable
 
         $pdf = new TSARpdf();
         $pdf->AddPage();
-        $pdf->SetMargins(25.4, 10, 25.4); 
+        $pdf->SetMargins(25.4, 10, 25.4);
         $pdf->SetFont('Arial', '', 8);
 
         $pageWidth = $pdf->GetPageWidth();
-        $pdf->Image(public_path('images/CDA-logo-RA11364-PNG.png'), 25.4, 25, 25); 
+        $pdf->Image(public_path('images/CDA-logo-RA11364-PNG.png'), 25.4, 25, 25);
         $pdf->Image(public_path('images/codedform.png'), $pageWidth - 25.4 - 30, 10, 30);
 
         $pdf->SetXY(25.4, 30);
@@ -64,7 +64,7 @@ class TicketReassigned extends Mailable
         $pdf->Cell(79.6, 7, 'Date Request:', 'LTR', 1);
         $pdf->SetFont('Arial', '', 8);
         $pdf->Cell(79.6, 10, $t->division, 'LR', 0);
-        $pdf->Cell(79.6, 10, \Carbon\Carbon::parse($t->date_created)->format('M d, Y h:i A'), 'LR', 1);
+        $pdf->Cell(79.6, 10, $t->date_created ? Carbon::parse($t->date_created)->format('M d, Y h:i A') : '', 'LR', 1);
         $pdf->Cell(159.2, 0, '', 'T', 1);
 
         $pdf->SetFont('Arial', 'B', 8);
@@ -88,21 +88,53 @@ class TicketReassigned extends Mailable
 
         $pdf->SetFont('Arial', 'B', 8);
         $pdf->Cell(159.2, 7, 'Technical Support Request Description/Definition:', 'LTR', 1);
-        $pdf->SetFont('Arial', '', 8);
-        $pdf->MultiCell(159.2, 21, $t->request, 'LRB');
+        $this->renderFixedTableCell($pdf, $t->request, 159.2, 21);
 
         $pdf->SetFont('Arial', 'B', 8);
         $pdf->Cell(159.2, 7, 'Action Taken/Recommendation:', 'LTR', 1);
-        $pdf->SetFont('Arial', '', 8);
-        $pdf->MultiCell(159.2, 21, $t->action_taken ?? 'Pending', 'LRB');
+        $this->renderFixedTableCell($pdf, $t->action_taken ?? 'Pending', 159.2, 21);
         $pdf->Ln(14);
 
         $pdf->SetFont('Arial', 'B', 10);
-        $pdf->Cell(79.6, 7, strtoupper($t->firstname . ' ' . $t->lastname . ' ' . Carbon::parse($t->date_created)->format('m/d/Y g:i A')), 0, 0, 'C');
-        $pdf->Cell(79.6, 7, strtoupper($t->assigned_to), 0, 1, 'C');
+
+        $pageHeight = $pdf->GetPageHeight();
+        $bottomMargin = 62; 
+
+        $signatureHeight = 15; 
+        $signatureWidth = 40;  
+
+        $ySignature = $pageHeight - $bottomMargin - $signatureHeight; 
+
+        $xLeft = 25.4;        
+        $xRight = $xLeft + 79.6; 
+
+        // Resolve signature image paths (handles local file paths and Base64 URIs)
+        $tempFiles = [];
+        $clientSigPath = $this->resolveSignaturePath($t->client_signature, $tempFiles);
+        $personnelSigPath = $this->resolveSignaturePath($t->personnel_signature, $tempFiles);
+
+        // Render Client Signature
+        if ($clientSigPath) {
+            $pdf->Image($clientSigPath, $xLeft + 20, $ySignature, $signatureWidth, $signatureHeight);
+        }
+
+        // Render Personnel Signature
+        if ($personnelSigPath) {
+            $pdf->Image($personnelSigPath, $xRight + 20, $ySignature, $signatureWidth, $signatureHeight);
+        }
+
+        // Move PDF Y-cursor directly below signature images before rendering text
+        $pdf->SetY($ySignature + $signatureHeight + 1);
+
+        $clientDate = $t->date_created ? Carbon::parse($t->date_created)->format('m/d/Y') : '';
+        $personnelDate = $t->date_resolved ? Carbon::parse($t->date_resolved)->format('m/d/Y') : '';
+
+        $pdf->Cell(79.6, 5, strtoupper(trim($t->firstname . ' ' . $t->lastname)) . ($clientDate ? ' ' . $clientDate : ''), 0, 0, 'C');
+        $pdf->Cell(79.6, 5, strtoupper(trim($t->it_personnel)) . ($personnelDate ? ' ' . $personnelDate : ''), 0, 1, 'C');
+        
         $pdf->SetFont('Arial', '', 8);
-        $pdf->Cell(79.6, 7, 'Name/Signature of Responsible Staff/Date', 0, 0, 'C');
-        $pdf->Cell(79.6, 7, 'Name/Signature of ICT Personnel/Date', 0, 1, 'C');
+        $pdf->Cell(79.6, 5, 'Name/Signature of Responsible Staff/Date', 0, 0, 'C');
+        $pdf->Cell(79.6, 5, 'Name/Signature of ICT Personnel/Date', 0, 1, 'C');
 
         $pdf->Ln(10);
 
@@ -125,5 +157,42 @@ class TicketReassigned extends Mailable
                     ->attachData($pdfData, 'TSAR.pdf', [
                         'mime' => 'application/pdf',
                     ]);
+    }
+    /**
+     * Renders a fixed-size table cell (preserving width and height) and fits the text inside cleanly.
+     */
+    private function renderFixedTableCell($pdf, $text, $width = 159.2, $height = 21)
+    {
+        $x = $pdf->GetX();
+        $y = $pdf->GetY();
+
+        // Draw the fixed outer table box to preserve exact table dimensions
+        $pdf->Cell($width, $height, '', 'LRB', 0);
+
+        // Position inside the box with padding
+        $paddingX = 1.5;
+        $paddingY = 1.5;
+        $availWidth = $width - ($paddingX * 2);
+
+        $text = trim((string)$text);
+
+        // Adjust font and line spacing for long text so it stays within the fixed cell
+        $fontSize = 8;
+        $lineHeight = 4;
+
+        if (strlen($text) > 400) {
+            $fontSize = 7;
+            $lineHeight = 3.2;
+        } elseif (strlen($text) > 250) {
+            $fontSize = 7.5;
+            $lineHeight = 3.6;
+        }
+
+        $pdf->SetFont('Arial', '', $fontSize);
+        $pdf->SetXY($x + $paddingX, $y + $paddingY);
+        $pdf->MultiCell($availWidth, $lineHeight, $text, 0, 'L');
+
+        // Always place cursor at the exact bottom of the fixed table cell
+        $pdf->SetXY($x, $y + $height);
     }
 }
