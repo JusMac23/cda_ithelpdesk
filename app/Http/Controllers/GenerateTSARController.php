@@ -76,13 +76,11 @@ class GenerateTSARController extends Controller
 
         $pdf->SetFont('Arial', 'B', 8);
         $pdf->Cell(159.2, 7, 'Technical Support Request Description/Definition:', 'LTR', 1);
-        $pdf->SetFont('Arial', '', 8);
-        $pdf->MultiCell(159.2, 21, $t->request, 'LRB');
+        $this->renderFixedTableCell($pdf, $t->request, 159.2, 21);
 
         $pdf->SetFont('Arial', 'B', 8);
         $pdf->Cell(159.2, 7, 'Action Taken/Recommendation:', 'LTR', 1);
-        $pdf->SetFont('Arial', '', 8);
-        $pdf->MultiCell(159.2, 21, $t->action_taken ?? 'Pending', 'LRB');
+        $this->renderFixedTableCell($pdf, $t->action_taken ?? 'Pending', 159.2, 21);
         $pdf->Ln(14);
 
         $pdf->SetFont('Arial', 'B', 10);
@@ -191,5 +189,43 @@ class GenerateTSARController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * Renders a fixed-size table cell (preserving width and height) and fits the text inside cleanly.
+     */
+    private function renderFixedTableCell($pdf, $text, $width = 159.2, $height = 21)
+    {
+        $x = $pdf->GetX();
+        $y = $pdf->GetY();
+
+        // Draw the fixed outer table box to preserve exact table dimensions
+        $pdf->Cell($width, $height, '', 'LRB', 0);
+
+        // Position inside the box with padding
+        $paddingX = 1.5;
+        $paddingY = 1.5;
+        $availWidth = $width - ($paddingX * 2);
+
+        $text = trim((string)$text);
+
+        // Adjust font and line spacing for long text so it stays within the fixed cell
+        $fontSize = 8;
+        $lineHeight = 4;
+
+        if (strlen($text) > 400) {
+            $fontSize = 7;
+            $lineHeight = 3.2;
+        } elseif (strlen($text) > 250) {
+            $fontSize = 7.5;
+            $lineHeight = 3.6;
+        }
+
+        $pdf->SetFont('Arial', '', $fontSize);
+        $pdf->SetXY($x + $paddingX, $y + $paddingY);
+        $pdf->MultiCell($availWidth, $lineHeight, $text, 0, 'L');
+
+        // Always place cursor at the exact bottom of the fixed table cell
+        $pdf->SetXY($x, $y + $height);
     }
 }

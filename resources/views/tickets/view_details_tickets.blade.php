@@ -136,9 +136,7 @@
                     <div class="space-y-4">
                         <div>
                             <span class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">Request Description</span>
-                            <div class="text-sm font-medium text-[var(--text-dark)] bg-slate-50 dark:bg-slate-800/50 border border-[var(--border-light)] rounded-xl p-4 leading-relaxed whitespace-pre-wrap">
-                                {{ $ticket->request }}
-                            </div>
+                            <div class="text-sm font-medium text-[var(--text-dark)] bg-slate-50 dark:bg-slate-800/50 border border-[var(--border-light)] rounded-xl p-4 leading-normal whitespace-pre-line break-words">{{ trim($ticket->request) }}</div>
                         </div>
 
                         <!-- Client Attached Issue Photo Evidence -->
@@ -185,9 +183,7 @@
 
                         <div>
                             <span class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">Action Taken</span>
-                            <div class="text-sm font-medium text-[var(--text-dark)] bg-slate-50 dark:bg-slate-800/50 border border-[var(--border-light)] rounded-xl p-4 leading-relaxed whitespace-pre-wrap">
-                                {{ $ticket->action_taken ?: 'No resolution actions recorded yet.' }}
-                            </div>
+                            <div class="text-sm font-medium text-[var(--text-dark)] bg-slate-50 dark:bg-slate-800/50 border border-[var(--border-light)] rounded-xl p-4 leading-normal whitespace-pre-line break-words">{{ trim($ticket->action_taken) ?: 'No resolution actions recorded yet.' }}</div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
