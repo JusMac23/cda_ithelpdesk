@@ -125,7 +125,7 @@
                 </a>
                 <span class="text-slate-600">•</span>
                 <a href="{{ route('login') }}" class="hover:text-blue-400 flex items-center gap-1 transition-colors">
-                    <span class="material-symbols-outlined text-base">lock</span> Staff Login
+                    <span class="material-symbols-outlined text-base">lock</span>Login
                 </a>
             </div>
 
@@ -384,8 +384,25 @@
                         <span class="material-symbols-outlined text-slate-400 text-2xl transition-transform duration-300 ease-out group-open:rotate-180 group-open:text-blue-400" aria-hidden="true">expand_more</span>
                     </summary>
                     <div class="px-6 pb-6 pt-2 text-slate-300 text-sm sm:text-base leading-relaxed border-t border-white/5 space-y-2">
-                        <ol class="list-decimal pl-6 space-y-2">
-                            <li>Submit an official scheduling request through <strong class="text-white">1calendar.cda.gov.ph</strong>.</li>
+                        <ol class="list-decimal pl-6 space-y-3">
+                            <li class="space-y-3">
+                                <div>Submit an official scheduling request through <strong class="text-white">1calendar.cda.gov.ph</strong> or <strong class="text-white">scan the QR code below</strong> to directly access the Google Form.</div>
+                                <div class="inline-flex flex-col sm:flex-row items-start sm:items-center gap-3.5 p-3 bg-slate-800/80 rounded-xl border border-white/10 shadow-md">
+                                    <div class="bg-white p-2 rounded-lg shadow-sm shrink-0">
+                                        <img src="{{ asset('images/zoomlinkrequest.png') }}" 
+                                             alt="Zoom Link Request QR Code" 
+                                             class="w-32 h-32 sm:w-36 sm:h-36 object-contain block" 
+                                             loading="lazy">
+                                    </div>
+                                    <div class="text-xs sm:text-sm text-slate-300 space-y-1">
+                                        <div class="font-semibold text-white flex items-center gap-1.5">
+                                            <span class="material-symbols-outlined text-blue-400 text-base" aria-hidden="true">qr_code_scanner</span>
+                                            Zoom Request Form QR
+                                        </div>
+                                        <p class="text-slate-400 text-xs leading-normal">Scan with your mobile camera or QR reader to open the Zoom scheduling request form.</p>
+                                    </div>
+                                </div>
+                            </li>
                             <li>Once submitted, invite <code class="text-blue-300 bg-blue-950/60 px-1.5 py-0.5 rounded">1calendar.cda.gov.ph</code> and <code class="text-blue-300 bg-blue-950/60 px-1.5 py-0.5 rounded">videocom@cda.gov.ph</code> as Event Modifiers.</li>
                             <li>Upon approval by PPDD, the ICT team will attach the confirmed Zoom meeting credentials to your calendar schedule.</li>
                         </ol>
@@ -393,6 +410,72 @@
                 </details>
 
                 {{-- FAQ 5 --}}
+                <details class="faq-item group bg-slate-900/60 backdrop-blur-md rounded-2xl border border-white/10 overflow-hidden transition-all duration-300 hover:border-blue-500/40 hover:bg-slate-900/80">
+                    <summary class="p-5 sm:p-6 text-base sm:text-lg font-bold text-white cursor-pointer list-none flex justify-between items-center select-none marker:content-none [&::-webkit-details-marker]:hidden">
+                        <span class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-blue-400">workspaces</span>
+                            How do I request a CDA Workspace Account?
+                        </span>
+                        <span class="material-symbols-outlined text-slate-400 text-2xl transition-transform duration-300 ease-out group-open:rotate-180 group-open:text-blue-400" aria-hidden="true">expand_more</span>
+                    </summary>
+                    <div class="px-6 pb-6 pt-2 text-slate-300 text-sm sm:text-base leading-relaxed border-t border-white/5 space-y-2">
+                        <ol class="list-decimal pl-6 space-y-3">
+                            <li class="space-y-3">
+                                <div>Submit an official scheduling request through <strong class="text-white">1calendar.cda.gov.ph</strong> or <strong class="text-white">scan the QR code below</strong> to directly access the Google Form.</div>
+                                <div class="inline-flex flex-col sm:flex-row items-start sm:items-center gap-3.5 p-3 bg-slate-800/80 rounded-xl border border-white/10 shadow-md">
+                                    <div class="bg-white p-2 rounded-lg shadow-sm shrink-0">
+                                        <img src="{{ asset('images/workspacerequest.png') }}" 
+                                             alt="CDA Workspace Account QR Code" 
+                                             class="w-32 h-32 sm:w-36 sm:h-36 object-contain block" 
+                                             loading="lazy">
+                                    </div>
+                                    <div class="text-xs sm:text-sm text-slate-300 space-y-1">
+                                        <div class="font-semibold text-white flex items-center gap-1.5">
+                                            <span class="material-symbols-outlined text-blue-400 text-base" aria-hidden="true">qr_code_scanner</span>
+                                            CDA Workspace Account QR
+                                        </div>
+                                        <p class="text-slate-400 text-xs leading-normal">Scan with your mobile camera or QR reader to open the CDA Workspace Account request form.</p>
+                                    </div>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                </details>
+
+                {{-- FAQ 6 --}}
+                <details class="faq-item group bg-slate-900/60 backdrop-blur-md rounded-2xl border border-white/10 overflow-hidden transition-all duration-300 hover:border-blue-500/40 hover:bg-slate-900/80">
+                    <summary class="p-5 sm:p-6 text-base sm:text-lg font-bold text-white cursor-pointer list-none flex justify-between items-center select-none marker:content-none [&::-webkit-details-marker]:hidden">
+                        <span class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-blue-400">email</span>
+                            How do I request a CDA Email Account?
+                        </span>
+                        <span class="material-symbols-outlined text-slate-400 text-2xl transition-transform duration-300 ease-out group-open:rotate-180 group-open:text-blue-400" aria-hidden="true">expand_more</span>
+                    </summary>
+                    <div class="px-6 pb-6 pt-2 text-slate-300 text-sm sm:text-base leading-relaxed border-t border-white/5 space-y-2">
+                        <ol class="list-decimal pl-6 space-y-3">
+                            <li class="space-y-3">
+                                <div>Submit an official scheduling request through <strong class="text-white">1calendar.cda.gov.ph</strong> or <strong class="text-white">scan the QR code below</strong> to directly access the Google Form.</div>
+                                <div class="inline-flex flex-col sm:flex-row items-start sm:items-center gap-3.5 p-3 bg-slate-800/80 rounded-xl border border-white/10 shadow-md">
+                                    <div class="bg-white p-2 rounded-lg shadow-sm shrink-0">
+                                        <img src="{{ asset('images/CDAemailaccount.png') }}" 
+                                             alt="CDA Email Account QR Code" 
+                                             class="w-32 h-32 sm:w-36 sm:h-36 object-contain block" 
+                                             loading="lazy">
+                                    </div>
+                                    <div class="text-xs sm:text-sm text-slate-300 space-y-1">
+                                        <div class="font-semibold text-white flex items-center gap-1.5">
+                                            <span class="material-symbols-outlined text-blue-400 text-base" aria-hidden="true">qr_code_scanner</span>
+                                            CDA Email Account QR
+                                        </div>
+                                        <p class="text-slate-400 text-xs leading-normal">Scan with your mobile camera or QR reader to open the CDA Email Account request form.</p>
+                                    </div>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                </details>
+
+                {{-- FAQ 7 --}}
                 <details class="faq-item group bg-slate-900/60 backdrop-blur-md rounded-2xl border border-white/10 overflow-hidden transition-all duration-300 hover:border-blue-500/40 hover:bg-slate-900/80">
                     <summary class="p-5 sm:p-6 text-base sm:text-lg font-bold text-white cursor-pointer list-none flex justify-between items-center select-none marker:content-none [&::-webkit-details-marker]:hidden">
                         <span class="flex items-center gap-3">
@@ -439,7 +522,7 @@
                 <ul class="space-y-2 text-xs">
                     <li><a href="{{ url('create_ticket') }}" class="hover:text-white transition-colors">Submit Support Ticket</a></li>
                     <li><a href="{{ url('create_incident') }}" class="hover:text-white transition-colors">Report Security Incident (DBRS)</a></li>
-                    <li><a href="{{ route('login') }}" class="hover:text-white transition-colors">Staff Login</a></li>
+                    <li><a href="{{ route('login') }}" class="hover:text-white transition-colors">Login</a></li>
                     <li><a href="#faq-heading" class="hover:text-white transition-colors">Help & Documentation</a></li>
                 </ul>
             </div>
