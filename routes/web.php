@@ -23,6 +23,7 @@ use App\Http\Controllers\GenerateDocsController;
 use App\Http\Controllers\DatabreachTeamController;
 use App\Http\Controllers\Auth\OAuthGoogleController;
 use App\Http\Controllers\Auth\OAuthAuthentikController;
+use App\Http\Controllers\ClientFeedbackController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -54,6 +55,10 @@ Route::post('/tickets/{ticket_id}/client-signature', [UploadClientSignatureContr
 // Personnel Signature Routes
 Route::get('/tickets/{ticket_id}/personnel-signature', [UploadPersonnelSignatureController::class, 'showSignatureForm'])->name('tickets.personnel_signature');
 Route::post('/tickets/{ticket_id}/personnel-signature', [UploadPersonnelSignatureController::class, 'saveSignature'])->name('tickets.savePersonnelSignature');
+
+// Client Feedback / CSM Routes
+Route::get('/tickets/{ticket_id}/feedback', [ClientFeedbackController::class, 'showFeedbackForm'])->name('tickets.feedback');
+Route::post('/tickets/{ticket_id}/feedback', [ClientFeedbackController::class, 'saveFeedback'])->name('tickets.saveFeedback');
 
 // Authenticated routes
 Route::middleware(['auth', 'verified'])->group(function () {

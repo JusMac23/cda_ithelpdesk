@@ -8,6 +8,7 @@ use Illuminate\Queue\SerializesModels;
 use App\PDF\TSARpdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class TicketUpdated extends Mailable
 {
@@ -149,11 +150,57 @@ class TicketUpdated extends Mailable
 
         $pdfData = $pdf->Output('S');
 
+        foreach ($tempFiles as $temp) {
+            if (file_exists($temp)) {
+                @unlink($temp);
+            }
+        }
+
         return $this->subject('A Ticket has been Resolved - Ticket Number: ' . $t->ticket_number)
                     ->markdown('emails.ticket_updated')
                     ->attachData($pdfData, 'TSAR.pdf', [
                         'mime' => 'application/pdf',
                     ]);
+    }
+
+    /**
+     * Resolves physical file path for signature data (supports local paths & Base64 URIs).
+     */
+    private function resolveSignaturePath($signatureData, &$tempFiles = [])
+    {
+        if (empty($signatureData)) {
+            return null;
+        }
+
+        // Case 1: Base64 Encoded Image Data (e.g., data:image/png;base64,...)
+        if (Str::startsWith($signatureData, 'data:image')) {
+            $parts = explode(',', $signatureData);
+            if (count($parts) > 1) {
+                $decoded = base64_decode($parts[1]);
+                $tempPath = sys_get_temp_dir() . '/sig_' . uniqid() . '.png';
+                file_put_contents($tempPath, $decoded);
+                $tempFiles[] = $tempPath;
+                return $tempPath;
+            }
+        }
+
+        // Case 2: Standard File Path
+        $cleanPath = ltrim(str_replace(['public/', 'storage/'], '', $signatureData), '/');
+
+        $possiblePaths = [
+            storage_path('app/public/' . $cleanPath),
+            public_path('storage/' . $cleanPath),
+            public_path($signatureData),
+            storage_path('app/' . $signatureData),
+        ];
+
+        foreach ($possiblePaths as $path) {
+            if (file_exists($path) && is_file($path)) {
+                return $path;
+            }
+        }
+
+        return null;
     }
 
     /**

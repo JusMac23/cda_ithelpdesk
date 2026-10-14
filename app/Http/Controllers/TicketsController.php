@@ -148,7 +148,7 @@ class TicketsController extends Controller
      * @param  string    $context   Human-readable label used in log messages.
      * @return void
      */
-    private function sendMailSafely(string $toEmail, $mailable, string $context = ''): void
+    private function sendMailSafely(?string $toEmail, $mailable, string $context = ''): void
     {
         if (empty($toEmail) || ! filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
             return;
@@ -624,9 +624,34 @@ class TicketsController extends Controller
 
         DB::transaction(fn() => $ticket->update($validated));
 
+        // Resolve IT personnel recipient email with fallback lookups
+        $itPersonnelEmail = trim($ticket->it_email ?? '');
+        if (empty($itPersonnelEmail) || ! filter_var($itPersonnelEmail, FILTER_VALIDATE_EMAIL)) {
+            $fallback = $ticket->re_assigned_it_email ?? $ticket->assigned_it_email;
+            if (! empty($fallback) && filter_var($fallback, FILTER_VALIDATE_EMAIL)) {
+                $itPersonnelEmail = trim($fallback);
+            } elseif (! empty($ticket->it_personnel)) {
+                $user = User::where('name', $ticket->it_personnel)
+                    ->orWhereRaw("CONCAT(firstname, ' ', lastname) = ?", [$ticket->it_personnel])
+                    ->first();
+                if ($user && filter_var($user->email, FILTER_VALIDATE_EMAIL)) {
+                    $itPersonnelEmail = trim($user->email);
+                } else {
+                    $itPerson = ITPersonnel::whereRaw("CONCAT(firstname, ' ', lastname) = ?", [$ticket->it_personnel])
+                        ->orWhere('firstname', $ticket->it_personnel)
+                        ->first();
+                    if ($itPerson && ! empty($itPerson->it_email) && filter_var($itPerson->it_email, FILTER_VALIDATE_EMAIL)) {
+                        $itPersonnelEmail = trim($itPerson->it_email);
+                    }
+                }
+            }
+        }
+
         // Send resolution emails outside the transaction.
+        // Requester receives TicketUpdated (includes feedback form link)
         $this->sendMailSafely($ticket->email,       new TicketUpdated($ticket),  'ticket-updated requester');
-        $this->sendMailSafely($ticket->it_email,    new TicketResolved($ticket), 'ticket-resolved IT personnel');
+        // IT personnel receives TicketResolved (NO feedback form link)
+        $this->sendMailSafely($itPersonnelEmail,    new TicketResolved($ticket), 'ticket-resolved IT personnel');
 
         // In-app notification for the requester on resolution.
         if ($ticket->status === 'Resolved') {

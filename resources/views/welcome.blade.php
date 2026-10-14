@@ -389,7 +389,7 @@
                                 <div>Submit an official scheduling request through <strong class="text-white">1calendar.cda.gov.ph</strong> or <strong class="text-white">scan the QR code below</strong> to directly access the Google Form.</div>
                                 <div class="inline-flex flex-col sm:flex-row items-start sm:items-center gap-3.5 p-3 bg-slate-800/80 rounded-xl border border-white/10 shadow-md">
                                     <div class="bg-white p-2 rounded-lg shadow-sm shrink-0">
-                                        <img src="{{ asset('images/zoomlinkrequest.png') }}" 
+                                        <img src="{{ asset('images/zoomlink.png') }}" 
                                              alt="Zoom Link Request QR Code" 
                                              class="w-32 h-32 sm:w-36 sm:h-36 object-contain block" 
                                              loading="lazy">
@@ -424,7 +424,7 @@
                                 <div>Submit an official reservation request through <strong class="text-white">itportal.cda.gov.ph</strong> or <strong class="text-white">scan the QR code below</strong> to directly access the Google Form.</div>
                                 <div class="inline-flex flex-col sm:flex-row items-start sm:items-center gap-3.5 p-3 bg-slate-800/80 rounded-xl border border-white/10 shadow-md">
                                     <div class="bg-white p-2 rounded-lg shadow-sm shrink-0">
-                                        <img src="{{ asset('images/workspacerequest.png') }}" 
+                                        <img src="{{ asset('images/cda-workspace.png') }}" 
                                              alt="CDA Workspace Account QR Code" 
                                              class="w-32 h-32 sm:w-36 sm:h-36 object-contain block" 
                                              loading="lazy">
@@ -457,7 +457,7 @@
                                 <div>Submit an official reservation request through <strong class="text-white">itportal.cda.gov.ph</strong> or <strong class="text-white">scan the QR code below</strong> to directly access the Google Form.</div>
                                 <div class="inline-flex flex-col sm:flex-row items-start sm:items-center gap-3.5 p-3 bg-slate-800/80 rounded-xl border border-white/10 shadow-md">
                                     <div class="bg-white p-2 rounded-lg shadow-sm shrink-0">
-                                        <img src="{{ asset('images/CDAemailaccount.png') }}" 
+                                        <img src="{{ asset('images/govmail.png') }}" 
                                              alt="CDA Email Account QR Code" 
                                              class="w-32 h-32 sm:w-36 sm:h-36 object-contain block" 
                                              loading="lazy">

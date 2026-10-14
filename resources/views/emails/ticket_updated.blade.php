@@ -30,7 +30,7 @@ Upload Signature
 
 We request also to fill out the feedback form to help us improve our services. Please click Feedback Form below to proceed:
 
-@component('mail::button', ['url' => 'https://docs.google.com/forms/d/e/1FAIpQLSf4wzO96Dzzoj68n0OIYvEYRupsHZLPxnn8QHBV8jRWjSpzqQ/viewform'])
+@component('mail::button', ['url' => route('tickets.feedback', $ticket->ticket_id)])
 Feedback Form
 @endcomponent
 

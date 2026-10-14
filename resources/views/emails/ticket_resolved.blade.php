@@ -28,10 +28,6 @@ Click Upload Signature below to upload your e-signature:
 Upload Signature
 @endcomponent
 
-@component('mail::button', ['url' => 'https://docs.google.com/forms/d/e/1FAIpQLSf4wzO96Dzzoj68n0OIYvEYRupsHZLPxnn8QHBV8jRWjSpzqQ/viewform'])
-Feedback Form
-@endcomponent
-
 **Ticket Number:** {{ $ticket->ticket_number }}  
 **Name:** {{ $ticket->firstname }} {{ $ticket->lastname }}  
 **Division:** {{ $ticket->division }}  

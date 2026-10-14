@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 use App\Mail\TicketReassigned;
@@ -162,9 +163,45 @@ class AssignedToMeController extends Controller
 
         $ticket->update($validatedData);
 
-        if ($ticket->email && $ticket->it_email) {
-            Mail::to($ticket->email)->send(new TicketUpdated($ticket));
-            Mail::to($ticket->it_email)->send(new TicketResolved($ticket));
+        // Resolve IT personnel email with fallback lookup
+        $itPersonnelEmail = trim($ticket->it_email ?? '');
+        if (empty($itPersonnelEmail) || ! filter_var($itPersonnelEmail, FILTER_VALIDATE_EMAIL)) {
+            $fallback = $ticket->re_assigned_it_email ?? $ticket->assigned_it_email;
+            if (! empty($fallback) && filter_var($fallback, FILTER_VALIDATE_EMAIL)) {
+                $itPersonnelEmail = trim($fallback);
+            } elseif (! empty($ticket->it_personnel)) {
+                $user = User::where('name', $ticket->it_personnel)
+                    ->orWhereRaw("CONCAT(firstname, ' ', lastname) = ?", [$ticket->it_personnel])
+                    ->first();
+                if ($user && filter_var($user->email, FILTER_VALIDATE_EMAIL)) {
+                    $itPersonnelEmail = trim($user->email);
+                } else {
+                    $itPerson = ITPersonnel::whereRaw("CONCAT(firstname, ' ', lastname) = ?", [$ticket->it_personnel])
+                        ->orWhere('firstname', $ticket->it_personnel)
+                        ->first();
+                    if ($itPerson && ! empty($itPerson->it_email) && filter_var($itPerson->it_email, FILTER_VALIDATE_EMAIL)) {
+                        $itPersonnelEmail = trim($itPerson->it_email);
+                    }
+                }
+            }
+        }
+
+        // Send resolution email to Requester (includes Feedback form link)
+        if (! empty($ticket->email) && filter_var($ticket->email, FILTER_VALIDATE_EMAIL)) {
+            try {
+                Mail::to($ticket->email)->send(new TicketUpdated($ticket));
+            } catch (\Throwable $e) {
+                Log::error("Resolution email to requester failed [{$ticket->email}]: " . $e->getMessage());
+            }
+        }
+
+        // Send resolution email to IT Personnel (NO feedback form link)
+        if (! empty($itPersonnelEmail) && filter_var($itPersonnelEmail, FILTER_VALIDATE_EMAIL)) {
+            try {
+                Mail::to($itPersonnelEmail)->send(new TicketResolved($ticket));
+            } catch (\Throwable $e) {
+                Log::error("Resolution email to IT personnel failed [{$itPersonnelEmail}]: " . $e->getMessage());
+            }
         }
 
         // Notify the requestee (ticket owner)

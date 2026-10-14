@@ -8,6 +8,7 @@ use Illuminate\Queue\SerializesModels;
 use App\PDF\TSARpdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class TicketResolved extends Mailable
 {
@@ -93,11 +94,45 @@ class TicketResolved extends Mailable
         $pdf->Ln(14);
 
         $pdf->SetFont('Arial', 'B', 10);
-        $pdf->Cell(79.6, 7, strtoupper($t->firstname . ' ' . $t->lastname . ' ' . Carbon::parse($t->date_created)->format('m/d/Y g:i A')), 0, 0, 'C');
-        $pdf->Cell(79.6, 7, strtoupper($t->it_personnel . ' ' . Carbon::parse($t->date_resolved)->format('M d, Y h:i A')), 0, 1, 'C');
+
+        $pageHeight = $pdf->GetPageHeight();
+        $bottomMargin = 62; 
+
+        $signatureHeight = 15; 
+        $signatureWidth = 40;  
+
+        $ySignature = $pageHeight - $bottomMargin - $signatureHeight; 
+
+        $xLeft = 25.4;        
+        $xRight = $xLeft + 79.6; 
+
+        // Resolve signature image paths (handles local file paths and Base64 URIs)
+        $tempFiles = [];
+        $clientSigPath = $this->resolveSignaturePath($t->client_signature, $tempFiles);
+        $personnelSigPath = $this->resolveSignaturePath($t->personnel_signature, $tempFiles);
+
+        // Render Client Signature
+        if ($clientSigPath) {
+            $pdf->Image($clientSigPath, $xLeft + 20, $ySignature, $signatureWidth, $signatureHeight);
+        }
+
+        // Render Personnel Signature
+        if ($personnelSigPath) {
+            $pdf->Image($personnelSigPath, $xRight + 20, $ySignature, $signatureWidth, $signatureHeight);
+        }
+
+        // Move PDF Y-cursor directly below signature images before rendering text
+        $pdf->SetY($ySignature + $signatureHeight + 1);
+
+        $clientDate = $t->date_created ? Carbon::parse($t->date_created)->format('m/d/Y') : '';
+        $personnelDate = $t->date_resolved ? Carbon::parse($t->date_resolved)->format('m/d/Y') : '';
+
+        $pdf->Cell(79.6, 5, strtoupper(trim($t->firstname . ' ' . $t->lastname)) . ($clientDate ? ' ' . $clientDate : ''), 0, 0, 'C');
+        $pdf->Cell(79.6, 5, strtoupper(trim($t->it_personnel)) . ($personnelDate ? ' ' . $personnelDate : ''), 0, 1, 'C');
+        
         $pdf->SetFont('Arial', '', 8);
-        $pdf->Cell(79.6, 7, 'Name/Signature of Responsible Staff/Date', 0, 0, 'C');
-        $pdf->Cell(79.6, 7, 'Name/Signature of ICT Personnel/Date', 0, 1, 'C');
+        $pdf->Cell(79.6, 5, 'Name/Signature of Responsible Staff/Date', 0, 0, 'C');
+        $pdf->Cell(79.6, 5, 'Name/Signature of ICT Personnel/Date', 0, 1, 'C');
 
         $pdf->Ln(10);
 
@@ -114,11 +149,57 @@ class TicketResolved extends Mailable
 
         $pdfData = $pdf->Output('S');
 
+        foreach ($tempFiles as $temp) {
+            if (file_exists($temp)) {
+                @unlink($temp);
+            }
+        }
+
         return $this->subject('A Ticket has been Resolved - Ticket Number: ' . $t->ticket_number)
                     ->markdown('emails.ticket_resolved')
                     ->attachData($pdfData, 'TSAR.pdf', [
                         'mime' => 'application/pdf',
                     ]);
+    }
+
+    /**
+     * Resolves physical file path for signature data (supports local paths & Base64 URIs).
+     */
+    private function resolveSignaturePath($signatureData, &$tempFiles = [])
+    {
+        if (empty($signatureData)) {
+            return null;
+        }
+
+        // Case 1: Base64 Encoded Image Data (e.g., data:image/png;base64,...)
+        if (Str::startsWith($signatureData, 'data:image')) {
+            $parts = explode(',', $signatureData);
+            if (count($parts) > 1) {
+                $decoded = base64_decode($parts[1]);
+                $tempPath = sys_get_temp_dir() . '/sig_' . uniqid() . '.png';
+                file_put_contents($tempPath, $decoded);
+                $tempFiles[] = $tempPath;
+                return $tempPath;
+            }
+        }
+
+        // Case 2: Standard File Path
+        $cleanPath = ltrim(str_replace(['public/', 'storage/'], '', $signatureData), '/');
+
+        $possiblePaths = [
+            storage_path('app/public/' . $cleanPath),
+            public_path('storage/' . $cleanPath),
+            public_path($signatureData),
+            storage_path('app/' . $signatureData),
+        ];
+
+        foreach ($possiblePaths as $path) {
+            if (file_exists($path) && is_file($path)) {
+                return $path;
+            }
+        }
+
+        return null;
     }
 
     /**

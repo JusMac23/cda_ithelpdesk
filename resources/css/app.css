@@ -1138,3 +1138,251 @@
     transition-delay: 0s !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   CDA Client Satisfaction Measurement (CSM) / Feedback Form Styles
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Custom checkbox and rating inputs with print-color-adjust */
+.csm-cb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  min-height: 12px;
+  border: 1.5px solid #1f2937;
+  border-radius: 2px;
+  background: #ffffff;
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  vertical-align: middle;
+  margin: 0;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  transition: background 0.1s;
+}
+
+.csm-cb:checked {
+  background: #111827;
+  border-color: #111827;
+}
+
+.csm-cb:checked::before {
+  content: '✔';
+  color: #ffffff;
+  font-size: 8.5px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.csm-rate {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 13px;
+  height: 13px;
+  min-width: 13px;
+  min-height: 13px;
+  border: 1.5px solid #374151;
+  border-radius: 2px;
+  background: #ffffff;
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+  margin: 0 auto;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  transition: background 0.1s;
+}
+
+.csm-rate:checked {
+  background: #111827;
+  border-color: #111827;
+}
+
+.csm-rate:checked::before {
+  content: '✔';
+  color: #ffffff;
+  font-size: 8.5px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* Underline fields */
+.csm-field {
+  border: none;
+  border-bottom: 1px solid #374151;
+  background: transparent;
+  outline: none;
+  padding: 0 2px 1px 2px;
+  font-size: 9px;
+  color: #111827;
+  line-height: 1.2;
+  font-family: inherit;
+}
+
+.csm-field:focus {
+  border-bottom-color: #2563eb;
+}
+
+.csm-field:disabled {
+  background: transparent;
+  cursor: default;
+  font-weight: 700;
+  color: #1e3a5f;
+}
+
+/* SQD Rating Table */
+.sqd-table {
+  border-collapse: collapse;
+  width: 100%;
+  height: 100%;
+  font-size: 8.5px;
+  table-layout: fixed;
+}
+
+.sqd-table th,
+.sqd-table td {
+  border: 1px solid #374151;
+  padding: 2.5px 3px;
+  vertical-align: middle;
+}
+
+.sqd-table th {
+  text-align: center;
+  font-weight: 700;
+  background: #f9fafb;
+  font-size: 8px;
+  line-height: 1.1;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+.sqd-table tbody {
+  height: 100%;
+}
+
+.sqd-table tbody tr {
+  height: 1px;
+}
+
+/* A4 Paper on screen */
+.paper-wrap {
+  width: 210mm;
+  min-height: 297mm;
+  height: 297mm;
+  margin: 0 auto;
+  padding: 0.5in;
+  box-sizing: border-box;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+#csmForm {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+}
+
+.sqd-section {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.sqd-section>div {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PRINT MEDIA STYLES (Single-Page A4, 0.5 inch margins)
+   ═══════════════════════════════════════════════════════════════════ */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0.5in;
+  }
+
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-sizing: border-box !important;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+    font-size: 9px !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  main {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+  }
+
+  .paper-wrap {
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  #csmForm {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  .sqd-section {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+  }
+
+  .sqd-table {
+    height: 100% !important;
+  }
+
+  .sqd-table tbody tr {
+    height: auto !important;
+  }
+}
