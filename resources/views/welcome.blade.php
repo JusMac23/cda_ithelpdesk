@@ -421,7 +421,7 @@
                     <div class="px-6 pb-6 pt-2 text-slate-300 text-sm sm:text-base leading-relaxed border-t border-white/5 space-y-2">
                         <ol class="list-decimal pl-6 space-y-3">
                             <li class="space-y-3">
-                                <div>Submit an official scheduling request through <strong class="text-white">1calendar.cda.gov.ph</strong> or <strong class="text-white">scan the QR code below</strong> to directly access the Google Form.</div>
+                                <div>Submit an official reservation request through <strong class="text-white">itportal.cda.gov.ph</strong> or <strong class="text-white">scan the QR code below</strong> to directly access the Google Form.</div>
                                 <div class="inline-flex flex-col sm:flex-row items-start sm:items-center gap-3.5 p-3 bg-slate-800/80 rounded-xl border border-white/10 shadow-md">
                                     <div class="bg-white p-2 rounded-lg shadow-sm shrink-0">
                                         <img src="{{ asset('images/workspacerequest.png') }}" 
@@ -454,7 +454,7 @@
                     <div class="px-6 pb-6 pt-2 text-slate-300 text-sm sm:text-base leading-relaxed border-t border-white/5 space-y-2">
                         <ol class="list-decimal pl-6 space-y-3">
                             <li class="space-y-3">
-                                <div>Submit an official scheduling request through <strong class="text-white">1calendar.cda.gov.ph</strong> or <strong class="text-white">scan the QR code below</strong> to directly access the Google Form.</div>
+                                <div>Submit an official reservation request through <strong class="text-white">itportal.cda.gov.ph</strong> or <strong class="text-white">scan the QR code below</strong> to directly access the Google Form.</div>
                                 <div class="inline-flex flex-col sm:flex-row items-start sm:items-center gap-3.5 p-3 bg-slate-800/80 rounded-xl border border-white/10 shadow-md">
                                     <div class="bg-white p-2 rounded-lg shadow-sm shrink-0">
                                         <img src="{{ asset('images/CDAemailaccount.png') }}" 
