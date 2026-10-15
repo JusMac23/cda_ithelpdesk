@@ -181,7 +181,7 @@ class GenerateFeedbackController extends Controller
         // ══════════════════════════════════════════════════════════
         // 5. SERVICES SECTION
         // ══════════════════════════════════════════════════════════
-        $pdf->SetXY(13, 53.0);
+        $pdf->SetXY(13, 51.5);
         $pdf->SetFont('Arial', 'B', 7.5);
         $pdf->Cell(184, 3.4, 'SERVICES', 0, 1, 'C');
         $pdf->SetFont('Arial', '', 6.8);
@@ -205,40 +205,40 @@ class GenerateFeedbackController extends Controller
             'Request for Technical Assistance',
         ];
 
-        $ySvcStart = 60.5;
-        $svcRowHeight = 3.6;
+        $ySvcStart = 58.5;
+        $svcRowHeight = 4.4; // Added vertical gap between service checkboxes
 
         // Render Left Column
         foreach ($leftServices as $i => $svc) {
             $yPos = $ySvcStart + ($i * $svcRowHeight);
             $isChecked = in_array($svc, $servicesSelected, true);
-            $pdf->Checkbox(13, $yPos + 0.3, $isChecked);
+            $pdf->Checkbox(13, $yPos + 0.3, $isChecked, 3.2);
             $pdf->SetXY(17, $yPos);
             $pdf->SetFont('Arial', '', 6.8);
-            $pdf->Cell(84, $svcRowHeight, $svc, 0, 0, 'L');
+            $pdf->Cell(84, 3.6, $svc, 0, 0, 'L');
         }
 
         // Render Right Column
         foreach ($rightServices as $i => $svc) {
             $yPos = $ySvcStart + ($i * $svcRowHeight);
             $isChecked = in_array($svc, $servicesSelected, true);
-            $pdf->Checkbox(107, $yPos + 0.3, $isChecked);
+            $pdf->Checkbox(107, $yPos + 0.3, $isChecked, 3.2);
             $pdf->SetXY(111, $yPos);
             $pdf->SetFont('Arial', '', 6.8);
-            $pdf->Cell(86, $svcRowHeight, $svc, 0, 0, 'L');
+            $pdf->Cell(86, 3.6, $svc, 0, 0, 'L');
         }
 
-        // OTHERS field in right column
+        // OTHERS field in right column with comfortable gap
         $yOthers = $ySvcStart + (count($rightServices) * $svcRowHeight) + 0.5;
         $pdf->SetXY(107, $yOthers);
         $pdf->SetFont('Arial', 'B', 6.8);
-        $pdf->Cell(13, $svcRowHeight, 'OTHERS,', 0, 0);
+        $pdf->Cell(13, 3.6, 'OTHERS,', 0, 0);
         $pdf->SetFont('Arial', '', 6.8);
-        $pdf->Cell(19, $svcRowHeight, 'please specify', 0, 0);
-        $pdf->Cell(58, $svcRowHeight, $otherService, 'B', 0, 'L');
+        $pdf->Cell(19, 3.6, 'please specify', 0, 0);
+        $pdf->Cell(58, 3.6, $otherService, 'B', 0, 'L');
 
-        // Extra underline beneath OTHERS row (matches blade border-bottom div)
-        $yOthersUnderline = $yOthers + $svcRowHeight + 2.0;
+        // Extra underline beneath OTHERS row
+        $yOthersUnderline = $yOthers + $svcRowHeight + 1.8;
         $pdf->SetLineWidth(0.25);
         $pdf->Line(107, $yOthersUnderline, 197, $yOthersUnderline);
 
@@ -277,25 +277,25 @@ class GenerateFeedbackController extends Controller
             '4' => "4. I do not know what a CC is and I did not see one in this office. (Answer 'N/A' on CC2 and CC3)",
         ];
 
+        $ccRowHeight = 4.3; // Added vertical gap between CC checkboxes
         $yOpt = $yCC1 + 3.8;
         foreach ($cc1Options as $key => $label) {
-            $pdf->Checkbox(21, $yOpt + 0.3, (string)$cc1 === (string)$key);
+            $pdf->Checkbox(21, $yOpt + 0.3, (string)$cc1 === (string)$key, 3.2);
             $pdf->SetXY(25, $yOpt);
             $pdf->SetFont('Arial', '', 6.8);
             $pdf->Cell(172, 3.3, $label, 0, 1);
-            $yOpt += 3.4;
+            $yOpt += $ccRowHeight;
         }
 
-        // CC2
-        $yCC2 = $yOpt + 1.2;
+        // CC2 (with margin-top gap)
+        $yCC2 = $yOpt + 2.5;
         $pdf->SetXY(13, $yCC2);
         $pdf->SetFont('Arial', 'B', 7.2);
         $pdf->Cell(8, 3.4, 'CC2', 0, 0);
         $pdf->SetFont('Arial', 'B', 6.8);
         $pdf->Cell(176, 3.4, 'If aware of CC (answered 1-3 in CC1), would you say that the CC of this office was ...?', 0, 1);
 
-        // CC2 options — 2-column grid matching blade layout:
-        // Left col: 1, 2, 3   |   Right col: 4, 5
+        // CC2 options — 2-column grid with gap
         $cc2Rows = [
             ['left' => ['key' => '1', 'label' => '1. Easy to see'],          'right' => ['key' => '4', 'label' => '4. Not visible at all']],
             ['left' => ['key' => '2', 'label' => '2. Somewhat easy to see'],  'right' => ['key' => '5', 'label' => '5. N/A']],
@@ -305,32 +305,31 @@ class GenerateFeedbackController extends Controller
         $yOpt2 = $yCC2 + 3.8;
         foreach ($cc2Rows as $row) {
             $left = $row['left'];
-            $pdf->Checkbox(21, $yOpt2 + 0.3, (string)$cc2 === (string)$left['key']);
+            $pdf->Checkbox(21, $yOpt2 + 0.3, (string)$cc2 === (string)$left['key'], 3.2);
             $pdf->SetXY(25, $yOpt2);
             $pdf->SetFont('Arial', '', 6.8);
             $pdf->Cell(80, 3.3, $left['label'], 0, 0);
 
             if (!empty($row['right'])) {
                 $right = $row['right'];
-                $pdf->Checkbox(107, $yOpt2 + 0.3, (string)$cc2 === (string)$right['key']);
+                $pdf->Checkbox(107, $yOpt2 + 0.3, (string)$cc2 === (string)$right['key'], 3.2);
                 $pdf->SetXY(111, $yOpt2);
                 $pdf->Cell(80, 3.3, $right['label'], 0, 0);
             }
 
-            $pdf->Ln(3.4);
-            $yOpt2 += 3.4;
+            $pdf->Ln($ccRowHeight);
+            $yOpt2 += $ccRowHeight;
         }
 
-        // CC3
-        $yCC3 = $yOpt2 + 1.2;
+        // CC3 (with margin-top gap)
+        $yCC3 = $yOpt2 + 2.5;
         $pdf->SetXY(13, $yCC3);
         $pdf->SetFont('Arial', 'B', 7.2);
         $pdf->Cell(8, 3.4, 'CC3', 0, 0);
         $pdf->SetFont('Arial', 'B', 6.8);
         $pdf->Cell(176, 3.4, 'If aware of CC (answered codes 1-3 in CC1), how much did the CC help you in your transaction?', 0, 1);
 
-        // CC3 options — 2-column grid matching blade layout:
-        // Left col: 1, 2   |   Right col: 3, 4
+        // CC3 options — 2-column grid with gap
         $cc3Rows = [
             ['left' => ['key' => '1', 'label' => '1. Helped very much'], 'right' => ['key' => '3', 'label' => '3. Did not help']],
             ['left' => ['key' => '2', 'label' => '2. Somewhat helped'],  'right' => ['key' => '4', 'label' => '4. N/A']],
@@ -339,26 +338,27 @@ class GenerateFeedbackController extends Controller
         $yOpt3 = $yCC3 + 3.8;
         foreach ($cc3Rows as $row) {
             $left = $row['left'];
-            $pdf->Checkbox(21, $yOpt3 + 0.3, (string)$cc3 === (string)$left['key']);
+            $pdf->Checkbox(21, $yOpt3 + 0.3, (string)$cc3 === (string)$left['key'], 3.2);
             $pdf->SetXY(25, $yOpt3);
             $pdf->SetFont('Arial', '', 6.8);
             $pdf->Cell(80, 3.3, $left['label'], 0, 0);
 
             if (!empty($row['right'])) {
                 $right = $row['right'];
-                $pdf->Checkbox(107, $yOpt3 + 0.3, (string)$cc3 === (string)$right['key']);
+                $pdf->Checkbox(107, $yOpt3 + 0.3, (string)$cc3 === (string)$right['key'], 3.2);
                 $pdf->SetXY(111, $yOpt3);
                 $pdf->Cell(80, 3.3, $right['label'], 0, 0);
             }
 
-            $pdf->Ln(3.4);
-            $yOpt3 += 3.4;
+            $pdf->Ln($ccRowHeight);
+            $yOpt3 += $ccRowHeight;
         }
 
         // ══════════════════════════════════════════════════════════
         // 7. SQD RATING TABLE
         // ══════════════════════════════════════════════════════════
-        $yTableIntro = $yOpt3 + 1.8;
+        // Added generous margin-top above instructions
+        $yTableIntro = $yOpt3 + 5.0;
         $pdf->SetXY(13, $yTableIntro);
         $pdf->SetFont('Arial', 'B', 7.2);
         $pdf->Cell(184, 3.2, 'INSTRUCTIONS:', 0, 1);
@@ -370,10 +370,11 @@ class GenerateFeedbackController extends Controller
         $pdf->SetFont('Arial', '', 7.0);
         $pdf->Write(3.2, ' on the column that best corresponds to your answer.');
 
-        $yTbl = $pdf->GetY() + 4.0;
+        // Added generous margin-bottom below instructions before table
+        $yTbl = $pdf->GetY() + 5.0;
         $colQ = 66.0; // 36% of 184mm
-        $colWidths = [19.3, 19.3, 20.4, 19.3, 19.3, 20.4]; // 10.5%, 10.5%, 11%, 10.5%, 10.5%, 11%
-        $tblHeaderH = 14.0;
+        $colWidths = [19.3, 19.3, 20.4, 19.3, 19.3, 20.4];
+        $tblHeaderH = 12.5;
 
         $pdf->SetLineWidth(0.25);
         $pdf->SetDrawColor(55, 65, 81);
@@ -387,7 +388,7 @@ class GenerateFeedbackController extends Controller
             if ($c < 5) {
                 // Faces 1 to 5
                 $xFaceCenter = $curX + ($w / 2) - 3.4;
-                $pdf->DrawFace($xFaceCenter, $yTbl + 1.2, $c + 1);
+                $pdf->DrawFace($xFaceCenter, $yTbl + 1.0, $c + 1);
             }
             $curX += $w;
         }
@@ -407,23 +408,23 @@ class GenerateFeedbackController extends Controller
             $w = $colWidths[$idx];
             if ($idx === 5) {
                 // N/A header — bold "N/A" then "Not" then "Applicable"
-                $pdf->SetXY($curX, $yTbl + 2.0);
-                $pdf->SetFont('Arial', 'B', 8);
-                $pdf->Cell($w, 3.5, 'N/A', 0, 1, 'C');
-                $pdf->SetXY($curX, $yTbl + 5.5);
-                $pdf->SetFont('Arial', '', 5.6);
-                $pdf->Cell($w, 2.5, 'Not', 0, 1, 'C');
+                $pdf->SetXY($curX, $yTbl + 1.5);
+                $pdf->SetFont('Arial', 'B', 7.5);
+                $pdf->Cell($w, 3.2, 'N/A', 0, 1, 'C');
+                $pdf->SetXY($curX, $yTbl + 4.8);
+                $pdf->SetFont('Arial', '', 5.4);
+                $pdf->Cell($w, 2.4, 'Not', 0, 1, 'C');
                 $pdf->SetX($curX);
-                $pdf->Cell($w, 2.5, 'Applicable', 0, 0, 'C');
+                $pdf->Cell($w, 2.4, 'Applicable', 0, 0, 'C');
             } else {
-                $pdf->SetFont('Arial', '', 5.8);
-                $pdf->SetXY($curX, $yTbl + 8.5);
+                $pdf->SetFont('Arial', '', 5.6);
+                $pdf->SetXY($curX, $yTbl + 7.8);
                 if (!empty($lines[0])) {
-                    $pdf->Cell($w, 2.5, $lines[0], 0, 1, 'C');
+                    $pdf->Cell($w, 2.3, $lines[0], 0, 1, 'C');
                     $pdf->SetX($curX);
-                    $pdf->Cell($w, 2.5, $lines[1], 0, 0, 'C');
+                    $pdf->Cell($w, 2.3, $lines[1], 0, 0, 'C');
                 } else {
-                    $pdf->Cell($w, 4.5, $lines[1], 0, 0, 'C');
+                    $pdf->Cell($w, 4.2, $lines[1], 0, 0, 'C');
                 }
             }
             $curX += $w;
@@ -441,7 +442,7 @@ class GenerateFeedbackController extends Controller
             8 => 'I am satisfied with the service rendered. (Outcome)',
         ];
 
-        $rowH = 7.0;
+        $rowH = 5.8;
         $currentRowY = $yTbl + $tblHeaderH;
 
         foreach ($questions as $qNum => $qText) {
@@ -456,9 +457,9 @@ class GenerateFeedbackController extends Controller
             }
 
             // Question Text
-            $pdf->SetXY(14.5, $currentRowY + 0.7);
-            $pdf->SetFont('Arial', '', 6.2);
-            $pdf->MultiCell($colQ - 3.0, 2.8, $qText, 0, 'L');
+            $pdf->SetXY(14.5, $currentRowY + 0.6);
+            $pdf->SetFont('Arial', '', 5.9);
+            $pdf->MultiCell($colQ - 3.0, 2.4, $qText, 0, 'L');
 
             // Square checkboxes for 1, 2, 3, 4, 5, N/A (matches blade csm-rate style)
             $sqdVal = (string)($feedback->{'sqd' . $qNum} ?? '');
@@ -469,10 +470,10 @@ class GenerateFeedbackController extends Controller
                 $ratingKey = ($rVal === 6) ? 'N/A' : (string)$rVal;
                 $isRated = (strcasecmp($sqdVal, $ratingKey) === 0);
 
-                $xCbCenter = $curX + ($w / 2) - 1.8;
-                $yCbCenter = $currentRowY + ($rowH / 2) - 1.8;
+                $xCbCenter = $curX + ($w / 2) - 1.6;
+                $yCbCenter = $currentRowY + ($rowH / 2) - 1.6;
 
-                $pdf->Checkbox($xCbCenter, $yCbCenter, $isRated, 3.6);
+                $pdf->Checkbox($xCbCenter, $yCbCenter, $isRated, 3.2);
                 $curX += $w;
             }
 
