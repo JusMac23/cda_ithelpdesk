@@ -20,13 +20,30 @@ class GenerateFeedbackController extends Controller
     public function generateFeedback($ticket_id)
     {
         $ticket = Tickets::findOrFail($ticket_id);
-        $feedback = ClientFeedback::where('ticket_id', $ticket_id)->first();
+
+        // Resilient query: if client_feedbacks table is not yet migrated in production, don't crash
+        $feedback = null;
+        try {
+            $feedback = ClientFeedback::where('ticket_id', $ticket_id)->first();
+        } catch (\Throwable $e) {
+            $feedback = null;
+        }
 
         // Safe resolution of data fields
         $clientType = trim($feedback->client_type ?? 'Government (Employee or another agency)');
         $sex        = trim($feedback->sex ?? '');
         $ageStr     = trim($feedback->age ?? '');
-        $dateStr    = $feedback->feedback_date ?? ($ticket->date_resolved ? Carbon::parse($ticket->date_resolved)->format('F d, Y') : Carbon::now('Asia/Manila')->format('F d, Y'));
+
+        // Safe date parsing
+        $resolvedDate = null;
+        if (!empty($ticket->date_resolved)) {
+            try {
+                $resolvedDate = Carbon::parse($ticket->date_resolved)->format('F d, Y');
+            } catch (\Throwable $e) {
+                $resolvedDate = null;
+            }
+        }
+        $dateStr    = $feedback->feedback_date ?? ($resolvedDate ?? Carbon::now('Asia/Manila')->format('F d, Y'));
         $regionStr  = $feedback->region ?? ($ticket->it_area ?? 'CDA HO');
         $emailStr   = $feedback->email ?? ($ticket->email ?? '');
         $suggestions = trim($feedback->suggestions ?? '');
@@ -60,9 +77,13 @@ class GenerateFeedbackController extends Controller
         // ══════════════════════════════════════════════════════════
         // 1. HEADER (Logo + Title Centered, Doc Code Top-Right)
         // ══════════════════════════════════════════════════════════
-        $logoPath = public_path('images/CDA-logo-RA11364-PNG.png');
-        if (file_exists($logoPath)) {
-            $pdf->Image($logoPath, 50, 10, 16, 16);
+        try {
+            $logoPath = public_path('images/CDA-logo-RA11364-PNG.png');
+            if (file_exists($logoPath)) {
+                $pdf->Image($logoPath, 50, 10, 16, 16);
+            }
+        } catch (\Throwable $e) {
+            // Continue rendering PDF even if logo fails on host filesystem
         }
 
         $pdf->SetFont('Arial', 'B', 12.5);

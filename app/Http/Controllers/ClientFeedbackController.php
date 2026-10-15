@@ -15,7 +15,12 @@ class ClientFeedbackController extends Controller
     public function showFeedbackForm($ticket_id)
     {
         $ticket = Tickets::findOrFail($ticket_id);
-        $existingFeedback = ClientFeedback::where('ticket_id', $ticket_id)->first();
+        $existingFeedback = null;
+        try {
+            $existingFeedback = ClientFeedback::where('ticket_id', $ticket_id)->first();
+        } catch (\Throwable $e) {
+            $existingFeedback = null;
+        }
 
         // Automatically generated date (Asia/Manila timezone)
         $autoDate = Carbon::now('Asia/Manila')->format('F d, Y');
