@@ -1238,9 +1238,10 @@
 .sqd-table {
   border-collapse: collapse;
   width: 100%;
-  height: 100%;
+  height: auto;
   font-size: 8.5px;
   table-layout: fixed;
+  margin-bottom: 12px;
 }
 
 .sqd-table th,
@@ -1260,48 +1261,27 @@
   print-color-adjust: exact !important;
 }
 
-.sqd-table tbody {
-  height: 100%;
-}
-
-.sqd-table tbody tr {
-  height: 1px;
-}
-
 /* A4 Paper on screen */
 .paper-wrap {
   width: 210mm;
   min-height: 297mm;
-  height: 297mm;
+  height: auto;
   margin: 0 auto;
-  padding: 0.5in;
+  padding: 10mm 13mm;
   box-sizing: border-box;
   background: #ffffff;
-  display: flex;
-  flex-direction: column;
-  position: relative;
+  display: block;
 }
 
 #csmForm {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  height: 100%;
+  display: block;
+  height: auto;
   min-height: 0;
 }
 
-.sqd-section {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.sqd-section>div {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
+.sqd-bottom {
+  margin-top: 14px;
+  clear: both;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -1310,7 +1290,7 @@
 @media print {
   @page {
     size: A4 portrait;
-    margin: 0.5in;
+    margin: 10mm 13mm;
   }
 
   *,
@@ -1327,10 +1307,10 @@
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
-    height: 100% !important;
-    max-height: 100% !important;
-    overflow: hidden !important;
-    font-size: 9px !important;
+    height: auto !important;
+    display: block !important;
+    overflow: visible !important;
+    font-size: 10px !important;
   }
 
   .no-print {
@@ -1342,8 +1322,7 @@
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
-    height: 100% !important;
-    max-height: 100% !important;
+    height: auto !important;
   }
 
   .paper-wrap {
@@ -1353,36 +1332,25 @@
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
-    height: 100% !important;
-    max-height: 100% !important;
-    overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-    page-break-after: avoid !important;
-    break-after: avoid !important;
   }
 
   #csmForm {
-    display: flex !important;
-    flex-direction: column !important;
-    flex: 1 1 auto !important;
-    height: 100% !important;
-    max-height: 100% !important;
-    justify-content: space-between !important;
-  }
-
-  .sqd-section {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
+    display: block !important;
+    height: auto !important;
   }
 
   .sqd-table {
-    height: 100% !important;
+    height: auto !important;
+    margin-bottom: 10px !important;
   }
 
-  .sqd-table tbody tr {
-    height: auto !important;
+  .sqd-bottom {
+    margin-top: 10px !important;
+    clear: both !important;
   }
 }

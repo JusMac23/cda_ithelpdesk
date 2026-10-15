@@ -366,6 +366,16 @@
                                                     @endif
                                                 @endcan
 
+                                                @can('generate_feedback')
+                                                    @if($ticket->status === 'Resolved')
+                                                        <a href="{{ route('tickets.generateFeedback', $ticket->ticket_id) }}"
+                                                            title="Generate Feedback"
+                                                            class="inline-flex items-center justify-center w-8 h-8 text-indigo-700 dark:text-indigo-400 transition-all">
+                                                            <span class="material-symbols-outlined text-sm">rate_review</span>
+                                                        </a>
+                                                    @endif
+                                                @endcan
+
                                                 @can('delete_ticket')
                                                     <form id="delete-form-{{ $ticket->ticket_id }}" action="{{ route('tickets.destroy', $ticket->ticket_id) }}" method="POST" class="m-0 contents">
                                                         @csrf

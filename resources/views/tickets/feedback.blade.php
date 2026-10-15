@@ -92,7 +92,7 @@
         .csm-field:disabled { background: transparent; cursor: default; color: #1e3a5f; }
 
         /* Rating Table */
-        .sqd-table { border-collapse: collapse; width: 100%; font-size: 9px; table-layout: fixed; }
+        .sqd-table { border-collapse: collapse; width: 100%; font-size: 9px; table-layout: fixed; margin-bottom: 12px; height: auto !important; }
         .sqd-table th, .sqd-table td { border: 1px solid #374151; vertical-align: middle; }
         .sqd-table th {
             text-align: center; font-weight: 700; background: #fff;
@@ -105,14 +105,15 @@
 
         /* Screen View Paper */
         .paper-wrap {
-            width: 210mm; min-height: 297mm; margin: 0 auto;
+            width: 210mm; min-height: 297mm; height: auto !important; margin: 0 auto;
             padding: 10mm 13mm;
             box-sizing: border-box; background: #fff;
             font-family: 'Inter', Arial, sans-serif;
             font-size: 10px; color: #111827;
+            display: block !important;
         }
-        #csmForm { display: flex; flex-direction: column; }
-        .sqd-bottom { padding-top: 6px; }
+        #csmForm { display: block !important; height: auto !important; min-height: 0 !important; }
+        .sqd-bottom { display: block !important; margin-top: 14px; padding-top: 0; clear: both; }
 
         /* ══════ PRINT VIEW ══════ */
         @media print {
@@ -137,14 +138,17 @@
                 width: 100% !important; height: auto !important;
                 margin: 0 !important; padding: 0 !important;
                 box-shadow: none !important; overflow: visible !important;
+                display: block !important;
                 page-break-inside: avoid !important;
             }
             #csmForm {
+                display: block !important;
                 height: auto !important; min-height: 0 !important;
             }
-            .sqd-table { font-size: 9px !important; }
+            .sqd-table { font-size: 9px !important; height: auto !important; margin-bottom: 8px !important; }
             .sqd-table td { padding: 3px 5px !important; line-height: 1.25 !important; }
             .sqd-table th { padding: 3px 2px !important; }
+            .sqd-bottom { display: block !important; margin-top: 8px !important; padding-top: 0 !important; clear: both !important; }
         }
     </style>
 </head>
@@ -386,7 +390,7 @@
             </div>
 
             {{-- ══ SQD RATING TABLE ══ --}}
-            <div>
+            <div style="margin-bottom:12px;">
                 <p style="font-size:10px; margin-bottom:2px; font-weight:700;">INSTRUCTIONS:</p>
                 <p style="font-size:10px; margin-bottom:4px;">
                     Please put a <strong>checkmark ( ✔ )</strong> on the column that best corresponds to your answer.
@@ -456,7 +460,7 @@
             </div>
 
             {{-- ══ BOTTOM CONTENT ══ --}}
-            <div class="sqd-bottom" style="font-size:10px;">
+            <div class="sqd-bottom" style="font-size:10px; margin-top:14px; clear:both;">
                 <div style="margin-bottom:4px;">
                     <p style="margin-bottom:3px;">Suggestions on how we can further improve our services (optional):</p>
                     <div style="border-bottom:1px solid #111827; margin-bottom:10px; min-height:14px;">

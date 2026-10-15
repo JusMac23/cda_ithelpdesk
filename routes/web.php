@@ -24,6 +24,7 @@ use App\Http\Controllers\DatabreachTeamController;
 use App\Http\Controllers\Auth\OAuthGoogleController;
 use App\Http\Controllers\Auth\OAuthAuthentikController;
 use App\Http\Controllers\ClientFeedbackController;
+use App\Http\Controllers\GenerateFeedbackController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -93,6 +94,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/tickets/{ticket_id}', [TicketsController::class, 'update'])->name('tickets.update')->middleware('permission:update_status_ticket');
     Route::delete('/tickets/{ticket_id}', [TicketsController::class, 'destroy'])->name('tickets.destroy')->middleware('permission:delete_ticket');
     Route::get('/tickets/{ticket_id}/generate-tsar', [GenerateTSARController::class, 'generateTSAR'])->name('tickets.generateTSAR')->middleware('permission:generate_tsar');
+    Route::get('/tickets/{ticket_id}/generate-feedback', [GenerateFeedbackController::class, 'generateFeedback'])->name('tickets.generateFeedback')->middleware('permission:generate_feedback');
 
     // Data Breach Notification
     Route::get('/databreach', [DataBreachReportsController::class, 'index'])->name('databreach.index')->middleware('permission:view_all_databreach');
