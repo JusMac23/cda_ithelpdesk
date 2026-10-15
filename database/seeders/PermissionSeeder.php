@@ -34,6 +34,7 @@ class PermissionSeeder extends Seeder
             'delete_ticket',
             'search_ticket',
             'generate_tsar',
+            'generate_feedback',
             'generate_report',
 
             'view_overview_tickets',
