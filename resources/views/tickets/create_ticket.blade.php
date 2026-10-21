@@ -114,172 +114,170 @@
         @endif
 
         {{-- Ticket Submission Form --}}
-        <form action="{{ route('tickets.store.client') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
+        <form action="{{ route('tickets.store.client') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <!-- Section 1: Client Information -->
-            <fieldset class="rounded-2xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-6">
-                <legend class="px-3 text-xs sm:text-sm font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-base">person</span>
+            <fieldset class="border border-[var(--border-light)] dark:border-slate-800 rounded-xl p-4 sm:p-6 mb-6 bg-slate-50/60 dark:bg-slate-800/30 shadow-2xs">
+                <legend class="px-2 text-xs sm:text-sm font-bold text-[var(--text-dark)] dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
                     <span>Client Information</span>
                 </legend>
 
-                {{-- Name Grid --}}
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-4">
                     <div>
-                        <label for="firstname" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                        <label for="firstname" class="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">
                             First Name <span class="text-rose-500">*</span>
                         </label>
-                        <input type="text" id="firstname" name="firstname" placeholder="e.g., Juan" required 
-                               class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                        <input type="text" id="firstname" name="firstname" value="{{ old('firstname') }}" placeholder="e.g., Juan" required 
+                            class="w-full h-11 px-3.5 rounded-xl text-sm bg-[var(--card-bg)] border border-[var(--border-light)] text-[var(--text-dark)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all shadow-xs">
                     </div>
 
                     <div>
-                        <label for="middle_initial" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                        <label for="middle_initial" class="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">
                             Middle Initial <span class="text-rose-500">*</span>
                         </label>
-                        <input type="text" id="middle_initial" name="middle_initial" placeholder="e.g., A." 
-                               class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                        <input type="text" id="middle_initial" name="middle_initial" value="{{ old('middle_initial') }}" placeholder="e.g., A." 
+                            class="w-full h-11 px-3.5 rounded-xl text-sm bg-[var(--card-bg)] border border-[var(--border-light)] text-[var(--text-dark)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all shadow-xs">
                     </div>
 
                     <div>
-                        <label for="lastname" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                        <label for="lastname" class="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">
                             Last Name <span class="text-rose-500">*</span>
                         </label>
-                        <input type="text" id="lastname" name="lastname" placeholder="e.g., Dela Cruz" required 
-                               class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                        <input type="text" id="lastname" name="lastname" value="{{ old('lastname') }}" placeholder="e.g., Dela Cruz" required 
+                            class="w-full h-11 px-3.5 rounded-xl text-sm bg-[var(--card-bg)] border border-[var(--border-light)] text-[var(--text-dark)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all shadow-xs">
                     </div>
                 </div>
 
-                {{-- Email & Date Created Grid --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label for="email" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                            Official Email <span class="text-rose-500">*</span>
-                        </label>
-                        <input type="email" id="email" name="email" placeholder="e.g., j_delacruz@cda.gov.ph" 
-                               pattern=".*@cda\.gov\.ph$" 
-                               title="Please use a valid @cda.gov.ph email address." 
-                               required 
-                               class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
-                    </div>
+                <div class="mb-4">
+                    <label for="email" class="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">
+                        Official Email <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="e.g., j_delacruz@cda.gov.ph" 
+                        pattern=".*@cda\.gov\.ph$" 
+                        title="Please use a valid @cda.gov.ph email address." 
+                        required 
+                        class="w-full h-11 px-3.5 rounded-xl text-sm bg-[var(--card-bg)] border border-[var(--border-light)] text-[var(--text-dark)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all shadow-xs">
+                </div>
 
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-4">
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Date Created</label>
+                        <label class="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Date Created</label>
                         <input type="text" value="{{ \Carbon\Carbon::now('Asia/Manila')->format('F j, Y h:i A') }}" readonly 
-                               class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-sm cursor-not-allowed outline-none">
+                            class="w-full h-11 px-3.5 rounded-xl text-sm bg-slate-100 dark:bg-slate-800/60 border border-[var(--border-light)] text-[var(--text-muted)] cursor-not-allowed">
                         <input type="hidden" name="date_created" value="{{ \Carbon\Carbon::now('Asia/Manila')->format('Y-m-d') }}">
                     </div>
-                </div>
 
-                {{-- Division & Equipment Grid --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label for="division" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                            Division / Section <span class="text-rose-500">*</span>
+                        <label for="division" class="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">
+                            Section / Division <span class="text-rose-500">*</span>
                         </label>
                         <select id="division" name="division" required 
-                                class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
-                            <option value="" disabled selected>Select Division / Section</option>
-                            @foreach ($sections_divisions as $division)
-                                <option value="{{ $division }}">{{ $division }}</option>
-                            @endforeach
+                            class="w-full h-11 px-3.5 rounded-xl text-sm bg-[var(--card-bg)] border border-[var(--border-light)] text-[var(--text-dark)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all shadow-xs">
+                            <option value="" disabled selected>Select Division</option>
+                            @forelse ($sections_divisions ?? [] as $division)
+                                <option value="{{ $division }}" {{ old('division') == $division ? 'selected' : '' }}>{{ $division }}</option>
+                            @empty
+                                <option value="" disabled>No divisions available</option>
+                            @endforelse
                         </select>
                     </div>
+                </div>
 
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-4">
                     <div>
-                        <label for="device" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                        <label for="device" class="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">
                             Device Equipment <span class="text-rose-500">*</span>
                         </label>
                         <select id="device" name="device" required 
-                                class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
-                            <option value="" disabled selected>Select Device Equipment</option>
+                            class="w-full h-11 px-3.5 rounded-xl text-sm bg-[var(--card-bg)] border border-[var(--border-light)] text-[var(--text-dark)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all shadow-xs">
+                            <option value="" disabled selected>Select Device</option>
                             @foreach (['Desktop PC', 'Laptop/Netbook PC', 'Tablet PC', 'All-in-1 Printer', 'Printer Only', 'Scanner Only', 'Others'] as $device)
-                                <option value="{{ $device }}">{{ $device }}</option>
+                                <option value="{{ $device }}" {{ old('device') == $device ? 'selected' : '' }}>{{ $device }}</option>
                             @endforeach
                         </select>
                     </div>
-                </div>
 
-                {{-- Technical Service & Priority Level Grid --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label for="service" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                        <label for="service" class="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">
                             Technical Service <span class="text-rose-500">*</span>
                         </label>
                         <select id="service" name="service" required 
-                                class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                            class="w-full h-11 px-3.5 rounded-xl text-sm bg-[var(--card-bg)] border border-[var(--border-light)] text-[var(--text-dark)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all shadow-xs">
                             <option value="" disabled selected>Select Technical Service</option>
-                            @foreach ($technical_services as $service)
-                                <option value="{{ $service }}">{{ $service }}</option>
-                            @endforeach
+                            @forelse ($technical_services ?? [] as $service)
+                                <option value="{{ $service }}" {{ old('service') == $service ? 'selected' : '' }}>{{ $service }}</option>
+                            @empty
+                                <option value="" disabled>No technical services available</option>
+                            @endforelse
                         </select>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="request" class="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">
+                        Request Details <span class="text-rose-500">*</span>
+                        <span class="text-xs normal-case text-slate-400 ml-1">(Note: for website postings, please include Google Drive link)</span>
+                    </label>
+                    <textarea id="request" name="request" rows="4" required 
+                        placeholder="Please describe your issue or request in detail..." 
+                        class="w-full px-3.5 py-3 rounded-xl text-sm bg-[var(--card-bg)] border border-[var(--border-light)] text-[var(--text-dark)] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all shadow-xs resize-y">{{ old('request') }}</textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div>
+                        <label for="photo" class="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">
+                            Attach Screenshot / Evidence Photo <span class="text-slate-400 text-xs normal-case">(Optional)</span>
+                        </label>
+                        <input type="file" id="photo" name="photo" accept="image/*" 
+                            class="w-full px-3 py-2 rounded-xl text-sm bg-[var(--card-bg)] border border-[var(--border-light)] text-[var(--text-dark)] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 dark:file:bg-slate-800 file:text-[var(--text-dark)] hover:file:bg-slate-200 cursor-pointer">
+                        <span class="block text-[11px] text-[var(--text-muted)] mt-1">Max file size: 20MB (JPEG, PNG, JPG, GIF, WEBP)</span>
                     </div>
 
                     <div>
-                        <label for="priority" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                        <label for="priority" class="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">
                             Priority Level <span class="text-rose-500">*</span>
                         </label>
                         <select id="priority" name="priority" required 
-                                class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                            class="w-full h-11 px-3.5 rounded-xl text-sm bg-[var(--card-bg)] border border-[var(--border-light)] text-[var(--text-dark)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all shadow-xs">
                             <option value="" disabled selected>Select Priority Level</option>
-                            <option value="Low">Low (Minor request, non-blocking)</option>
-                            <option value="Medium">Medium (Normal daily tasks affected)</option>
-                            <option value="High">High (Major task / urgent milestone)</option>
-                            <option value="Critical">Critical (System down, widespread impact)</option>
+                            <option value="High" {{ old('priority') == 'High' ? 'selected' : '' }}>High</option>
+                            <option value="Medium" {{ old('priority') == 'Medium' ? 'selected' : '' }}>Medium</option>
+                            <option value="Low" {{ old('priority') == 'Low' ? 'selected' : '' }}>Low</option>
+                            <option value="Critical" {{ old('priority') == 'Critical' ? 'selected' : '' }}>Critical</option>
                         </select>
                     </div>
-                </div>
-
-                {{-- Request Description Details --}}
-                <div>
-                    <label for="request" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                        Request Details / Problem Description <span class="text-rose-500">*</span>
-                    </label>
-                    <textarea id="request" name="request" rows="4" required 
-                              placeholder="Please describe your issue or technical assistance request in detail... (For CDA website postings, please include the Google Drive share link)" 
-                              class="w-full p-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none resize-y"></textarea>
-                    <span class="block mt-1 text-2xs text-slate-400">For CDA website postings, please include the public Google Drive link inside the description.</span>
-                </div>
-
-                {{-- Photo Evidence Attachment --}}
-                <div>
-                    <label for="photo" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                        Attach Screenshot / Evidence Photo <span class="text-xs font-normal text-slate-400 lowercase">(optional)</span>
-                    </label>
-                    <input type="file" id="photo" name="photo" accept="image/*" 
-                           class="w-full p-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-xs sm:text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-950 dark:file:text-indigo-300 transition-all">
-                    <span class="block mt-1 text-2xs text-slate-400">Max file size: 20MB (JPEG, PNG, JPG, GIF, WEBP)</span>
-                </div>
+                </div>    
             </fieldset>
 
             <!-- Section 2: Designated Personnel & Assignment -->
-            <fieldset class="rounded-2xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-6">
-                <legend class="px-3 text-xs sm:text-sm font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-base">support_agent</span>
-                    <span>Designated Support Area</span>
+            <fieldset class="border border-[var(--border-light)] dark:border-slate-800 rounded-xl p-4 sm:p-6 mb-6 bg-slate-50/60 dark:bg-slate-800/30 shadow-2xs">
+                <legend class="px-2 text-xs sm:text-sm font-bold text-[var(--text-dark)] dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>Designated Personnel</span>
                 </legend>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div>
-                        <label for="it_area" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                            Operating Region / Area <span class="text-rose-500">*</span>
+                        <label for="it_area" class="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">
+                            Region <span class="text-rose-500">*</span>
                         </label>
                         <select id="it_area" name="it_area" required 
-                                class="w-full h-11 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
-                            <option value="" disabled selected>Select Region / Area</option>
-                            @foreach($it_area as $area)
-                                <option value="{{ $area }}">{{ $area }}</option>
-                            @endforeach
+                            class="w-full h-11 px-3.5 rounded-xl text-sm bg-[var(--card-bg)] border border-[var(--border-light)] text-[var(--text-dark)] focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all shadow-xs">
+                            <option value="" disabled selected>Select Region</option>
+                            @forelse ($it_area ?? [] as $area)
+                                <option value="{{ $area }}" {{ old('it_area') == $area ? 'selected' : '' }}>{{ $area }}</option>
+                            @empty
+                                <option value="" disabled>No regions available</option>
+                            @endforelse
                         </select>
                     </div>
 
                     <div>
-                        <label for="status" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Ticket Status</label>
+                        <label for="status" class="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Status</label>
                         <div class="relative">
                             <input type="text" id="status" name="status" value="Pending" readonly 
-                                   class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-sm font-semibold cursor-not-allowed outline-none">
-                            <span class="absolute right-3 top-3 w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                class="w-full h-11 px-3.5 rounded-xl text-sm bg-slate-100 dark:bg-slate-800/60 border border-[var(--border-light)] text-[var(--text-muted)] cursor-not-allowed">
+                            <span class="absolute right-3.5 top-4 w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
                         </div>
                     </div>
                 </div>
@@ -289,16 +287,16 @@
                 <input type="hidden" id="it_email" name="it_email" value="">
             </fieldset>
 
-            <!-- Terms & Consent Agreement -->
-            <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-                <label class="flex items-start gap-3 cursor-pointer text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed" for="terms_agree">
+            <!-- Form Footer & Terms -->
+            <div class="mt-4 mb-6">
+                <label class="flex items-start gap-3 cursor-pointer text-xs sm:text-sm text-[var(--text-muted)] leading-relaxed select-none" for="terms_agree">
                     <input type="checkbox" id="terms_agree" name="terms_agree" required 
-                           class="mt-1 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-700 cursor-pointer">
+                        class="mt-1 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600 shrink-0">
                     <span>
                         I have read and agree to the 
-                        <a href="https://cda.gov.ph/cda-privacy-policy/" class="text-indigo-600 dark:text-indigo-400 font-semibold underline hover:text-indigo-500" target="_blank" rel="noopener noreferrer">Terms and Conditions</a> 
+                        <a href="https://cda.gov.ph/cda-privacy-policy/" class="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline" target="_blank" rel="noopener noreferrer">Terms and Conditions</a> 
                         and the 
-                        <a href="https://cda.gov.ph/cda-privacy-policy/" class="text-indigo-600 dark:text-indigo-400 font-semibold underline hover:text-indigo-500" target="_blank" rel="noopener noreferrer">Privacy Policy</a>, 
+                        <a href="https://cda.gov.ph/cda-privacy-policy/" class="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline" target="_blank" rel="noopener noreferrer">Privacy Policy</a>, 
                         and I confirm that the information provided is accurate and true to the best of my knowledge. 
                         <span class="text-rose-500 font-bold">*</span>
                     </span>
@@ -306,14 +304,14 @@
             </div>
 
             <!-- Form Action Footer -->
-            <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-[var(--border-light)] dark:border-slate-800">
                 <a href="{{ url('/') }}" 
-                   class="w-full sm:w-auto h-11 px-5 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer">
+                    class="w-full sm:w-auto h-11 px-5 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer">
                     Cancel
                 </a>
 
                 <button type="submit" id="submitTicketBtn" disabled 
-                        class="w-full sm:w-auto h-11 px-8 rounded-xl text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed shadow-md shadow-indigo-600/20 disabled:shadow-none flex items-center justify-center gap-2 transition-all cursor-pointer">
+                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-11 px-6 sm:px-8 rounded-xl font-semibold text-sm text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-600 transition-all shadow-sm shadow-indigo-600/20 cursor-pointer">
                     <span>Submit Ticket</span>
                 </button>
             </div>

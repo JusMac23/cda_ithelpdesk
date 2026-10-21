@@ -486,7 +486,7 @@
 
                         <div class="mb-4">
                             <label for="email" class="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">
-                                Email <span class="text-rose-500">*</span>
+                                Official Email <span class="text-rose-500">*</span>
                             </label>
                             <input type="email" id="email" name="email" value="{{ auth()->user()->email }}" readonly
                                 class="w-full h-11 px-3.5 rounded-xl text-sm bg-slate-100 dark:bg-slate-800/60 border border-[var(--border-light)] text-[var(--text-muted)] cursor-not-allowed">
@@ -558,7 +558,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                             <div>
                                 <label for="photo" class="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">
-                                    Attach Photo <span class="text-slate-400 text-xs normal-case">(Optional)</span>
+                                    Attach Screenshot / Evidence Photo <span class="text-slate-400 text-xs normal-case">(Optional)</span>
                                 </label>
                                 <input type="file" id="photo" name="photo" accept="image/*"
                                     class="w-full px-3 py-2 rounded-xl text-sm bg-[var(--card-bg)] border border-[var(--border-light)] text-[var(--text-dark)] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 dark:file:bg-slate-800 file:text-[var(--text-dark)] hover:file:bg-slate-200 cursor-pointer">
