@@ -589,16 +589,16 @@
     font-size: 13px;
     font-weight: 500;
     white-space: nowrap;
-    padding: 6px 14px;
+    padding: 6px 8px;
     border-radius: 12px;
-    background-color: var(--dropdown-hover);
-    border: 1px solid var(--border-color);
+    background-color: transparent;
+    border: none;
+    outline: none;
     transition: all 0.25s ease;
   }
 
   .clock-widget:hover {
     color: var(--text-dark);
-    border-color: var(--border-light);
   }
 
   .clock-widget .material-symbols-outlined {
@@ -615,8 +615,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--dropdown-hover);
-    border: 1px solid var(--border-color);
+    background-color: transparent;
+    border: none;
+    outline: none;
     color: var(--text-muted);
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -624,10 +625,17 @@
   }
 
   .theme-toggle-btn:hover {
-    background-color: var(--bg-alt);
-    border-color: var(--border-light);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    background-color: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    transform: scale(1.08);
+  }
+
+  .theme-toggle-btn:focus,
+  .theme-toggle-btn:focus-visible {
+    outline: none;
+    box-shadow: none;
   }
 
   .theme-toggle-btn:active {

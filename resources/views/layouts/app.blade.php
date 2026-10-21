@@ -97,8 +97,10 @@
                                 setInterval(() => this.updateTime(), 1000);
                             },
                             updateTime() {
-                                const options = { timeZone: 'Asia/Manila', weekday: 'long', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
-                                this.time = new Date().toLocaleString('en-US', options);
+                                const now = new Date();
+                                const datePart = now.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+                                const timePart = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour: 'numeric', minute: '2-digit', hour12: true }).replace(/\u202F|\u00A0/g, ' ');
+                                this.time = `${datePart} ${timePart}`;
                             }
                         }">
                         <span class="material-symbols-outlined">schedule</span>
